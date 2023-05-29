@@ -39,8 +39,13 @@ SEMICOLON : ';';
 
 IDENT : (LETTER | '_') (LETTER | DIGIT | '_')* ;
 
+fragment
 DECIMAL_CONST : '0' | [1-9] [0-9]*;
+
+fragment
 OCTAL_CONST : '0' [0-7]+;
+
+fragment
 HEX_CONST : ('0x' | '0X') (DIGIT | [a-fA-F])+ ;
 
 INTEGER_CONST : DECIMAL_CONST |
