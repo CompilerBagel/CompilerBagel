@@ -2,6 +2,7 @@ lexer grammar SysYLexer;
 
 CONST : 'const';
 INT : 'int';
+FLOAT : 'float';
 VOID : 'void';
 IF : 'if';
 ELSE : 'else';
