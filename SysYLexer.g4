@@ -48,9 +48,9 @@ OCTAL_CONST : '0' [0-7]+;
 fragment
 HEX_CONST : ('0x' | '0X') (DIGIT | [a-fA-F])+ ;
 
-INTEGER_CONST : DECIMAL_CONST |
+INTEGER_CONST : [+-]? (DECIMAL_CONST |
                 OCTAL_CONST |
-                HEX_CONST
+                HEX_CONST)
                 ;
 
 FLOAT_CONST : DECIMAL_CONST+ '.' DECIMAL_CONST* EXPONENT?
