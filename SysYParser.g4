@@ -1,5 +1,9 @@
 parser grammar SysYParser;
 
+options {
+    tokenVocab = SysYLexer;
+}
+
 program
    : compUnit
    ;
