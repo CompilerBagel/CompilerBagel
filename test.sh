@@ -1,5 +1,6 @@
 
 err_count=0
+wrong_num=0
 
 for sy_file in $(find ./test -name "*.sy")
 do
@@ -8,5 +9,7 @@ do
   if [ ${err_count} -gt 0 ]
   then
       echo ${sy_file}
+      ((wrong_num++))
   fi
 done
+echo ${wrong_num}
