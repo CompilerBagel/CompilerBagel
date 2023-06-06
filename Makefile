@@ -12,12 +12,16 @@ ANTLRPATH = $(shell find /usr/local/lib -name "antlr-*-complete.jar")
 
 antlr: $(LFILE) $(PFILE)
 	$(ANTLR) $(PFILE) $(LFILE)
+	javac *.java
 
 clean:
 	rm -f ./*.tokens
 	rm -f ./*.interp
+	rm -f ./*.java
+	rm -f ./*.class
 	rm -f ./SysYLexer.java src/SysYParser.java src/SysYParserBaseListener.java src/SysYParserBaseVisitor.java src/SysYParserListener.java src/SysYParserVisitor.java
 	rm -rf classes
+
 
 .PHONY: antlr clean
 
