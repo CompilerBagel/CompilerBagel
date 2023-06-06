@@ -53,11 +53,11 @@ INTEGER_CONST : [+-]? (DECIMAL_CONST |
                 HEX_CONST)
                 ;
 
-FLOAT_CONST : DECIMAL_CONST+ '.' DECIMAL_CONST* EXPONENT?
-            | '.' DECIMAL_CONST+EXPONENT? 
-            | DECIMAL_CONST+ BINARY_EXPONENT
-            | DECIMAL_CONST+ EXPONENT BINARY_EXPONENT
-            | HEX_FLOAT_CONST
+FLOAT_CONST : [+-]? (DECIMAL_CONST* ('.' DECIMAL_CONST+)? EXPONENT
+            | DECIMAL_CONST+ '.' DECIMAL_CONST* EXPONENT?
+            | DECIMAL_CONST+ EXPONENT
+            | '.' DECIMAL_CONST+ EXPONENT?
+            | HEX_FLOAT_CONST)
             ;
 
 fragment HEX_DIGIT : [0-9a-fA-F];
