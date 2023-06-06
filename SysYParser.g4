@@ -107,11 +107,11 @@ number
 
 unaryExp
     : primaryExp
-    | IDENT L_PAREN (L_BRACKT funcRParams R_BRACKT)? R_PAREN
+    | IDENT L_PAREN ( funcRParams )? R_PAREN
     | unaryOp unaryExp
     ;
 
-unaryOp
+unaryOp 
    : PLUS
    | MINUS
    | NOT
