@@ -3,9 +3,14 @@ package Scope;
 import IRBuider.Register;
 import Type.Type;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class BaseScope implements Scope {
     private final Scope enclosingScope;
     private String scopeName;
+    private final Map<String, Register> symbols = new LinkedHashMap<>();
+    private final Map<String, Type> types = new LinkedHashMap<>();
 
     public BaseScope(String scopeName, Scope enclosingScope) {
         this.scopeName = scopeName;
@@ -17,15 +22,33 @@ public class BaseScope implements Scope {
     }
 
     public void define(String name, Register register, Type type) {
-        // TODO:
+        symbols.put(name, register);
+        types.put(name, type);
     }
 
-    public void getRegister(String name) {
-        // TODO:
+    public Register getRegister(String name) {
+        Register register = symbols.get(name);
+        if (register != null) {
+            return register;
+        }
+
+        if (enclosingScope != null) {
+            return enclosingScope.getRegister(name);
+        }
+
+        return null;
     }
 
-    public void getType(String name) {
-        // TODO:
+    public Type getType(String name) {
+        Type type = types.get(name);
+        if (type != null) {
+            return type;
+        }
+
+        if (enclosingScope != null) {
+            return enclosingScope.getType(name);
+        }
+        return null;
     }
 
     public String getScopeName() {
