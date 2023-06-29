@@ -6,7 +6,7 @@ public class FloatType implements Type {
 
     private FloatType() {}
 
-    public static Type IRInt32Type() {
+    public static Type IRFloatType() {
         if (floatType == null) {
             floatType = new FloatType();
         }
