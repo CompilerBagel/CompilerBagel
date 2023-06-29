@@ -17,15 +17,18 @@ public class BaseScope implements Scope {
         this.enclosingScope = enclosingScope;
     }
 
+    @Override
     public Scope getEnclosingScope() {
         return enclosingScope;
     }
 
+    @Override
     public void define(String name, Register register, Type type) {
         symbols.put(name, register);
         types.put(name, type);
     }
 
+    @Override
     public Register getRegister(String name) {
         Register register = symbols.get(name);
         if (register != null) {
@@ -39,6 +42,7 @@ public class BaseScope implements Scope {
         return null;
     }
 
+    @Override
     public Type getType(String name) {
         Type type = types.get(name);
         if (type != null) {
@@ -51,10 +55,11 @@ public class BaseScope implements Scope {
         return null;
     }
 
+    @Override
     public String getScopeName() {
         return scopeName;
     }
-
+    @Override
     public void setScopeName(String scopeName) {
         this.scopeName = scopeName;
     }
