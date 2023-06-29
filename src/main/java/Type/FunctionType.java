@@ -3,6 +3,12 @@ package Type;
 import java.util.ArrayList;
 import static Type.VoidType.IRVoidType;
 
+/**
+ * Function: can be represented as (BaseType, ...) : BaseType or (BaseType, ...)
+ * e.g. (i32, i32): i32, ()
+ * the latter representing a function without a return value.
+ */
+
 public class FunctionType implements Type{
     private final Type retType;
     private final ArrayList<Type> paramsType;
@@ -28,6 +34,7 @@ public class FunctionType implements Type{
                     .append(paramsType.get(i).getName());
         }
         stringBuilder.append(")");
+
         if (retType != voidType) {
             stringBuilder.append(": ")
                     .append(retType.getName());
