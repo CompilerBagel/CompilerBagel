@@ -12,7 +12,6 @@ ANTLRPATH = $(shell find /usr/local/lib -name "antlr-*-complete.jar")
 
 antlr: $(LFILE) $(PFILE)
 	$(ANTLR) $(PFILE) $(LFILE)
-	javac *.java
 
 clean:
 	rm -f ./*.tokens
