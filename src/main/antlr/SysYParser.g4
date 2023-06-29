@@ -40,7 +40,7 @@ varDecl
    ;
 
 varDef
-   :  IDENT (L_BRACKT constExp R_BRACKT)* (ASSIGN initVal)?
+   : IDENT (L_BRACKT constExp R_BRACKT)* (ASSIGN initVal)?
    ;
 
 initVal
@@ -86,76 +86,46 @@ stmt
    | RETURN (exp)? SEMICOLON #returnStmt
    ;
 
-exp:  addExp;
+exp
+   : L_PAREN exp R_PAREN #expParenthesis
+   | lVal #lvalExp
+   | number #numberExp
+   | IDENT L_PAREN funcRParams? R_PAREN #callFuncExp
+   | unaryOp exp #unaryOpExp
+   | exp (MUL | DIV | MOD) exp #mulExp
+   | exp (PLUS | MINUS) exp #plusExp
+   ;
 
-cond: lOrExp;
+cond
+   : exp #expCond
+   | cond (LT | GT | LE | GE) cond #ltCond
+   | cond (EQ | NEQ) cond #eqCond
+   | cond AND cond #andCond
+   | cond OR cond #orCond
+   ;
 
 lVal
    : IDENT (L_BRACKT exp R_BRACKT)*
    ;
 
-primaryExp
-    : L_PAREN exp R_PAREN
-    | lVal
-    | number
-    ;
-
 number
    : INTEGER_CONST
-   | FLOAT_CONST
    ;
 
-unaryExp
-    : primaryExp
-    | IDENT L_PAREN ( funcRParams )? R_PAREN
-    | unaryOp unaryExp
-    ;
-
-unaryOp 
+unaryOp
    : PLUS
    | MINUS
    | NOT
    ;
 
 funcRParams
-   : funcRparam (COMMA funcRparam)*
+   : param (COMMA param)*
    ;
 
-funcRparam
+param
    : exp
    ;
 
-mulExp
-    : unaryExp
-    | mulExp (MUL | DIV | MOD) unaryExp
-    ;
-
-addExp
-    : mulExp
-    | addExp (PLUS | MINUS) mulExp
-    ;
-
-relExp
-    : addExp
-    | relExp (LT | GT | LE | GE) addExp
-    ;
-
-eqExp
-    : relExp
-    | eqExp (EQ | NEQ) relExp
-    ;
-
-lAndExp
-    : eqExp
-    | lAndExp AND eqExp
-    ;
-
-lOrExp
-    : lAndExp
-    | lOrExp OR lAndExp
-    ;
-
 constExp
-   : addExp
+   : exp
    ;
-
