@@ -1,6 +1,8 @@
 package Type;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import static Type.VoidType.IRVoidType;
 
 /**
@@ -11,11 +13,11 @@ import static Type.VoidType.IRVoidType;
 
 public class FunctionType implements Type{
     private final Type retType;
-    private final ArrayList<Type> paramsType;
+    private final List<Type> paramsType;
     private final int paramsCount;
     private static final Type voidType = IRVoidType();
 
-    public FunctionType(ArrayList<Type> paramsType, Type retType) {
+    public FunctionType(List<Type> paramsType, Type retType) {
         this.paramsType = paramsType;
         this.retType = retType;
         this.paramsCount = paramsType.size();
