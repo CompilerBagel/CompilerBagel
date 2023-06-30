@@ -110,6 +110,7 @@ lVal
 
 number
    : INTEGER_CONST
+   | FLOAT_CONST
    ;
 
 unaryOp

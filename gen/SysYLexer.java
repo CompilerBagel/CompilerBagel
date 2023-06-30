@@ -1,4 +1,4 @@
-// Generated from /home/cardigan/Compiler/CompilerBagel/SysYLexer.g4 by ANTLR 4.12.0
+// Generated from C:/codedocuments/compilerBagel/CompilerBagel/src/main/antlr\SysYLexer.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
