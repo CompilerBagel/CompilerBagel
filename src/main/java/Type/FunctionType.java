@@ -1,6 +1,5 @@
 package Type;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static Type.VoidType.IRVoidType;
@@ -24,22 +23,22 @@ public class FunctionType implements Type{
     }
 
     @Override
-    public String getName() {
+    public String getText() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append('(');
 
         if (paramsCount > 0) {
-            stringBuilder.append(paramsType.get(0).getName());
+            stringBuilder.append(paramsType.get(0).getText());
         }
         for (int i = 1; i < paramsCount; i++) {
             stringBuilder.append(", ")
-                    .append(paramsType.get(i).getName());
+                    .append(paramsType.get(i).getText());
         }
         stringBuilder.append(")");
 
         if (retType != voidType) {
             stringBuilder.append(": ")
-                    .append(retType.getName());
+                    .append(retType.getText());
         }
         return stringBuilder.toString();
     }

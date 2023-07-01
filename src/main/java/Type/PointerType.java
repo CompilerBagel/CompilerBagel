@@ -12,8 +12,8 @@ public class PointerType implements Type {
         this.baseType = baseType;
     }
     @Override
-    public String getName() {
-        return "*" + baseType.getName();
+    public String getText() {
+        return "*" + baseType.getText();
     }
 
     public Type getBaseType() {

@@ -1,5 +1,5 @@
 package Type;
 
 public interface Type {
-    String getName();
+    String getText();
 }

@@ -14,7 +14,7 @@ public class FloatType implements Type {
     }
 
     @Override
-    public String getName() {
+    public String getText() {
         return name;
     }
 }

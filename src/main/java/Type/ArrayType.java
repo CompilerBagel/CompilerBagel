@@ -1,7 +1,5 @@
 package Type;
 
-import java.util.ArrayList;
-
 /**
  * Arrays: can be represented as [BaseType, Length], e.g. [i32, 2].
  * BaseType: the type of the array element
@@ -20,8 +18,8 @@ public class ArrayType implements Type{
     }
 
     @Override
-    public String getName() {
-        return "[" + elementType.getName() + ", "
+    public String getText() {
+        return "[" + elementType.getText() + ", "
                 + elementNumber + "]";
     }
 

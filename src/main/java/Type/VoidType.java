@@ -14,7 +14,7 @@ public class VoidType implements Type{
     }
 
     @Override
-    public String getName() {
+    public String getText() {
         return name;
     }
 }
