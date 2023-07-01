@@ -42,4 +42,5 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         currentScope = currentScope.getEnclosingScope();
         return ret;
     }
+
 }

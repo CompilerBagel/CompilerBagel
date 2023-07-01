@@ -18,4 +18,13 @@ public class FunctionBlock {
     public void addBaseBlock(BaseBlock baseBlock) {
         baseBlocks.add(baseBlock);
     }
+
+    public StringBuilder genIRCodes() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (BaseBlock baseBlock : baseBlocks) {
+            stringBuilder.append(baseBlock.getLabel());
+            stringBuilder.append(baseBlock.getCodeBuilder());
+        }
+        return stringBuilder;
+    }
 }

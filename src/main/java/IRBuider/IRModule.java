@@ -2,6 +2,9 @@ package IRBuider;
 
 import Type.FunctionType;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,10 +24,26 @@ public class IRModule {
         return function;
     }
 
+    public static void PrintModuleToFile(IRModule module, String dest) {
+        for (FunctionBlock function: module.functionBlocks) {
+            module.stringBuilder.append(function.genIRCodes());
+        }
+        try {
+            BufferedWriter out = new BufferedWriter(new FileWriter(dest));
+            out.write(module.stringBuilder.toString());
+            out.close();
+        } catch (IOException e) {
+            System.err.println("failed to print module to file " + dest);
+        }
+    }
+
     /** -------- member methods --------*/
     private IRModule(String name) {
         this.name = name;
         this.functionBlocks = new ArrayList<>();
+        this.stringBuilder = new StringBuilder();
+        this.stringBuilder.append("; ModuleID = '").append(name).append("'\n");
+        this.stringBuilder.append("source_filename = \"").append(name).append("\"\n");
     }
 
     public void addFunction(FunctionBlock function) {

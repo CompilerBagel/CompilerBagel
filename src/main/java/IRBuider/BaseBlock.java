@@ -3,8 +3,8 @@ package IRBuider;
 public class BaseBlock {
     public static int baseBlockCounter = 0;
     private final StringBuilder codeBuilder;
-    private String label;
-    private int baseBlockId;
+    private final String label;
+    private final int baseBlockId;
 
     /** -------- static methods --------*/
     public static void IRAppendBasicBlock(FunctionBlock function, String label) {
@@ -25,4 +25,13 @@ public class BaseBlock {
     public String toString() {
         return codeBuilder.toString();
     }
+
+    public String getLabel() {
+        return this.label;
+    }
+
+    public StringBuilder getCodeBuilder() {
+        return this.codeBuilder;
+    }
+
 }
