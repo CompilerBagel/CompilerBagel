@@ -4,13 +4,14 @@ import Type.Type;
 
 public class Register implements ValueRef{
     static int tempCounter = 0;
-    private Type type;
+    private final Type type;
     private final String identity;
     private final int tempNO;
 
-    public Register(String identity) {
+    public Register(String identity, Type type) {
         this.identity = identity;
         this.tempNO = tempCounter++;
+        this.type = type;
     }
     @Override
     public String getText() {
