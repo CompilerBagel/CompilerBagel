@@ -13,8 +13,9 @@ public class IRBuilder {
     }
 
     public static void IRBuildRet(IRBuilder builder, ValueRef valueRef) {
-        // TODO:
+        builder.emit("ret " + valueRef.getTypeText() + " " + valueRef.getText());
     }
+
     // TODO: Add concrete functions that generates IR.You need to call builder.emit()
 
 
