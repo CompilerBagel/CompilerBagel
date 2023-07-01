@@ -19,6 +19,6 @@ public class Register implements ValueRef{
 
     @Override
     public String getTypeText() {
-        return null;
+        return type.getText();
     }
 }

@@ -1,7 +1,10 @@
 package IRBuider;
 
-public class ConstIntValue implements ValueRef{
+import Type.Int32Type;
+
+public class ConstIntValueRef implements ValueRef{
     private int value;
+    private Int32Type type;
     @Override
     public String getText() {
         return "" + value;
@@ -9,6 +12,6 @@ public class ConstIntValue implements ValueRef{
 
     @Override
     public String getTypeText() {
-        return null;
+        return type.getText();
     }
 }
