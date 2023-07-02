@@ -31,8 +31,16 @@ public class IRBuilder {
     // TODO: Add concrete functions that generates IR.You need to call builder.emit()
 
     public static ValueRef IRBuildAdd(IRBuilder builder, ValueRef LvalRef, ValueRef RvalRef, String name) {
-        builder.emit("");
-        return null;
+        String LvalRefRegisterStr = builder.loadVariable(LvalRef);
+        String RvalRefRegisterStr = builder.loadVariable(RvalRef);
+        Register resRegister;
+        if(LvalRef.getTypeText().equals("float") || RvalRef.getTypeText().equals("float")){
+            resRegister = new Register(name,FloatType.IRFloatType());
+        }else{
+            resRegister = new Register(name,Int32Type.IRInt32Type());
+        }
+        builder.emit("  "+resRegister.getText()+" = add "+resRegister.getTypeText()+" "+LvalRefRegisterStr+", "+RvalRefRegisterStr);
+        return resRegister;
     }
 
 
@@ -48,12 +56,19 @@ public class IRBuilder {
 
     private String loadVariable(ValueRef valueRef) {
         if (valueRef instanceof LocalVarIntValueRef) {
-            Type int32Type = Int32Type.IRInt32Type();
-            Register register = new Register(valueRef.getTypeText(), int32Type);
+            Register register = new Register(valueRef.getTypeText(), Int32Type.IRInt32Type());
             emit("  " + register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
                     + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText()
                     + "," + "align 4");
             return register.getText();
+        }else if(valueRef instanceof GlobalVarIntValueRef){
+            Register register = new Register(valueRef.getTypeText(), Int32Type.IRInt32Type());
+            emit("  " + register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
+                    + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText()
+                    + "," + "align 4");
+            return register.getText();
+        }else if(valueRef instanceof ConstIntValueRef) {
+            return valueRef.getText();
         }
         //TODO: Add more
         return null;

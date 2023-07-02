@@ -22,6 +22,6 @@ public class GlobalVarIntValueRef implements ValueRef {
         return ""+type.getText();
     }
     public String getRegisterText(){
-        return register.getText();
+        return register.getGlobalText();
     }
 }
