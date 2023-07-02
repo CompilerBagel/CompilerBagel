@@ -7,8 +7,10 @@ public class BaseBlock {
     private final int baseBlockId;
 
     /** -------- static methods --------*/
-    public static void IRAppendBasicBlock(FunctionBlock function, String label) {
-        function.addBaseBlock(new BaseBlock(label));
+    public static BaseBlock IRAppendBasicBlock(FunctionBlock function, String label) {
+        BaseBlock baseBlock = new BaseBlock(label);
+        function.addBaseBlock(baseBlock);
+        return baseBlock;
     }
 
     /** -------- member methods --------*/
