@@ -1,7 +1,6 @@
-package IRBuider;
+package IRBuilder;
 
 import Type.Int32Type;
-import Type.Type;
 
 public class ConstIntValueRef implements ValueRef{
     private int value;

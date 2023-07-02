@@ -1,10 +1,15 @@
-package IRBuider;
+package IRBuilder;
 
 import Type.Type;
 import Type.*;
+import static IRBuilder.IRConstants.*;
+import static Type.FloatType.IRFloatType;
+import static Type.Int32Type.IRInt32Type;
 
 public class IRBuilder {
     private BaseBlock currentBaseBlock = null;
+    private static final Type int32Type = IRInt32Type();
+    private static final Type floatType = IRFloatType();
 
     /**
      * -------- static methods --------
@@ -19,7 +24,7 @@ public class IRBuilder {
 
     public static void IRBuildRet(IRBuilder builder, ValueRef valueRef) {
         if (valueRef instanceof ConstIntValueRef || valueRef instanceof ConstFloatValueRef) {
-            builder.emit("  ret " + valueRef.getTypeText() + " " + valueRef.getText());
+            builder.emit("  " + RET + " " + valueRef.getTypeText() + " " + valueRef.getText());
         } else if (valueRef instanceof LocalVarIntValueRef) {
             String registerName = builder.loadVariable(valueRef);
             builder.emit("  ret " + valueRef.getTypeText() + " " + registerName);
@@ -30,16 +35,16 @@ public class IRBuilder {
 
     // TODO: Add concrete functions that generates IR.You need to call builder.emit()
 
-    public static ValueRef IRBuildAdd(IRBuilder builder, ValueRef LvalRef, ValueRef RvalRef, String name) {
-        String LvalRefRegisterStr = builder.loadVariable(LvalRef);
-        String RvalRefRegisterStr = builder.loadVariable(RvalRef);
+    public static ValueRef IRBuildAdd(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
+        String lhsValRefRegisterStr = builder.loadVariable(lhsValRef);
+        String rhsValRefRegisterStr = builder.loadVariable(rhsValRef);
         Register resRegister;
-        if(LvalRef.getTypeText().equals("float") || RvalRef.getTypeText().equals("float")){
-            resRegister = new Register(name,FloatType.IRFloatType());
-        }else{
-            resRegister = new Register(name,Int32Type.IRInt32Type());
+        if (lhsValRef.getTypeText().equals("float") || rhsValRef.getTypeText().equals("float")) {
+            resRegister = new Register(name, floatType);
+        } else {
+            resRegister = new Register(name, int32Type);
         }
-        builder.emit("  "+resRegister.getText()+" = add "+resRegister.getTypeText()+" "+LvalRefRegisterStr+", "+RvalRefRegisterStr);
+        builder.emit("  " + resRegister.getText() + " = add " + resRegister.getTypeText() + " " + lhsValRefRegisterStr + ", " + rhsValRefRegisterStr);
         return resRegister;
     }
 
@@ -61,13 +66,13 @@ public class IRBuilder {
                     + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText()
                     + "," + "align 4");
             return register.getText();
-        }else if(valueRef instanceof GlobalVarIntValueRef){
+        } else if (valueRef instanceof GlobalVarIntValueRef) {
             Register register = new Register(valueRef.getTypeText(), Int32Type.IRInt32Type());
             emit("  " + register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
                     + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText()
                     + "," + "align 4");
             return register.getText();
-        }else if(valueRef instanceof ConstIntValueRef) {
+        } else if (valueRef instanceof ConstIntValueRef) {
             return valueRef.getText();
         }
         //TODO: Add more

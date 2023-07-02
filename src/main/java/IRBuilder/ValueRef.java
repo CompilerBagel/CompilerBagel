@@ -1,4 +1,4 @@
-package IRBuider;
+package IRBuilder;
 
 public interface ValueRef {
     String getText();

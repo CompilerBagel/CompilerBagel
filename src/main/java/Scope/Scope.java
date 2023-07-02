@@ -1,9 +1,7 @@
 package Scope;
 
-import IRBuider.Register;
+import IRBuilder.Register;
 import Type.Type;
-
-import java.util.Map;
 
 public interface Scope {
     Scope getEnclosingScope();

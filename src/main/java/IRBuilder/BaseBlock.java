@@ -1,4 +1,4 @@
-package IRBuider;
+package IRBuilder;
 
 public class BaseBlock {
     public static int baseBlockCounter = 0;

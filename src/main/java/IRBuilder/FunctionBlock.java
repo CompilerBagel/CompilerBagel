@@ -1,4 +1,4 @@
-package IRBuider;
+package IRBuilder;
 
 import Type.FunctionType;
 

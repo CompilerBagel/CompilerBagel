@@ -1,16 +1,11 @@
-import IRBuider.*;
+import IRBuilder.*;
 import Scope.*;
 import Type.Type;
 import antlr.SysYParser;
 import antlr.SysYParserBaseVisitor;
-import antlr.SysYParserVisitor;
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.RuleNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
-import static IRBuider.IRBuilder.IRCreateBuilder;
-import static IRBuider.IRModule.IRModuleCreateWithName;
+import static IRBuilder.IRBuilder.IRCreateBuilder;
+import static IRBuilder.IRModule.IRModuleCreateWithName;
 import static Type.FloatType.IRFloatType;
 import static Type.Int32Type.IRInt32Type;
 
