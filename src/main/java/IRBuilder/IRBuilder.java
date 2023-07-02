@@ -36,18 +36,21 @@ public class IRBuilder {
     // TODO: Add concrete functions that generates IR.You need to call builder.emit()
 
     public static ValueRef IRBuildAdd(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
-        String lhsValRefRegisterStr = builder.loadVariable(lhsValRef);
-        String rhsValRefRegisterStr = builder.loadVariable(rhsValRef);
-        Register resRegister;
+        ValueRef resRegister;
+        Type resType = int32Type;
         if (lhsValRef.getType() == floatType || rhsValRef.getType() == floatType) {
-            resRegister = new Register(name, floatType);
-        } else {
-            resRegister = new Register(name, int32Type);
+            resType = floatType;
         }
-        builder.emit(resRegister.getText() + " = add " + resRegister.getTypeText() + " " + lhsValRefRegisterStr + ", " + rhsValRefRegisterStr);
+        resRegister = new Register(name, resType);
+        builder.emit(resRegister.getText() + " = " + ADD + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + lhsValRef.getText());
         return resRegister;
     }
 
+    public static ValueRef IRAddGlobal(IRModule module, Type type, String globalVarName) {
+        // TODO:
+        //   tips: This method need to call module.emit()
+        return null;
+    }
 
     /**
      * -------- member methods --------
@@ -65,12 +68,12 @@ public class IRBuilder {
 
     private String loadVariable(ValueRef valueRef) {
         if (valueRef instanceof LocalVarIntValueRef) {
-            Register register = new Register(valueRef.getTypeText(), Int32Type.IRInt32Type());
+            Register register = new Register(valueRef.getTypeText(), int32Type);
             emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
                     + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText(), 4);
             return register.getText();
         } else if (valueRef instanceof GlobalVarIntValueRef) {
-            Register register = new Register(valueRef.getTypeText(), Int32Type.IRInt32Type());
+            Register register = new Register(valueRef.getTypeText(), int32Type);
             emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
                     + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText(), 4);
             return register.getText();

@@ -1,6 +1,7 @@
 package IRBuilder;
 
 import Type.FunctionType;
+import Type.Type;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -50,5 +51,7 @@ public class IRModule {
         functionBlocks.add(function);
     }
 
-
+    public void emit(String code) {
+        this.stringBuilder.append(code).append("\n");
+    }
 }
