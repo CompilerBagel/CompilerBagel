@@ -24,4 +24,8 @@ public class Register implements ValueRef{
     public String getTypeText() {
         return type.getText();
     }
+    @Override
+    public Type getType() {
+        return type;
+    }
 }

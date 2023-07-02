@@ -1,10 +1,17 @@
 package IRBuilder;
 
 import Type.FloatType;
+import Type.Type;
 
 public class ConstFloatValueRef implements ValueRef{
-    private float value;
-    private FloatType type;
+    private final float value;
+    private final Type type;
+
+    public ConstFloatValueRef(float value) {
+        this.value = value;
+        this.type = FloatType.IRFloatType();
+    }
+
     @Override
     public String getText() {
         return "" + value;
@@ -13,5 +20,10 @@ public class ConstFloatValueRef implements ValueRef{
     @Override
     public String getTypeText() {
         return type.getText();
+    }
+
+    @Override
+    public Type getType() {
+        return type;
     }
 }

@@ -24,12 +24,12 @@ public class IRBuilder {
 
     public static void IRBuildRet(IRBuilder builder, ValueRef valueRef) {
         if (valueRef instanceof ConstIntValueRef || valueRef instanceof ConstFloatValueRef) {
-            builder.emit("  " + RET + " " + valueRef.getTypeText() + " " + valueRef.getText());
+            builder.emit(RET + " " + valueRef.getTypeText() + " " + valueRef.getText());
         } else if (valueRef instanceof LocalVarIntValueRef) {
             String registerName = builder.loadVariable(valueRef);
-            builder.emit("  ret " + valueRef.getTypeText() + " " + registerName);
+            builder.emit(RET + " " + valueRef.getTypeText() + " " + registerName);
         } else if (valueRef instanceof GlobalVarIntValueRef) {
-            builder.emit("  ret " + valueRef.getTypeText() + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText());
+            builder.emit(RET + " " + valueRef.getTypeText() + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText());
         }
     }
 
@@ -39,12 +39,12 @@ public class IRBuilder {
         String lhsValRefRegisterStr = builder.loadVariable(lhsValRef);
         String rhsValRefRegisterStr = builder.loadVariable(rhsValRef);
         Register resRegister;
-        if (lhsValRef.getTypeText().equals("float") || rhsValRef.getTypeText().equals("float")) {
+        if (lhsValRef.getType() == floatType || rhsValRef.getType() == floatType) {
             resRegister = new Register(name, floatType);
         } else {
             resRegister = new Register(name, int32Type);
         }
-        builder.emit("  " + resRegister.getText() + " = add " + resRegister.getTypeText() + " " + lhsValRefRegisterStr + ", " + rhsValRefRegisterStr);
+        builder.emit(resRegister.getText() + " = add " + resRegister.getTypeText() + " " + lhsValRefRegisterStr + ", " + rhsValRefRegisterStr);
         return resRegister;
     }
 
@@ -62,13 +62,13 @@ public class IRBuilder {
     private String loadVariable(ValueRef valueRef) {
         if (valueRef instanceof LocalVarIntValueRef) {
             Register register = new Register(valueRef.getTypeText(), Int32Type.IRInt32Type());
-            emit("  " + register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
+            emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
                     + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText()
                     + "," + "align 4");
             return register.getText();
         } else if (valueRef instanceof GlobalVarIntValueRef) {
             Register register = new Register(valueRef.getTypeText(), Int32Type.IRInt32Type());
-            emit("  " + register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
+            emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
                     + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText()
                     + "," + "align 4");
             return register.getText();

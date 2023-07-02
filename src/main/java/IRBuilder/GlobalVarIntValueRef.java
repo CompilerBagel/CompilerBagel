@@ -19,8 +19,14 @@ public class GlobalVarIntValueRef implements ValueRef {
     }
     @Override
     public String getTypeText() {
-        return ""+type.getText();
+        return type.getText();
     }
+
+    @Override
+    public Type getType() {
+        return type;
+    }
+
     public String getRegisterText(){
         return register.getGlobalText();
     }

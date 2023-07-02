@@ -19,8 +19,9 @@ public class BaseBlock {
     }
 
     public void emit(String code) {
-        codeBuilder.append(code).append("\n");
+        codeBuilder.append("  ").append(code).append("\n");
     }
+
     @Override
     public String toString() {
         return codeBuilder.toString();
