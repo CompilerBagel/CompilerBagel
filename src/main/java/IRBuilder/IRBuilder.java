@@ -60,19 +60,19 @@ public class IRBuilder {
     }
 
     private String loadVariable(ValueRef valueRef) {
-        if (valueRef instanceof LocalVarIntValueRef) {
-            BaseRegister register = new BaseRegister(valueRef.getTypeText(), int32Type);
-            emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
-                    + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText(), 4);
-            return register.getText();
-        } else if (valueRef instanceof GlobalVarIntValueRef) {
-            BaseRegister register = new BaseRegister(valueRef.getTypeText(), int32Type);
-            emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
-                    + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText(), 4);
-            return register.getText();
-        } else if (valueRef instanceof ConstIntValueRef) {
-            return valueRef.getText();
-        }
+//        if (valueRef instanceof LocalVarIntValueRef) {
+//            BaseRegister register = new BaseRegister(valueRef.getTypeText(), int32Type);
+//            emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
+//                    + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText(), 4);
+//            return register.getText();
+//        } else if (valueRef instanceof GlobalVarIntValueRef) {
+//            BaseRegister register = new BaseRegister(valueRef.getTypeText(), int32Type);
+//            emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
+//                    + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText(), 4);
+//            return register.getText();
+//        } else if (valueRef instanceof ConstIntValueRef) {
+//            return valueRef.getText();
+//        }
         //TODO: Add more
         return null;
     }
