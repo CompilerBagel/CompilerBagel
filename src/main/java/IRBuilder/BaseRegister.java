@@ -17,9 +17,6 @@ public class BaseRegister implements ValueRef{
     public String getText() {
         return "%" + identity + tempNO;
     }
-    public String getGlobalText(){
-        return "@" + identity + tempNO;
-    }
     @Override
     public String getTypeText() {
         return type.getText();

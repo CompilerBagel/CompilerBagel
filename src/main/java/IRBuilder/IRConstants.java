@@ -5,5 +5,7 @@ public final class IRConstants {
     public static final String RET = "ret";
     public static final String LOAD = "load";
     public static final String ADD = "add";
-    public static final String ALLOCA ="alloca";
+    public static final String SUB = "sub";
+    public static final String ALLOCA = "alloca";
+    public static final String STORE =  "store";
 }
