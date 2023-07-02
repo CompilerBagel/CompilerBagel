@@ -5,13 +5,13 @@ import Type.Type;
 public class LocalVarIntValueRef implements ValueRef{
     private String name;
     private ConstIntValueRef intValueRef;
-    private Register register;
+    private BaseRegister register;
     private Type type;
     LocalVarIntValueRef(ConstIntValueRef intValueRef,String name, Type type){
         this.name = name;
         this.intValueRef = intValueRef;
         this.type = type;
-        this.register = new Register(name,type);
+        this.register = new BaseRegister(name,type);
     }
     @Override
     public String getText() {

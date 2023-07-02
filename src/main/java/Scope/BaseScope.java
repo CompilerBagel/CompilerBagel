@@ -1,6 +1,6 @@
 package Scope;
 
-import IRBuilder.Register;
+import IRBuilder.ValueRef;
 import Type.Type;
 
 import java.util.LinkedHashMap;
@@ -9,7 +9,7 @@ import java.util.Map;
 public class BaseScope implements Scope {
     private final Scope enclosingScope;
     private String scopeName;
-    private final Map<String, Register> symbols = new LinkedHashMap<>();
+    private final Map<String, ValueRef> symbols = new LinkedHashMap<>();
     private final Map<String, Type> types = new LinkedHashMap<>();
 
     public BaseScope(String scopeName, Scope enclosingScope) {
@@ -23,20 +23,20 @@ public class BaseScope implements Scope {
     }
 
     @Override
-    public void define(String name, Register register, Type type) {
-        symbols.put(name, register);
+    public void define(String name, ValueRef valueRef, Type type) {
+        symbols.put(name, valueRef);
         types.put(name, type);
     }
 
     @Override
-    public Register getRegister(String name) {
-        Register register = symbols.get(name);
-        if (register != null) {
-            return register;
+    public ValueRef getValueRef(String name) {
+        ValueRef valueRef = symbols.get(name);
+        if (valueRef != null) {
+            return valueRef;
         }
 
         if (enclosingScope != null) {
-            return enclosingScope.getRegister(name);
+            return enclosingScope.getValueRef(name);
         }
 
         return null;

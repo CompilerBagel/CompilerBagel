@@ -2,13 +2,13 @@ package IRBuilder;
 
 import Type.Type;
 
-public class Register implements ValueRef{
+public class BaseRegister implements ValueRef{
     static int tempCounter = 0;
     private final Type type;
     private final String identity;
     private final int tempNO;
 
-    public Register(String identity, Type type) {
+    public BaseRegister(String identity, Type type) {
         this.identity = identity;
         this.tempNO = tempCounter++;
         this.type = type;

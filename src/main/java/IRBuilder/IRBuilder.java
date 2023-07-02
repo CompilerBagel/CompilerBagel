@@ -1,7 +1,7 @@
 package IRBuilder;
 
 import Type.Type;
-import Type.*;
+
 import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
 import static Type.Int32Type.IRInt32Type;
@@ -41,7 +41,7 @@ public class IRBuilder {
         if (lhsValRef.getType() == floatType || rhsValRef.getType() == floatType) {
             resType = floatType;
         }
-        resRegister = new Register(name, resType);
+        resRegister = new BaseRegister(name, resType);
         builder.emit(resRegister.getText() + " = " + ADD + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + lhsValRef.getText());
         return resRegister;
     }
@@ -68,12 +68,12 @@ public class IRBuilder {
 
     private String loadVariable(ValueRef valueRef) {
         if (valueRef instanceof LocalVarIntValueRef) {
-            Register register = new Register(valueRef.getTypeText(), int32Type);
+            BaseRegister register = new BaseRegister(valueRef.getTypeText(), int32Type);
             emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
                     + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText(), 4);
             return register.getText();
         } else if (valueRef instanceof GlobalVarIntValueRef) {
-            Register register = new Register(valueRef.getTypeText(), int32Type);
+            BaseRegister register = new BaseRegister(valueRef.getTypeText(), int32Type);
             emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
                     + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText(), 4);
             return register.getText();
