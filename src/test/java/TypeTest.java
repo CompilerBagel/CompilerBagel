@@ -65,7 +65,7 @@ public class TypeTest {
     public void pointerTypeTest1() {
         Type pointer1 = new PointerType(int32Type);
         Type pointer2 = new PointerType(pointer1);
-        assertEquals(pointer2.getText(), "**i32");
+        assertEquals(pointer2.getText(), "i32**");
     }
 
 }
