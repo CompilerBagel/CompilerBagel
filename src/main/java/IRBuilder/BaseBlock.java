@@ -22,6 +22,10 @@ public class BaseBlock {
         codeBuilder.append("  ").append(code).append("\n");
     }
 
+    public void emit(String code, int align) {
+        codeBuilder.append("  ").append(code).append(", align ").append(align).append("\n");
+    }
+
     @Override
     public String toString() {
         return codeBuilder.toString();

@@ -59,18 +59,20 @@ public class IRBuilder {
         currentBaseBlock.emit(code);
     }
 
+    private void emit(String code, int align) {
+        currentBaseBlock.emit(code, align);
+    }
+
     private String loadVariable(ValueRef valueRef) {
         if (valueRef instanceof LocalVarIntValueRef) {
             Register register = new Register(valueRef.getTypeText(), Int32Type.IRInt32Type());
             emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
-                    + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText()
-                    + "," + "align 4");
+                    + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText(), 4);
             return register.getText();
         } else if (valueRef instanceof GlobalVarIntValueRef) {
             Register register = new Register(valueRef.getTypeText(), Int32Type.IRInt32Type());
             emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
-                    + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText()
-                    + "," + "align 4");
+                    + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText(), 4);
             return register.getText();
         } else if (valueRef instanceof ConstIntValueRef) {
             return valueRef.getText();
