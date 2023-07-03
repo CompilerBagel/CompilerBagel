@@ -1,15 +1,10 @@
-import IRBuilder.FunctionBlock;
-import IRBuilder.IRBuilder;
-import IRBuilder.IRModule;
-import IRBuilder.ValueRef;
+import IRBuilder.*;
 import Scope.GlobalScope;
 import Scope.LocalScope;
 import Scope.Scope;
 import Type.FunctionType;
 import Type.Type;
-import IRBuilder.ConstIntValueRef;
-import IRBuilder.ConstFloatValueRef;
-import antlr.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,6 +103,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRAddGlobal(module, type, constName);
                 // todo: const global initializer
                 //IRSetInitializer(constVariable, assign);
+                IRSetInitializer(module, assign);
             }else{
                 constVariable = IRBuildAlloca(builder, type, constName);
                 IRBuildStore(builder, constVariable, assign);
@@ -138,6 +134,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 variable = IRAddGlobal(module, type, variableName);
                 // todo: global initializer
                 //IRSetInitializer(variable, assign);
+                IRSetInitializer(module, assign);
             }else{
                 variable = IRBuildAlloca(builder, type, variableName);
                 IRBuildStore(builder, variable, assign);
@@ -173,7 +170,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         int num;
         if(number.startsWith("0x") || number.startsWith("0X")){
             num = Integer.parseInt(number.substring(2), 16);
-        }else if(number.startsWith("0")){
+        }else if(number.startsWith("0") && number.length() != 1){
             num = Integer.parseInt(number.substring(1), 8);
         }else{
             num = Integer.parseInt(number);
