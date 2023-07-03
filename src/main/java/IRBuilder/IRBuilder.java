@@ -106,9 +106,13 @@ public class IRBuilder {
         return resRegister;
     }
 
-    public static void IRBuildStore(IRBuilder builder, ValueRef valueRef, ValueRef pointer) {
+    public static ValueRef IRBuildStore(IRBuilder builder, ValueRef valueRef, ValueRef pointer) {
+        ValueRef resRegister;
+        PointerType pointerType = new PointerType(valueRef.getType());
+        resRegister = new BaseRegister("temp", pointerType);
         builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
                 ", " + pointer.getTypeText() + " " + pointer.getText() ,4);
+        return resRegister;
     }
 
     /**
