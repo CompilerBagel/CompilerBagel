@@ -5,6 +5,7 @@ import Type.Type;
 
 import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
+import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
 
 import Type.PointerType;
@@ -14,6 +15,8 @@ public class IRBuilder {
     private BaseBlock currentBaseBlock = null;
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
+
+    private static final Type int1Type = IRInt1Type();
 
     /**
      * -------- static methods --------
@@ -102,7 +105,7 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(type);
         resRegister = new BaseRegister(name, pointerType);
-        builder.emit(resRegister.getText() + " = " + ALLOCA + " " + type.getText() ,4);
+        builder.emit(resRegister.getText() + " = " + ALLOCA + " " + type.getText(), 4);
         return resRegister;
     }
 
@@ -111,7 +114,7 @@ public class IRBuilder {
         PointerType pointerType = new PointerType(valueRef.getType());
         resRegister = new BaseRegister("temp", pointerType);
         builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
-                ", " + pointer.getTypeText() + " " + pointer.getText() ,4);
+                ", " + pointer.getTypeText() + " " + pointer.getText(), 4);
         return resRegister;
     }
 
@@ -149,6 +152,13 @@ public class IRBuilder {
     public static void IRBuildCondBr(IRBuilder builder, ValueRef condition, BaseBlock ifTrue, BaseBlock ifFalse) {
         builder.emit(BR + " " + condition.getTypeText() + " " + condition.getText() + ", " +
                 "label %" + ifTrue.getLabel() + ", label %" + ifFalse.getLabel());
+    }
+
+    public static ValueRef IRBuildICmp(IRBuilder builder, int icmpType, ValueRef lhs, ValueRef rhs, String text) {
+        ValueRef resRegister = new BaseRegister(text, int1Type);
+        builder.emit(resRegister.getText() + " = " + ICMP + " " + ICMPCodes[icmpType] + " "
+                + lhs.getTypeText() + " " + lhs.getText() + ", " + rhs.getText());
+        return resRegister;
     }
 
     /**
