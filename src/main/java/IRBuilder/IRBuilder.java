@@ -7,6 +7,8 @@ import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
 import static Type.Int32Type.IRInt32Type;
 import Type.PointerType;
+import com.sun.jdi.Value;
+
 public class IRBuilder {
     private BaseBlock currentBaseBlock = null;
     private static final Type int32Type = IRInt32Type();
@@ -131,6 +133,11 @@ public class IRBuilder {
 
     public static void IRBuildBr(IRBuilder builder, BaseBlock block) {
         builder.emit(BR + " label %" + block.getLabel());
+    }
+
+    public static void IRBuildCondBr(IRBuilder builder, ValueRef condition, BaseBlock ifTrue, BaseBlock ifFalse) {
+        builder.emit(BR + " " + condition.getTypeText() + " " + condition.getText() + ", " +
+                "label %" + ifTrue.getLabel() + ", label %" + ifFalse.getLabel());
     }
 
     /**
