@@ -42,6 +42,7 @@ public class TypeTest {
         params.add(floatType);
         Type function1 = new FunctionType(params, int32Type);
         assertEquals(function1.getText(), "(i32, float): i32");
+        assertEquals(((FunctionType)function1).getParamsTable(), "(i32 %0, float %1)");
     }
 
     @Test

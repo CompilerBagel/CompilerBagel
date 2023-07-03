@@ -43,6 +43,22 @@ public class FunctionType implements Type{
         return stringBuilder.toString();
     }
 
+    public String getParamsTable() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append('(');
+        if (paramsCount > 0) {
+            stringBuilder.append(paramsType.get(0).getText());
+            stringBuilder.append(" ").append("%").append(0);
+        }
+        for (int i = 1; i < paramsCount; i++) {
+            stringBuilder.append(", ")
+                    .append(paramsType.get(i).getText())
+                    .append(" ").append("%").append(i);
+        }
+        stringBuilder.append(")");
+        return stringBuilder.toString();
+    }
+
     public Type getParamType(int i) {
         return paramsType.get(i);
     }
