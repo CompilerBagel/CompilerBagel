@@ -1,11 +1,11 @@
 package Type;
 
 /**
- * Arrays: can be represented as [BaseType, Length], e.g. [i32, 2].
+ * Arrays: can be represented as [Length x BaseType], e.g. [3 x i32].
  * BaseType: the type of the array element
  * Length: represent the length of the array
- * e.g. [[i32, 3], 2]: an array of length 2, the array element type is a 32-bit signed array of length 3
- * equivalent to int[2][3] in C/C++.
+ * e.g. [3 x [2 x i32]]: an array of length 3, the array element type is a 32-bit signed array of length 2
+ * equivalent to int[3][2] in C/C++.
  */
 
 public class ArrayType implements Type{
@@ -19,8 +19,7 @@ public class ArrayType implements Type{
 
     @Override
     public String getText() {
-        return "[" + elementType.getText() + ", "
-                + elementNumber + "]";
+        return "[" + elementNumber + " x " + elementType.getText() + "]";
     }
 
     public int getElementNumber() {

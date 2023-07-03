@@ -18,21 +18,21 @@ public class TypeTest {
     @Test
     public void arrayTypeTest1() {
         Type array1 = new ArrayType(int32Type, 5);
-        assertEquals(array1.getText(), "[i32, 5]");
+        assertEquals(array1.getText(), "[5 x i32]");
     }
 
     @Test
     public void arrayTypeTest2() {
         Type array1 = new ArrayType(int32Type, 5);
         Type array2 = new ArrayType(array1, 2);
-        assertEquals(array2.getText(), "[[i32, 5], 2]");
+        assertEquals(array2.getText(), "[2 x [5 x i32]]");
     }
 
     @Test
     public void arrayTypeTest3() {
         Type array1 = new ArrayType(floatType, 6);
         Type array2 = new ArrayType(array1, 2);
-        assertEquals(array2.getText(), "[[float, 6], 2]");
+        assertEquals(array2.getText(), "[2 x [6 x float]]");
     }
 
     @Test
@@ -52,7 +52,7 @@ public class TypeTest {
         params.add(int32Type);
         params.add(array1);
         Type function1 = new FunctionType(params, IRVoidType());
-        assertEquals(function1.getText(), "(i32, [i32, 5])");
+        assertEquals(function1.getText(), "(i32, [5 x i32])");
     }
 
     @Test

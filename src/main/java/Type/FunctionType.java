@@ -37,8 +37,7 @@ public class FunctionType implements Type{
         stringBuilder.append(")");
 
         if (retType != voidType) {
-            stringBuilder.append(": ")
-                    .append(retType.getText());
+            stringBuilder.append(": ").append(retType.getText());
         }
         return stringBuilder.toString();
     }
