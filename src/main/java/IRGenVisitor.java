@@ -8,7 +8,8 @@ import Scope.Scope;
 import Type.FunctionType;
 import Type.Type;
 import IRBuilder.ConstIntValueRef;
-import antlr.*;
+import IRBuilder.ConstFloatValueRef;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         // todo: floatType arrayType
         if(ctx.funcType().getText().equals("int")){
             returnType = IRInt32Type();
+        }else if(ctx.funcType().getText().equals("float")){
+            returnType = IRFloatType();
         }else{
             returnType = IRVoidType();
         }
@@ -55,7 +58,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if(ctx.funcFParams().funcFParam(i).L_BRACKT(0) != null){
                 //paramsType.add(IRArrayType());
             }else{
-                paramsType.add(IRInt32Type());
+                if(ctx.funcFParams().funcFParam(i).bType().getText().equals("int")){
+                    paramsType.add(IRInt32Type());
+                }else if(ctx.funcFParams().funcFParam(i).bType().getText().equals("float")){
+                    paramsType.add(IRFloatType());
+                }
             }
         }
         FunctionType functionType = new FunctionType(paramsType, returnType);
@@ -78,8 +85,90 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
     @Override
     public ValueRef visitReturnStmt(SysYParser.ReturnStmtContext ctx){
-        ValueRef ret = new ConstIntValueRef(1);
+        ValueRef ret = ctx.exp().accept(this);
         IRBuildRet(builder, ret);
+        return ret;
+    }
+
+    @Override
+    public ValueRef visitNumberExp(SysYParser.NumberExpContext ctx){
+        return ctx.number().accept(this);
+    }
+
+    @Override
+    public ValueRef visitNumber(SysYParser.NumberContext ctx){
+        String num = ctx.getText();
+        if(ctx.INTEGER_CONST() != null){
+            return calculateInt(num);
+        }else if(ctx.FLOAT_CONST() != null){
+            return calculateFloat(num);
+        }
+        return new ConstIntValueRef(0);
+    }
+
+
+
+    public ValueRef calculateInt(String number){
+        int num;
+        if(number.startsWith("0x") || number.startsWith("0X")){
+            num = Integer.parseInt(number.substring(2), 16);
+        }else if(number.startsWith("0")){
+            num = Integer.parseInt(number.substring(1), 8);
+        }else{
+            num = Integer.parseInt(number);
+        }
+        return new ConstIntValueRef(num);
+    }
+
+    public ValueRef calculateFloat(String number){
+        float num = Float.parseFloat(number);
+        return new ConstFloatValueRef(num);
+    }
+
+    @Override
+    public ValueRef visitMulExp(SysYParser.MulExpContext ctx) {
+        ValueRef left = visit(ctx.exp(0));
+        ValueRef right = visit(ctx.exp(1));
+
+        if (ctx.MUL() != null) {
+            return IRBuildMul(builder, left, right, "mul_");
+        } else if (ctx.DIV() != null) {
+            return IRBuildDiv(builder, left, right, "div_");
+        } else if (ctx.MOD() != null) {
+            return IRBuildMod(builder, left, right, "mod_");
+        }
+
+        return null;
+    }
+
+    @Override
+    public ValueRef visitPlusExp(SysYParser.PlusExpContext ctx) {
+        ValueRef left = visit(ctx.exp(0));
+        ValueRef right = visit(ctx.exp(1));
+
+        if (ctx.PLUS() != null) {
+            return IRBuildAdd(builder, left, right, "add_");
+        } else if (ctx.MINUS() != null) {
+            return IRBuildSub(builder, left, right, "sub_");
+        }
+
+        return null;
+    }
+
+    @Override
+    public ValueRef visitUnaryExp(SysYParser.UnaryExpContext ctx) {
+        String operator = ctx.unaryOp().getText();
+        ValueRef operand = visit(ctx.exp());
+        switch (operator) {
+            case "+":
+                return operand;
+            case "-":
+                return IRBuildNeg(builder, operand, "neg_");
+            case "!":
+                return IRBuildNot(builder, operand, "not_");
+            default:
+        }
+
         return null;
     }
 }
