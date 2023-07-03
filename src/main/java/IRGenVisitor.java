@@ -11,6 +11,7 @@ import java.util.List;
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
 import static IRBuilder.IRModule.IRModuleCreateWithName;
+import static IRBuilder.IRModule.IRAddFunction;
 import static Type.FloatType.IRFloatType;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
@@ -64,11 +65,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
         }
         FunctionType functionType = new FunctionType(paramsType, returnType);
-        FunctionBlock functionBlock = new FunctionBlock(funcName, functionType);
+        FunctionBlock functionBlock = IRAddFunction(module, funcName, functionType);
         IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(functionBlock, funcName + "Entry"));
-        module.addFunction(functionBlock);
-        // todo: function's valueRef?
-        globalScope.define(funcName, null, functionType);
+        globalScope.define(funcName, functionBlock, functionType);
         ValueRef ret = super.visitFuncDef(ctx);
         return ret;
     }
@@ -140,6 +139,22 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
             currentScope.define(variableName, variable, type);
         }
+        return null;
+    }
+
+    @Override
+    public ValueRef visitCallFuncExp(SysYParser.CallFuncExpContext ctx){
+        String funcName = ctx.IDENT().getText();
+        FunctionBlock functionBlock = (FunctionBlock) globalScope.getValueRef(funcName);
+        FunctionType functionType = (FunctionType) globalScope.getType(funcName);
+
+        int argsNum = functionType.getParamsType().size();
+        ValueRef[] args = new ValueRef[argsNum];
+        for(int i = 0; i < argsNum; i++){
+            args[i] = ctx.funcRParams().param(i).accept(this);
+        }
+        // todo: callfunc 具体怎么设计还需要商讨
+        // IRBuildCall(builder, functionBlock, args, argsNum, functionType.retType);
         return null;
     }
 
