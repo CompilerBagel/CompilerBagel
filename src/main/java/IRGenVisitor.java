@@ -4,22 +4,28 @@ import Scope.LocalScope;
 import Scope.Scope;
 import Type.FunctionType;
 import Type.Type;
+import antlr.SysYParser;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import antlr.SysYParserBaseVisitor;
+
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
 import static IRBuilder.IRModule.IRModuleCreateWithName;
+import static IRBuilder.IRModule.IRAddFunction;
 import static Type.FloatType.IRFloatType;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
+import static Type.Int1Type.IRInt1Type;
 
 public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRModule module = IRModuleCreateWithName("module");
     IRBuilder builder = IRCreateBuilder();
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
+    private static final Type int1Type = IRInt1Type();
     private GlobalScope globalScope = null;
     private Scope currentScope = null;
     private int localScopeCounter = 0;
@@ -64,9 +70,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
         }
         FunctionType functionType = new FunctionType(paramsType, returnType);
-        FunctionBlock functionBlock = new FunctionBlock(funcName, functionType);
+        FunctionBlock functionBlock = IRAddFunction(module, funcName, functionType);
         IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(functionBlock, funcName + "Entry"));
-        module.addFunction(functionBlock);
+        globalScope.define(funcName, functionBlock, functionType);
         ValueRef ret = super.visitFuncDef(ctx);
         return ret;
     }
@@ -101,13 +107,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
             if(currentScope instanceof GlobalScope){
                 constVariable = IRAddGlobal(module, type, constName);
-                // todo: const global initializer
-                //IRSetInitializer(constVariable, assign);
                 IRSetInitializer(module, assign);
             }else{
                 constVariable = IRBuildAlloca(builder, type, constName);
                 IRBuildStore(builder, constVariable, assign);
             }
+            currentScope.define(constName, constVariable, type);
         }
         return null;
     }
@@ -132,14 +137,29 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
             if(currentScope instanceof GlobalScope){
                 variable = IRAddGlobal(module, type, variableName);
-                // todo: global initializer
-                //IRSetInitializer(variable, assign);
                 IRSetInitializer(module, assign);
             }else{
                 variable = IRBuildAlloca(builder, type, variableName);
                 IRBuildStore(builder, variable, assign);
             }
+            currentScope.define(variableName, variable, type);
         }
+        return null;
+    }
+
+    @Override
+    public ValueRef visitCallFuncExp(SysYParser.CallFuncExpContext ctx){
+        String funcName = ctx.IDENT().getText();
+        FunctionBlock functionBlock = (FunctionBlock) globalScope.getValueRef(funcName);
+        FunctionType functionType = (FunctionType) globalScope.getType(funcName);
+
+        int argsNum = functionType.getParamsType().size();
+        ValueRef[] args = new ValueRef[argsNum];
+        for(int i = 0; i < argsNum; i++){
+            args[i] = ctx.funcRParams().param(i).accept(this);
+        }
+        // todo: callfunc 具体怎么设计还需要商讨
+        // IRBuildCall(builder, functionBlock, args, argsNum, functionType.retType);
         return null;
     }
 
@@ -192,9 +212,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             return IRBuildMul(builder, left, right, "mul_");
         } else if (ctx.DIV() != null) {
             return IRBuildDiv(builder, left, right, "div_");
-        } /*else if (ctx.MOD() != null) {
-            return IRBuildMod(builder, left, right, "mod_");
-        }*/
+        } else if (ctx.MOD() != null) {
+            return IRBuildSRem(builder, left, right, "srem_");
+        }
 
         return null;
     }
@@ -220,11 +240,15 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         switch (operator) {
             case "+":
                 return operand;
-/*            case "-":
+            case "-":
                 return IRBuildNeg(builder, operand, "neg_");
             case "!":
-                return IRBuildNot(builder, operand, "not_");
-            default:*/
+                operand = IRBuildICmp(builder , 1 , new ConstIntValueRef(0) , operand , "icmp_");
+                operand = IRBuildXor(builder , operand , new ConstIntValueRef(1, int1Type) , "xor_");
+                operand = IRBuildZExt(builder , operand , int32Type , "zext_");
+                return operand;
+            default:
+                break;
         }
 
         return null;
@@ -235,6 +259,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef lValPointer = this.visitLVal(ctx.lVal());
         ValueRef exp = this.visit(ctx.exp());
         return IRBuildStore(builder, exp, lValPointer);
+    }
+
+    @Override
+    public ValueRef visitLvalExp(SysYParser.LvalExpContext ctx){
+        ValueRef lvalPointer = ctx.lVal().accept(this);
+        return IRBuildLoad(builder, lvalPointer, ctx.lVal().getText());
     }
     
     @Override
@@ -248,6 +278,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             // TODO: array
         }
         
-        return null;
+        return lValPointer;
     }
 }
