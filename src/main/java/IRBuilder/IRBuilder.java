@@ -45,7 +45,7 @@ public class IRBuilder {
             resType = floatType;
         }
         resRegister = new BaseRegister(name, resType);
-        builder.emit(resRegister.getText() + " = " + ADD + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + lhsValRef.getText());
+        builder.emit(resRegister.getText() + " = " + ADD + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText());
         return resRegister;
     }
 
@@ -61,7 +61,7 @@ public class IRBuilder {
             resType = floatType;
         }
         resRegister = new BaseRegister(name, resType);
-        builder.emit(resRegister.getText() + " = " + SUB + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + lhsValRef.getText());
+        builder.emit(resRegister.getText() + " = " + SUB + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText());
         return resRegister;
     }
 
@@ -78,7 +78,7 @@ public class IRBuilder {
             resType = floatType;
         }
         resRegister = new BaseRegister(name, resType);
-        builder.emit(resRegister.getText() + " = " + MUL + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText());
+        builder.emit(resRegister.getText() + " = " + MUL + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText());
         return resRegister;
     }
 
@@ -95,7 +95,7 @@ public class IRBuilder {
             resType = floatType;
         }
         resRegister = new BaseRegister(name, resType);
-        builder.emit(resRegister.getText() + " = " + DIV + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText());
+        builder.emit(resRegister.getText() + " = " + DIV + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText());
         return resRegister;
     }
 
