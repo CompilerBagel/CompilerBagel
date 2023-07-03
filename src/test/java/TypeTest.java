@@ -40,9 +40,9 @@ public class TypeTest {
         List<Type> params = new ArrayList<>();
         params.add(int32Type);
         params.add(floatType);
-        Type function1 = new FunctionType(params, int32Type);
+        FunctionType function1 = new FunctionType(params, int32Type);
         assertEquals(function1.getText(), "(i32, float): i32");
-        assertEquals(((FunctionType)function1).getParamsTable(), "(i32 %0, float %1)");
+        assertEquals(function1.getParamsTable(), "(i32 %0, float %1)");
     }
 
     @Test
@@ -58,8 +58,9 @@ public class TypeTest {
     @Test
     public void functionTypeTest3() {
         List<Type> params = new ArrayList<>();
-        Type function1 = new FunctionType(params, IRVoidType());
+        FunctionType function1 = new FunctionType(params, IRVoidType());
         assertEquals(function1.getText(), "()");
+        assertEquals(function1.getParamsTable(), "()");
     }
 
     @Test

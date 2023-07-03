@@ -22,8 +22,8 @@ public class FunctionBlock implements ValueRef{
 
     public StringBuilder genIRCodes() {
         StringBuilder stringBuilder = new StringBuilder();
-        // TODO: params
-        stringBuilder.append("define ").append(type.getRetType().getText()).append(" @").append(functionName).append("() {\n");
+        stringBuilder.append("define ").append(type.getRetType().getText()).append(" @").append(functionName)
+                .append(type.getParamsTable()).append(" {\n");
         for (BaseBlock baseBlock : baseBlocks) {
             stringBuilder.append(baseBlock.getLabel()).append(":\n");
             stringBuilder.append(baseBlock.getCodeBuilder());
