@@ -67,6 +67,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         FunctionBlock functionBlock = new FunctionBlock(funcName, functionType);
         IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(functionBlock, funcName + "Entry"));
         module.addFunction(functionBlock);
+        // todo: function's valueRef?
+        globalScope.define(funcName, null, functionType);
         ValueRef ret = super.visitFuncDef(ctx);
         return ret;
     }
@@ -101,13 +103,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
             if(currentScope instanceof GlobalScope){
                 constVariable = IRAddGlobal(module, type, constName);
-                // todo: const global initializer
-                //IRSetInitializer(constVariable, assign);
                 IRSetInitializer(module, assign);
             }else{
                 constVariable = IRBuildAlloca(builder, type, constName);
                 IRBuildStore(builder, constVariable, assign);
             }
+            currentScope.define(constName, constVariable, type);
         }
         return null;
     }
@@ -132,13 +133,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
             if(currentScope instanceof GlobalScope){
                 variable = IRAddGlobal(module, type, variableName);
-                // todo: global initializer
-                //IRSetInitializer(variable, assign);
                 IRSetInitializer(module, assign);
             }else{
                 variable = IRBuildAlloca(builder, type, variableName);
                 IRBuildStore(builder, variable, assign);
             }
+            currentScope.define(variableName, variable, type);
         }
         return null;
     }
@@ -236,6 +236,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef exp = this.visit(ctx.exp());
         return IRBuildStore(builder, exp, lValPointer);
     }
+
+    @Override
+    public ValueRef visitLvalExp(SysYParser.LvalExpContext ctx){
+        ValueRef lvalPointer = ctx.lVal().accept(this);
+        return IRBuildLoad(builder, lvalPointer, ctx.lVal().getText());
+    }
     
     @Override
     public ValueRef visitLVal(SysYParser.LValContext ctx){
@@ -248,6 +254,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             // TODO: array
         }
         
-        return null;
+        return lValPointer;
     }
 }
