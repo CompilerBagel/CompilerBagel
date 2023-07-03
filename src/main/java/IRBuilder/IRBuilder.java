@@ -1,15 +1,13 @@
 package IRBuilder;
 
 
+import Type.PointerType;
 import Type.Type;
 
 import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
 import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
-
-import Type.PointerType;
-import com.sun.jdi.Value;
 
 public class IRBuilder {
     private BaseBlock currentBaseBlock = null;
@@ -125,7 +123,7 @@ public class IRBuilder {
      * @param varName the name of variable
      */
     public static ValueRef IRBuildLoad(IRBuilder builder, ValueRef pointer, String varName) {
-        Type baseType = ((PointerType) pointer).getBaseType();
+        Type baseType = ((PointerType) pointer.getType()).getBaseType();
         ValueRef resRegister = new BaseRegister(varName, baseType);
         builder.emit(resRegister.getText() + " = " + LOAD + " " + baseType.getText() + ", "
                 + pointer.getTypeText() + " " + pointer.getText(), 4);
