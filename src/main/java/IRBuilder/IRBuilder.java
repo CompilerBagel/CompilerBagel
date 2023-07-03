@@ -30,6 +30,13 @@ public class IRBuilder {
     // TODO: Add concrete functions that generates IR.You need to call builder.emit()
 
     public static ValueRef IRBuildAdd(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
+        if(lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef){
+            ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) + Integer.valueOf(rhsValRef.getText()));
+            return resIntValueRef;
+        }else if(lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef){
+            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText())+Float.valueOf(rhsValRef.getText()));
+            return resFloatValueRef;
+        }
         ValueRef resRegister;
         Type resType = int32Type;
         if (lhsValRef.getType() == floatType || rhsValRef.getType() == floatType) {
@@ -41,6 +48,13 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildSub(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name){
+        if(lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef){
+            ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) - Integer.valueOf(rhsValRef.getText()));
+            return resIntValueRef;
+        }else if(lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef){
+            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) - Float.valueOf(rhsValRef.getText()));
+            return resFloatValueRef;
+        }
         ValueRef resRegister;
         Type resType = int32Type;
         if (lhsValRef.getType() == floatType || rhsValRef.getType() == floatType) {
@@ -48,6 +62,44 @@ public class IRBuilder {
         }
         resRegister = new BaseRegister(name, resType);
         builder.emit(resRegister.getText() + " = " + SUB + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + lhsValRef.getText());
+        return resRegister;
+    }
+
+    // Author: huangwei021230
+    public static ValueRef IRBuildMul(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name){
+        if(lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef){
+            ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) * Integer.valueOf(rhsValRef.getText()));
+            return resIntValueRef;
+        }else if(lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef){
+            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) * Float.valueOf(rhsValRef.getText()));
+            return resFloatValueRef;
+        }
+        ValueRef resRegister;
+        Type resType = int32Type;
+        if(lhsValRef.getType() == floatType || rhsValRef.getType() == floatType){
+            resType = floatType;
+        }
+        resRegister = new BaseRegister(name, resType);
+        builder.emit(resRegister.getText() + " = " + MUL + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + lhsValRef.getText());
+        return resRegister;
+    }
+
+    // Author: huangwei021230
+    public static ValueRef IRBuildDiv(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name){
+        if(lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef){
+            ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) / Integer.valueOf(rhsValRef.getText()));
+            return resIntValueRef;
+        }else if(lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef){
+            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) / Float.valueOf(rhsValRef.getText()));
+            return resFloatValueRef;
+        }
+        ValueRef resRegister;
+        Type resType = int32Type;
+        if(lhsValRef.getType() == floatType || rhsValRef.getType() == floatType){
+            resType = floatType;
+        }
+        resRegister = new BaseRegister(name, resType);
+        builder.emit(resRegister.getText() + " = " + DIV + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + lhsValRef.getText());
         return resRegister;
     }
 
