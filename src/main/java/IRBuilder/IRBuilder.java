@@ -34,11 +34,9 @@ public class IRBuilder {
 
     public static ValueRef IRBuildAdd(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
         if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
-            ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) + Integer.valueOf(rhsValRef.getText()));
-            return resIntValueRef;
+            return new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) + Integer.valueOf(rhsValRef.getText()));
         } else if (lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef) {
-            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) + Float.valueOf(rhsValRef.getText()));
-            return resFloatValueRef;
+            return new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) + Float.valueOf(rhsValRef.getText()));
         }
         ValueRef resRegister;
         Type resType = int32Type;
@@ -52,11 +50,9 @@ public class IRBuilder {
 
     public static ValueRef IRBuildSub(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
         if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
-            ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) - Integer.valueOf(rhsValRef.getText()));
-            return resIntValueRef;
+            return new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) - Integer.valueOf(rhsValRef.getText()));
         } else if (lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef) {
-            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) - Float.valueOf(rhsValRef.getText()));
-            return resFloatValueRef;
+            return new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) - Float.valueOf(rhsValRef.getText()));
         }
         ValueRef resRegister;
         Type resType = int32Type;
@@ -71,11 +67,9 @@ public class IRBuilder {
     // Author: huangwei021230
     public static ValueRef IRBuildMul(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
         if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
-            ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) * Integer.valueOf(rhsValRef.getText()));
-            return resIntValueRef;
+            return new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) * Integer.valueOf(rhsValRef.getText()));
         } else if (lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef) {
-            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) * Float.valueOf(rhsValRef.getText()));
-            return resFloatValueRef;
+            return new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) * Float.valueOf(rhsValRef.getText()));
         }
         ValueRef resRegister;
         Type resType = int32Type;
@@ -90,11 +84,9 @@ public class IRBuilder {
     // Author: huangwei021230
     public static ValueRef IRBuildDiv(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
         if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
-            ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) / Integer.valueOf(rhsValRef.getText()));
-            return resIntValueRef;
+            return new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) / Integer.valueOf(rhsValRef.getText()));
         } else if (lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef) {
-            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) / Float.valueOf(rhsValRef.getText()));
-            return resFloatValueRef;
+            return new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) / Float.valueOf(rhsValRef.getText()));
         }
         ValueRef resRegister;
         Type resType = int32Type;
