@@ -133,8 +133,8 @@ public class IRBuilder {
     public static ValueRef IRAddGlobal(IRModule module, Type type, String globalVarName) {
         // TODO:
         //   ArrayType
-        ValueRef resRegister;
-        resRegister = new GlobalRegister(globalVarName, type);
+        Type baseType = new PointerType(type);
+        ValueRef resRegister = new GlobalRegister(globalVarName, baseType);
         module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " + resRegister.getTypeText() + " ");
         return resRegister;
     }
