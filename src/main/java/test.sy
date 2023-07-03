@@ -1,5 +1,6 @@
-int g_var = 2;
+
 int main(){
     int a = 1;
-    return a + g_var ;
+    int b = !a;
+    return 1;
 }

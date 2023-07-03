@@ -82,7 +82,7 @@ public class IRBuilder {
         return resRegister;
     }
 
-    // Author: huangwei021230
+
     public static ValueRef IRBuildDiv(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
         if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
             return new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) / Integer.valueOf(rhsValRef.getText()));
@@ -96,6 +96,37 @@ public class IRBuilder {
         }
         resRegister = new BaseRegister(name, resType);
         builder.emit(resRegister.getText() + " = " + DIV + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText());
+        return resRegister;
+    }
+
+    public static ValueRef IRBuildNeg(IRBuilder builder , ValueRef valueRef , String name){
+        return IRBuildSub(builder , new ConstIntValueRef(0) , valueRef , name);
+    }
+
+    public static ValueRef IRBuildSRem(IRBuilder builder , ValueRef lhsValRef, ValueRef rhsValRef , String name){
+        if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
+            return new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) % Integer.valueOf(rhsValRef.getText()));
+        }
+        ValueRef resRegister = new BaseRegister(name, int32Type);
+        builder.emit(resRegister.getText() + " = " + SREM + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText());
+        return resRegister;
+    }
+
+    public static ValueRef IRBuildZExt(IRBuilder builder , ValueRef valueRef , Type type , String name){
+        if(valueRef instanceof ConstIntValueRef){
+            return new ConstIntValueRef(Integer.valueOf(valueRef.getText()));
+        }
+        ValueRef resRegister = new BaseRegister(name , type);
+        builder.emit(resRegister.getText() + " = " + ZEXT + " " + int1Type.getText() + " " + valueRef.getText() + " to " + type.getText());
+        return resRegister;
+    }
+
+    public static ValueRef IRBuildXor(IRBuilder builder , ValueRef lhs , ValueRef rhs , String name){
+        if(lhs instanceof ConstIntValueRef){
+            return new ConstIntValueRef(Integer.valueOf(lhs.getText())^1);
+        }
+        ValueRef resRegister = new BaseRegister(name , rhs.getType());
+        builder.emit(resRegister.getText() + " = " + XOR + " " + rhs.getTypeText() + " " + lhs.getText() + ", true");
         return resRegister;
     }
 

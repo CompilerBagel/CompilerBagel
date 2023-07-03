@@ -18,12 +18,14 @@ import static IRBuilder.IRModule.IRAddFunction;
 import static Type.FloatType.IRFloatType;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
+import static Type.Int1Type.IRInt1Type;
 
 public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRModule module = IRModuleCreateWithName("module");
     IRBuilder builder = IRCreateBuilder();
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
+    private static final Type int1Type = IRInt1Type();
     private GlobalScope globalScope = null;
     private Scope currentScope = null;
     private int localScopeCounter = 0;
@@ -210,9 +212,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             return IRBuildMul(builder, left, right, "mul_");
         } else if (ctx.DIV() != null) {
             return IRBuildDiv(builder, left, right, "div_");
-        } /*else if (ctx.MOD() != null) {
-            return IRBuildMod(builder, left, right, "mod_");
-        }*/
+        } else if (ctx.MOD() != null) {
+            return IRBuildSRem(builder, left, right, "srem_");
+        }
 
         return null;
     }
@@ -238,11 +240,15 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         switch (operator) {
             case "+":
                 return operand;
-/*            case "-":
+            case "-":
                 return IRBuildNeg(builder, operand, "neg_");
             case "!":
-                return IRBuildNot(builder, operand, "not_");
-            default:*/
+                operand = IRBuildICmp(builder , 1 , new ConstIntValueRef(0) , operand , "icmp_");
+                operand = IRBuildXor(builder , operand , new ConstIntValueRef(1, int1Type) , "xor_");
+                operand = IRBuildZExt(builder , operand , int32Type , "zext_");
+                return operand;
+            default:
+                break;
         }
 
         return null;

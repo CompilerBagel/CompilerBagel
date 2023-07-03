@@ -10,6 +10,10 @@ public class ConstIntValueRef implements ValueRef{
         this.value = value;
         this.type = Int32Type.IRInt32Type();
     }
+    public ConstIntValueRef(int value,Type type){
+        this.value = value;
+        this.type = type;
+    }
     @Override
     public String getText() {
         return "" + value;
