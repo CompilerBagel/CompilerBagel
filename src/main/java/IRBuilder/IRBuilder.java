@@ -130,7 +130,7 @@ public class IRBuilder {
         //   ArrayType
         ValueRef resRegister;
         resRegister = new GlobalRegister(globalVarName, type);
-        module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " + resRegister.getTypeText());
+        module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " + resRegister.getTypeText() + " ");
         return resRegister;
     }
 
