@@ -1,7 +1,6 @@
 package IRBuilder;
 
 import Type.FunctionType;
-import Type.Type;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
