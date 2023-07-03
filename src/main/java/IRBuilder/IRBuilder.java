@@ -6,6 +6,7 @@ import Type.Type;
 import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
 import static Type.Int32Type.IRInt32Type;
+
 import Type.PointerType;
 import com.sun.jdi.Value;
 
@@ -32,11 +33,11 @@ public class IRBuilder {
     // TODO: Add concrete functions that generates IR.You need to call builder.emit()
 
     public static ValueRef IRBuildAdd(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
-        if(lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef){
+        if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
             ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) + Integer.valueOf(rhsValRef.getText()));
             return resIntValueRef;
-        }else if(lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef){
-            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText())+Float.valueOf(rhsValRef.getText()));
+        } else if (lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef) {
+            ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) + Float.valueOf(rhsValRef.getText()));
             return resFloatValueRef;
         }
         ValueRef resRegister;
@@ -49,11 +50,11 @@ public class IRBuilder {
         return resRegister;
     }
 
-    public static ValueRef IRBuildSub(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name){
-        if(lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef){
+    public static ValueRef IRBuildSub(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
+        if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
             ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) - Integer.valueOf(rhsValRef.getText()));
             return resIntValueRef;
-        }else if(lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef){
+        } else if (lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef) {
             ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) - Float.valueOf(rhsValRef.getText()));
             return resFloatValueRef;
         }
@@ -68,17 +69,17 @@ public class IRBuilder {
     }
 
     // Author: huangwei021230
-    public static ValueRef IRBuildMul(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name){
-        if(lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef){
+    public static ValueRef IRBuildMul(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
+        if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
             ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) * Integer.valueOf(rhsValRef.getText()));
             return resIntValueRef;
-        }else if(lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef){
+        } else if (lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef) {
             ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) * Float.valueOf(rhsValRef.getText()));
             return resFloatValueRef;
         }
         ValueRef resRegister;
         Type resType = int32Type;
-        if(lhsValRef.getType() == floatType || rhsValRef.getType() == floatType){
+        if (lhsValRef.getType() == floatType || rhsValRef.getType() == floatType) {
             resType = floatType;
         }
         resRegister = new BaseRegister(name, resType);
@@ -87,17 +88,17 @@ public class IRBuilder {
     }
 
     // Author: huangwei021230
-    public static ValueRef IRBuildDiv(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name){
-        if(lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef){
+    public static ValueRef IRBuildDiv(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
+        if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
             ConstIntValueRef resIntValueRef = new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) / Integer.valueOf(rhsValRef.getText()));
             return resIntValueRef;
-        }else if(lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef){
+        } else if (lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef) {
             ConstFloatValueRef resFloatValueRef = new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) / Float.valueOf(rhsValRef.getText()));
             return resFloatValueRef;
         }
         ValueRef resRegister;
         Type resType = int32Type;
-        if(lhsValRef.getType() == floatType || rhsValRef.getType() == floatType){
+        if (lhsValRef.getType() == floatType || rhsValRef.getType() == floatType) {
             resType = floatType;
         }
         resRegister = new BaseRegister(name, resType);
@@ -105,29 +106,43 @@ public class IRBuilder {
         return resRegister;
     }
 
-    public static ValueRef IRBuildAlloca(IRBuilder builder, Type type , String name){
+    public static ValueRef IRBuildAlloca(IRBuilder builder, Type type, String name) {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(type);
         resRegister = new BaseRegister(name, pointerType);
-        builder.emit(resRegister.getText() + " = " + ALLOCA + type.getText() + ", " ,4);
+        builder.emit(resRegister.getText() + " = " + ALLOCA + type.getText() + ", ", 4);
         return resRegister;
     }
 
-    public static void IRBuildStore(IRBuilder builder, ValueRef valueRef, ValueRef pointer){
+    public static void IRBuildStore(IRBuilder builder, ValueRef valueRef, ValueRef pointer) {
         builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
-                ", " + pointer.getTypeText() + " " + pointer.getText() + ", ",4);
+                ", " + pointer.getTypeText() + " " + pointer.getText() + ", ", 4);
+    }
+
+    /**
+     * Fetch the value from memory
+     *
+     * @param pointer a valueRef that is a pointer
+     * @param varName the name of variable
+     */
+    public static ValueRef IRBuildLoad(IRBuilder builder, ValueRef pointer, String varName) {
+        Type baseType = ((PointerType) pointer).getBaseType();
+        ValueRef resRegister = new BaseRegister(varName, baseType);
+        builder.emit(resRegister.getText() + " = " + LOAD + " " + baseType.getText() + ", "
+                + pointer.getTypeText() + " " + pointer.getText(), 4);
+        return resRegister;
     }
 
     public static ValueRef IRAddGlobal(IRModule module, Type type, String globalVarName) {
         // TODO:
         //   ArrayType
         ValueRef resRegister;
-        resRegister = new GlobalRegister(globalVarName , type);
+        resRegister = new GlobalRegister(globalVarName, type);
         module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + resRegister.getTypeText());
         return resRegister;
     }
 
-    public static void IRSetInitializer(IRModule module, ValueRef valueRef){
+    public static void IRSetInitializer(IRModule module, ValueRef valueRef) {
         module.emit(valueRef.getText());
     }
 
