@@ -4,9 +4,12 @@ import Scope.LocalScope;
 import Scope.Scope;
 import Type.FunctionType;
 import Type.Type;
+import antlr.SysYParser;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import antlr.SysYParserBaseVisitor;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
