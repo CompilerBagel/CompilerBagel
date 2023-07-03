@@ -9,7 +9,7 @@ import Type.FunctionType;
 import Type.Type;
 import IRBuilder.ConstIntValueRef;
 import IRBuilder.ConstFloatValueRef;
-
+import antlr.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,7 +135,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.DIV() != null) {
             return IRBuildDiv(builder, left, right, "div_");
         } else if (ctx.MOD() != null) {
-            return IRBuildMod(builder, left, right, "mod_");
+//            return IRBuildMod(builder, left, right, "mod_");
         }
 
         return null;
@@ -156,16 +156,16 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     }
 
     @Override
-    public ValueRef visitUnaryExp(SysYParser.UnaryExpContext ctx) {
+    public ValueRef visitUnaryOpExp(SysYParser.UnaryOpExpContext ctx) {
         String operator = ctx.unaryOp().getText();
         ValueRef operand = visit(ctx.exp());
         switch (operator) {
             case "+":
                 return operand;
-            case "-":
-                return IRBuildNeg(builder, operand, "neg_");
-            case "!":
-                return IRBuildNot(builder, operand, "not_");
+//            case "-":
+//                return IRBuildNeg(builder, operand, "neg_");
+//            case "!":
+//                return IRBuildNot(builder, operand, "not_");
             default:
         }
 
