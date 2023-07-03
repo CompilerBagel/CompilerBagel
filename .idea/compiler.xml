@@ -9,8 +9,5 @@
         <module name="CompilerBagel" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="CompilerBagel" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>

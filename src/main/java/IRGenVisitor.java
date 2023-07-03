@@ -124,4 +124,51 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         float num = Float.parseFloat(number);
         return new ConstFloatValueRef(num);
     }
+
+    @Override
+    public ValueRef visitMulExp(SysYParser.MulExpContext ctx) {
+        ValueRef left = visit(ctx.exp(0));
+        ValueRef right = visit(ctx.exp(1));
+
+        if (ctx.MUL() != null) {
+            return IRBuildMul(builder, left, right, "mul_");
+        } else if (ctx.DIV() != null) {
+            return IRBuildDiv(builder, left, right, "div_");
+        } else if (ctx.MOD() != null) {
+            return IRBuildMod(builder, left, right, "mod_");
+        }
+
+        return null;
+    }
+
+    @Override
+    public ValueRef visitPlusExp(SysYParser.PlusExpContext ctx) {
+        ValueRef left = visit(ctx.exp(0));
+        ValueRef right = visit(ctx.exp(1));
+
+        if (ctx.PLUS() != null) {
+            return IRBuildAdd(builder, left, right, "add_");
+        } else if (ctx.MINUS() != null) {
+            return IRBuildSub(builder, left, right, "sub_");
+        }
+
+        return null;
+    }
+
+    @Override
+    public ValueRef visitUnaryExp(SysYParser.UnaryExpContext ctx) {
+        String operator = ctx.unaryOp().getText();
+        ValueRef operand = visit(ctx.exp());
+        switch (operator) {
+            case "+":
+                return operand;
+            case "-":
+                return IRBuildNeg(builder, operand, "neg_");
+            case "!":
+                return IRBuildNot(builder, operand, "not_");
+            default:
+        }
+
+        return null;
+    }
 }
