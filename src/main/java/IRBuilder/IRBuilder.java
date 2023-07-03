@@ -110,7 +110,7 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(type);
         resRegister = new BaseRegister(name, pointerType);
-        builder.emit(resRegister.getText() + " = " + ALLOCA + type.getText() + ", ", 4);
+        builder.emit(resRegister.getText() + " = " + ALLOCA + " " + type.getText() ,4);
         return resRegister;
     }
 
