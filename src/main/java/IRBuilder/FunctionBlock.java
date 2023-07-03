@@ -1,11 +1,12 @@
 package IRBuilder;
 
 import Type.FunctionType;
+import Type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionBlock {
+public class FunctionBlock implements ValueRef{
     private final List<BaseBlock> baseBlocks;
     private final FunctionType type;
     private final String functionName;
@@ -29,5 +30,20 @@ public class FunctionBlock {
         }
         stringBuilder.append("}\n");
         return stringBuilder;
+    }
+
+    @Override
+    public String getText() {
+        return "@" + functionName;
+    }
+
+    @Override
+    public String getTypeText() {
+        return type.getText();
+    }
+
+    @Override
+    public Type getType() {
+        return type;
     }
 }
