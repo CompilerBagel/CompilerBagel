@@ -263,8 +263,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
     @Override
     public ValueRef visitLvalExp(SysYParser.LvalExpContext ctx){
-        ValueRef lvalPointer = ctx.lVal().accept(this);
-        return IRBuildLoad(builder, lvalPointer, ctx.lVal().getText());
+        ValueRef lValPointer = ctx.lVal().accept(this);
+        return IRBuildLoad(builder, lValPointer, ctx.lVal().getText());
     }
     
     @Override

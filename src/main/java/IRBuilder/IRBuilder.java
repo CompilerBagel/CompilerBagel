@@ -99,11 +99,11 @@ public class IRBuilder {
         return resRegister;
     }
 
-    public static ValueRef IRBuildNeg(IRBuilder builder , ValueRef valueRef , String name){
-        return IRBuildSub(builder , new ConstIntValueRef(0) , valueRef , name);
+    public static ValueRef IRBuildNeg(IRBuilder builder, ValueRef valueRef, String name) {
+        return IRBuildSub(builder, new ConstIntValueRef(0), valueRef, name);
     }
 
-    public static ValueRef IRBuildSRem(IRBuilder builder , ValueRef lhsValRef, ValueRef rhsValRef , String name){
+    public static ValueRef IRBuildSRem(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
         if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
             return new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) % Integer.valueOf(rhsValRef.getText()));
         }
@@ -112,20 +112,20 @@ public class IRBuilder {
         return resRegister;
     }
 
-    public static ValueRef IRBuildZExt(IRBuilder builder , ValueRef valueRef , Type type , String name){
-        if(valueRef instanceof ConstIntValueRef){
+    public static ValueRef IRBuildZExt(IRBuilder builder, ValueRef valueRef, Type type, String name) {
+        if (valueRef instanceof ConstIntValueRef) {
             return new ConstIntValueRef(Integer.valueOf(valueRef.getText()));
         }
-        ValueRef resRegister = new BaseRegister(name , type);
+        ValueRef resRegister = new BaseRegister(name, type);
         builder.emit(resRegister.getText() + " = " + ZEXT + " " + int1Type.getText() + " " + valueRef.getText() + " to " + type.getText());
         return resRegister;
     }
 
-    public static ValueRef IRBuildXor(IRBuilder builder , ValueRef lhs , ValueRef rhs , String name){
-        if(lhs instanceof ConstIntValueRef){
-            return new ConstIntValueRef(Integer.valueOf(lhs.getText())^1);
+    public static ValueRef IRBuildXor(IRBuilder builder, ValueRef lhs, ValueRef rhs, String name) {
+        if (lhs instanceof ConstIntValueRef) {
+            return new ConstIntValueRef(Integer.valueOf(lhs.getText()) ^ 1);
         }
-        ValueRef resRegister = new BaseRegister(name , rhs.getType());
+        ValueRef resRegister = new BaseRegister(name, rhs.getType());
         builder.emit(resRegister.getText() + " = " + XOR + " " + rhs.getTypeText() + " " + lhs.getText() + ", true");
         return resRegister;
     }
@@ -204,21 +204,5 @@ public class IRBuilder {
         currentBaseBlock.emit(code, align);
     }
 
-    private String loadVariable(ValueRef valueRef) {
-//        if (valueRef instanceof LocalVarIntValueRef) {
-//            BaseRegister register = new BaseRegister(valueRef.getTypeText(), int32Type);
-//            emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
-//                    + valueRef.getTypeText() + "*" + " " + ((LocalVarIntValueRef) valueRef).getRegisterText(), 4);
-//            return register.getText();
-//        } else if (valueRef instanceof GlobalVarIntValueRef) {
-//            BaseRegister register = new BaseRegister(valueRef.getTypeText(), int32Type);
-//            emit(register.getText() + " " + "= load " + valueRef.getTypeText() + ", "
-//                    + valueRef.getTypeText() + "*" + " " + ((GlobalVarIntValueRef) valueRef).getRegisterText(), 4);
-//            return register.getText();
-//        } else if (valueRef instanceof ConstIntValueRef) {
-//            return valueRef.getText();
-//        }
-        return null;
-    }
 
 }
