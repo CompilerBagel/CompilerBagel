@@ -109,13 +109,13 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(type);
         resRegister = new BaseRegister(name, pointerType);
-        builder.emit(resRegister.getText() + " = " + ALLOCA + type.getText() + ", " ,4);
+        builder.emit(resRegister.getText() + " = " + ALLOCA + " " + type.getText() ,4);
         return resRegister;
     }
 
     public static void IRBuildStore(IRBuilder builder, ValueRef valueRef, ValueRef pointer){
         builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
-                ", " + pointer.getTypeText() + " " + pointer.getText() + ", ",4);
+                ", " + pointer.getTypeText() + " " + pointer.getText(),4);
     }
 
     public static ValueRef IRAddGlobal(IRModule module, Type type, String globalVarName) {
