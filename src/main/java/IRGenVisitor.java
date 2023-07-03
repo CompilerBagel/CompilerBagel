@@ -9,7 +9,7 @@ import Type.FunctionType;
 import Type.Type;
 import IRBuilder.ConstIntValueRef;
 import IRBuilder.ConstFloatValueRef;
-import antlr.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +29,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private Scope currentScope = null;
     private int localScopeCounter = 0;
 
+    private ValueRef intZero = new ConstIntValueRef(0);
+    private ValueRef floatZero = new ConstFloatValueRef(0);
+
     public IRModule getModule() {
         return module;
     }
@@ -46,7 +49,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         int paramsCount = 0;
         if(ctx.funcFParams() != null)   paramsCount = ctx.funcFParams().funcFParam().size();
         List<Type> paramsType = new ArrayList<Type>(paramsCount);
-        // todo: floatType arrayType
+        // todo: arrayType
         if(ctx.funcType().getText().equals("int")){
             returnType = IRInt32Type();
         }else if(ctx.funcType().getText().equals("float")){
@@ -81,6 +84,66 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef ret = super.visitBlock(ctx);
         currentScope = currentScope.getEnclosingScope();
         return ret;
+    }
+
+    @Override
+    public ValueRef visitConstDecl(SysYParser.ConstDeclContext ctx){
+        String typeName = ctx.bType().getText();
+        Type type;
+        ValueRef constVariable;
+        ValueRef assign;
+        if(typeName.equals("int")){
+            type = IRInt32Type();
+            assign = intZero;
+        }else{
+            type = IRFloatType();
+            assign = floatZero;
+        }
+        for(SysYParser.ConstDefContext constDefContext: ctx.constDef()){
+            String constName = constDefContext.IDENT().getText();
+            if(constDefContext.ASSIGN() != null){
+                assign = constDefContext.constInitVal().accept(this);
+            }
+            if(currentScope instanceof GlobalScope){
+                constVariable = IRAddGlobal(module, type, constName);
+                // todo: const global initializer
+                //IRSetInitializer(constVariable, assign);
+            }else{
+                constVariable = IRBuildAlloca(builder, type, constName);
+                IRBuildStore(builder, constVariable, assign);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ValueRef visitVarDecl(SysYParser.VarDeclContext ctx){
+        String typeName = ctx.bType().getText();
+        Type type;
+        ValueRef variable;
+        ValueRef assign;
+        if(typeName.equals("int")){
+            type = IRInt32Type();
+            assign = intZero;
+        }else{
+            type = IRFloatType();
+            assign = floatZero;
+        }
+        for(SysYParser.VarDefContext varDefContext: ctx.varDef()){
+            String variableName = varDefContext.IDENT().getText();
+            if(varDefContext.ASSIGN() != null){
+                assign = varDefContext.initVal().accept(this);
+            }
+            if(currentScope instanceof GlobalScope){
+                variable = IRAddGlobal(module, type, variableName);
+                // todo: global initializer
+                //IRSetInitializer(variable, assign);
+            }else{
+                variable = IRBuildAlloca(builder, type, variableName);
+                IRBuildStore(builder, variable, assign);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -134,9 +197,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             return IRBuildMul(builder, left, right, "mul_");
         } else if (ctx.DIV() != null) {
             return IRBuildDiv(builder, left, right, "div_");
-        } else if (ctx.MOD() != null) {
-//            return IRBuildMod(builder, left, right, "mod_");
-        }
+        } /*else if (ctx.MOD() != null) {
+            return IRBuildMod(builder, left, right, "mod_");
+        }*/
 
         return null;
     }
@@ -162,11 +225,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         switch (operator) {
             case "+":
                 return operand;
-//            case "-":
-//                return IRBuildNeg(builder, operand, "neg_");
-//            case "!":
-//                return IRBuildNot(builder, operand, "not_");
-            default:
+/*            case "-":
+                return IRBuildNeg(builder, operand, "neg_");
+            case "!":
+                return IRBuildNot(builder, operand, "not_");
+            default:*/
         }
 
         return null;
