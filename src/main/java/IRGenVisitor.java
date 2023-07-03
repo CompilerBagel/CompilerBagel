@@ -168,9 +168,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         }
         return new ConstIntValueRef(0);
     }
-
-
-
+    
     public ValueRef calculateInt(String number){
         int num;
         if(number.startsWith("0x") || number.startsWith("0X")){
@@ -232,6 +230,27 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             default:*/
         }
 
+        return null;
+    }
+    
+    @Override
+    public ValueRef visitAssignStmt(SysYParser.AssignStmtContext ctx){
+        ValueRef lValPointer = this.visitLVal(ctx.lVal());
+        ValueRef exp = this.visit(ctx.exp());
+        return IRBuildStore(builder, exp, lValPointer);
+    }
+    
+    @Override
+    public ValueRef visitLVal(SysYParser.LValContext ctx){
+        String lValName = ctx.IDENT().getText();
+        ValueRef lValPointer = currentScope.getValueRef(lValName);
+        
+        if (ctx.exp().size() == 0) {
+            return lValPointer;
+        } else {
+            // TODO: array
+        }
+        
         return null;
     }
 }
