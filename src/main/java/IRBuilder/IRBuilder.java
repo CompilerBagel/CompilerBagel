@@ -108,7 +108,7 @@ public class IRBuilder {
 
     public static void IRBuildStore(IRBuilder builder, ValueRef valueRef, ValueRef pointer) {
         builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
-                ", " + pointer.getTypeText() + " " + pointer.getText() + ", ", 4);
+                ", " + pointer.getTypeText() + " " + pointer.getText() ,4);
     }
 
     /**
