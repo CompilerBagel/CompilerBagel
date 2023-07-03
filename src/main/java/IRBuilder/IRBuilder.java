@@ -111,8 +111,8 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(valueRef.getType());
         resRegister = new BaseRegister("temp", pointerType);
-        builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
-                ", " + pointer.getTypeText() + " " + pointer.getText(), 4);
+        builder.emit(STORE + " " + pointer.getTypeText() + " " + pointer.getText() +
+                ", " + valueRef.getTypeText() + " " + valueRef.getText(), 4);
         return resRegister;
     }
 
