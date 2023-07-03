@@ -54,4 +54,7 @@ public class IRModule {
     public void emit(String code) {
         this.stringBuilder.append(code).append("\n");
     }
+    public void emitWithoutLF(String code){
+        this.stringBuilder.append(code);
+    }
 }

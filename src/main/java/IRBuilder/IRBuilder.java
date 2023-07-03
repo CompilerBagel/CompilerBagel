@@ -66,8 +66,15 @@ public class IRBuilder {
 
     public static ValueRef IRAddGlobal(IRModule module, Type type, String globalVarName) {
         // TODO:
-        //   tips: This method need to call module.emit()
-        return null;
+        //   ArrayType
+        ValueRef resRegister;
+        resRegister = new GlobalRegister(globalVarName , type);
+        module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + resRegister.getTypeText());
+        return resRegister;
+    }
+
+    public static void IRSetInitializer(IRModule module, ValueRef valueRef){
+        module.emit(valueRef.getText());
     }
 
     /**
