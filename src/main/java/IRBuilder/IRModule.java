@@ -43,7 +43,7 @@ public class IRModule {
         this.functionBlocks = new ArrayList<>();
         this.stringBuilder = new StringBuilder();
         this.stringBuilder.append("; ModuleID = '").append(name).append("'\n");
-        this.stringBuilder.append("source_filename = \"").append(name).append("\"\n");
+        this.stringBuilder.append("source_filename = \"").append(name).append("\"\n\n");
     }
 
     public void addFunction(FunctionBlock function) {
