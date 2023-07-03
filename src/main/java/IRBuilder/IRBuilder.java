@@ -77,6 +77,10 @@ public class IRBuilder {
         module.emit(valueRef.getText());
     }
 
+    public static void IRBuildBr(IRBuilder builder, BaseBlock block) {
+        builder.emit(BR + " label %" + block.getLabel());
+    }
+
     /**
      * -------- member methods --------
      */

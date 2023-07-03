@@ -9,4 +9,5 @@ public final class IRConstants {
     public static final String ALLOCA = "alloca";
     public static final String STORE =  "store";
     public static final String GLOBAL = "global";
+    public static final String BR = "br";
 }
