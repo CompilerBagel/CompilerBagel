@@ -2,15 +2,9 @@ import IRBuilder.*;
 import Scope.GlobalScope;
 import Scope.LocalScope;
 import Scope.Scope;
+import Type.ArrayType;
 import Type.FunctionType;
 import Type.Type;
-
-import java.util.ArrayList;
-import java.util.List;
-import Type.ArrayType;
-
-import static IRBuilder.BaseBlock.IRAppendBasicBlock;
-import static IRBuilder.IRBuilder.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,15 +12,13 @@ import java.util.Stack;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
-import static IRBuilder.IRConstants.IRIntNE;
-import static IRBuilder.IRModule.IRModuleCreateWithName;
+import static IRBuilder.IRConstants.*;
 import static IRBuilder.IRModule.IRAddFunction;
 import static IRBuilder.IRModule.IRModuleCreateWithName;
 import static Type.FloatType.IRFloatType;
 import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
-import static IRBuilder.IRConstants.*;
 
 public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRModule module = IRModuleCreateWithName("module");
@@ -112,8 +104,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConstDecl(SysYParser.ConstDeclContext ctx){
         String typeName = ctx.bType().getText();
-        Type type = defineType(typeName);
-        ValueRef constVariable;
         ValueRef assign;
         if(typeName.equals("int")){
             assign = intZero;
@@ -121,16 +111,34 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             assign = floatZero;
         }
         for(SysYParser.ConstDefContext constDefContext: ctx.constDef()){
+            Type type = defineType(typeName);
+            ValueRef constVariable;
             String constName = constDefContext.IDENT().getText();
+            ValueRef pointer = null;
+            int paramCount = 0;
+            int totalParamCount = 1;
+            for(SysYParser.ConstExpContext constExpContext: constDefContext.constExp()){
+                paramCount = Integer.parseInt(constExpContext.getText());
+                type = new ArrayType(type,paramCount);
+                totalParamCount *= paramCount;
+            }
             if(constDefContext.ASSIGN() != null){
                 assign = constDefContext.constInitVal().accept(this);
             }
             if(currentScope instanceof GlobalScope){
                 constVariable = IRAddGlobal(module, type, constName);
-                IRSetInitializer(module, assign);
+                if(paramCount == 0){
+                    IRSetInitializer(module, assign);
+                }else{
+                    // TODO
+                }
             }else{
                 constVariable = IRBuildAlloca(builder, type, constName);
-                IRBuildStore(builder, assign, constVariable);
+                if(paramCount == 0){
+                    IRBuildStore(builder, assign, constVariable);
+                }else{
+                    // TODO
+                }
             }
             currentScope.define(constName, constVariable, type);
         }
@@ -171,7 +179,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 }
             }else{
                 variable = IRBuildAlloca(builder, type, variableName);
-                IRBuildStore(builder, assign, variable);
+                if(paramCount == 0){
+                    IRBuildStore(builder, assign, variable);
+                }else{
+                    //TODO
+                }
             }
             currentScope.define(variableName, variable, type);
         }
