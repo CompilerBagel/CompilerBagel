@@ -7,16 +7,15 @@ import Type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
-import antlr.*;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
 import static IRBuilder.IRModule.IRAddFunction;
 import static IRBuilder.IRModule.IRModuleCreateWithName;
 import static Type.FloatType.IRFloatType;
+import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
-import static Type.Int1Type.IRInt1Type;
 
 public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRModule module = IRModuleCreateWithName("module");
@@ -27,6 +26,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private GlobalScope globalScope = null;
     private Scope currentScope = null;
     private int localScopeCounter = 0;
+    private FunctionBlock currentFunction = null;
 
     private ValueRef intZero = new ConstIntValueRef(0);
     private ValueRef floatZero = new ConstFloatValueRef(0);
@@ -77,7 +77,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type paramType = defineType(paramTypeName);
             ValueRef paramPointer = IRBuildAlloca(builder, paramType, paramName);
             // todo: param
-            ValueRef param = IRBuildAlloca(builder, paramType, String.valueOf(i));
+            ValueRef param = IRGetParam(functionBlock, i);
             IRBuildStore(builder, param, paramPointer);
             currentScope.define(paramName, paramPointer, paramType);
         }
@@ -160,7 +160,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         FunctionType functionType = (FunctionType) globalScope.getType(funcName);
 
         int argc = functionType.getParamsType().size();
-        List<ValueRef> args = new ArrayList<ValueRef>(argc);
+        List<ValueRef> args = new ArrayList<>(argc);
         for(int i = 0; i < argc; i++){
             args.add(i, ctx.funcRParams().param(i).accept(this));
         }
@@ -283,5 +283,81 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         }
         
         return lValPointer;
+    }
+
+    @Override
+    public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx){
+        ValueRef conditionVal = this.visit(ctx.cond());
+        ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+        BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
+        BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
+        BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
+
+        IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
+
+        IRPositionBuilderAtEnd(builder, trueBlock);
+        this.visit(ctx.stmt(0));
+        IRBuildBr(builder, afterBlock);
+
+        IRPositionBuilderAtEnd(builder, falseBlock);
+        if (ctx.ELSE() != null) {
+            this.visit(ctx.stmt(1));
+        }
+        IRBuildBr(builder, afterBlock);
+
+        IRPositionBuilderAtEnd(builder, afterBlock);
+        return null;
+    }
+
+    @Override
+    public ValueRef visitLtCond(SysYParser.LtCondContext ctx) {
+        ValueRef lVal = this.visit(ctx.cond(0));
+        ValueRef rVal = this.visit(ctx.cond(1));
+        ValueRef cmpResult = null;
+
+        if (ctx.LT() != null) {
+            cmpResult = IRBuildICmp(builder, 8,  lVal, rVal, "icmp_LT");
+        } else if (ctx.LE() != null) {
+            cmpResult = IRBuildICmp(builder, 9, lVal, rVal, "icmp_LE");
+        } else if (ctx.GE() != null) {
+            cmpResult = IRBuildICmp(builder, 7, lVal, rVal, "icmp_GE");
+        } else if (ctx.GT() != null) {
+            cmpResult = IRBuildICmp(builder, 6, lVal, rVal, "icmp_GT");
+        }
+
+        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+    }
+
+    @Override
+    public ValueRef visitEqCond(SysYParser.EqCondContext ctx) {
+        ValueRef lVal = this.visit(ctx.cond(0));
+        ValueRef rVal = this.visit(ctx.cond(1));
+        ValueRef cmpResult = null;
+
+        if (ctx.EQ() != null) {
+            cmpResult = IRBuildICmp(builder, 0, lVal, rVal, "icmp_EQ");
+        } else if (ctx.NEQ() != null) {
+            cmpResult = IRBuildICmp(builder, 1, lVal, rVal, "icmp_NE");
+        }
+
+        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+    }
+
+    @Override
+    public ValueRef visitAndCond(SysYParser.AndCondContext ctx) {
+        ValueRef lVal = this.visit(ctx.cond(0));
+        ValueRef rVal = this.visit(ctx.cond(1));
+        // TODO: icmpType = 10 -> and
+        ValueRef cmpResult = IRBuildICmp(builder, 10, lVal, rVal, "and_");
+        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+    }
+
+    @Override
+    public ValueRef visitOrCond(SysYParser.OrCondContext ctx) {
+        ValueRef lVal = this.visit(ctx.cond(0));
+        ValueRef rVal = this.visit(ctx.cond(1));
+        // TODO: icmpType = 11 -> or
+        ValueRef cmpResult = IRBuildICmp(builder, 11, lVal, rVal, "or_");
+        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 }
