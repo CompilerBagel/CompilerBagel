@@ -147,7 +147,7 @@ public class IRBuilder {
         PointerType pointerType = new PointerType(valueRef.getType());
         resRegister = new BaseRegister("temp", pointerType);
         builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
-                ", " + pointer.getTypeText() + " " + pointer.getText() , 4);
+                ", " + pointer.getTypeText() + " " + pointer.getText(), 4);
         return resRegister;
     }
 
@@ -220,7 +220,8 @@ public class IRBuilder {
         if (retType != voidType) {
             stringBuilder.append(resRegister.getText()).append(" = ");
         }
-        stringBuilder.append(CALL).append(" ").append(function.getText()).append("(");
+        stringBuilder.append(CALL).append(" ").append(function.getRetType().getText())
+                .append(" ").append(function.getText()).append("(");
         if (argc > 0) {
             stringBuilder.append(args.get(0).getTypeText()).append(" ").append(args.get(0).getText());
         }

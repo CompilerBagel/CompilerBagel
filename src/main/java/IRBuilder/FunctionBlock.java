@@ -75,4 +75,8 @@ public class FunctionBlock implements ValueRef{
     public Type getType() {
         return type;
     }
+
+    public Type getRetType() {
+        return type.getRetType();
+    }
 }
