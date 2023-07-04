@@ -4,9 +4,12 @@ import Scope.LocalScope;
 import Scope.Scope;
 import Type.FunctionType;
 import Type.Type;
+import antlr.SysYParser;
+import antlr.SysYParserBaseVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import Type.ArrayType;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
@@ -128,8 +131,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitVarDecl(SysYParser.VarDeclContext ctx){
         String typeName = ctx.bType().getText();
-        Type type = defineType(typeName);
-        ValueRef variable;
         ValueRef assign;
         if(typeName.equals("int")){
             assign = intZero;
@@ -137,13 +138,28 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             assign = floatZero;
         }
         for(SysYParser.VarDefContext varDefContext: ctx.varDef()){
+            Type type = defineType(typeName);
+            ValueRef variable;
             String variableName = varDefContext.IDENT().getText();
+            ValueRef pointer = null;
+            int paramCount = 0;
+            int totalParamCount = 1;
+            for(SysYParser.ConstExpContext constExpContext: varDefContext.constExp()){
+                paramCount = Integer.parseInt(constExpContext.getText());
+                type = new ArrayType(type,paramCount);
+                totalParamCount *= paramCount;
+            }
+
             if(varDefContext.ASSIGN() != null){
                 assign = varDefContext.initVal().accept(this);
             }
             if(currentScope instanceof GlobalScope){
                 variable = IRAddGlobal(module, type, variableName);
-                IRSetInitializer(module, assign);
+                if(paramCount == 0) {
+                    IRSetInitializer(module, assign);
+                }else{
+                    //TODO PointerPointer
+                }
             }else{
                 variable = IRBuildAlloca(builder, type, variableName);
                 IRBuildStore(builder, assign, variable);
