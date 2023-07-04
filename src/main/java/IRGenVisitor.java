@@ -10,6 +10,7 @@ import java.util.List;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
+import static IRBuilder.IRConstants.IRIntNE;
 import static IRBuilder.IRModule.IRModuleCreateWithName;
 import static IRBuilder.IRModule.IRAddFunction;
 import static Type.FloatType.IRFloatType;
@@ -68,9 +69,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
         }
         FunctionType functionType = new FunctionType(paramsType, returnType);
-        FunctionBlock functionBlock = IRAddFunction(module, funcName, functionType);
-        IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(functionBlock, funcName + "Entry"));
-        globalScope.define(funcName, functionBlock, functionType);
+        currentFunction = IRAddFunction(module, funcName, functionType);
+        IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(currentFunction, funcName + "Entry"));
+        globalScope.define(funcName, currentFunction, functionType);
         ValueRef ret = super.visitFuncDef(ctx);
         return ret;
     }
@@ -353,5 +354,24 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         // TODO: icmpType = 11 -> or
         ValueRef cmpResult = IRBuildICmp(builder, 11, lVal, rVal, "or_");
         return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+    }
+    
+    @Override
+    public ValueRef visitWhileStmt(SysYParser.WhileStmtContext ctx) {
+        BaseBlock condBlock = IRAppendBasicBlock(currentFunction, "condBlock");
+        BaseBlock bodyBlock = IRAppendBasicBlock(currentFunction, "bodyBlock");
+        BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
+        
+        IRPositionBuilderAtEnd(builder, condBlock);
+        ValueRef conditionVal = this.visit(ctx.cond());
+        ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
+        IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
+        
+        IRPositionBuilderAtEnd(builder, bodyBlock);
+        this.visit(ctx.stmt());
+        IRBuildBr(builder, afterBlock);
+        
+        IRPositionBuilderAtEnd(builder, afterBlock);
+        return null;
     }
 }
