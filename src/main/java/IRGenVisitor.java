@@ -19,6 +19,7 @@ import static Type.FloatType.IRFloatType;
 import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
+import static IRBuilder.IRConstants.*;
 
 public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRModule module = IRModuleCreateWithName("module");
@@ -332,13 +333,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef cmpResult = null;
 
         if (ctx.LT() != null) {
-            cmpResult = IRBuildICmp(builder, 8,  lVal, rVal, "icmp_LT");
+            cmpResult = IRBuildICmp(builder, IRIntSLT,  lVal, rVal, "icmp_LT");
         } else if (ctx.LE() != null) {
-            cmpResult = IRBuildICmp(builder, 9, lVal, rVal, "icmp_LE");
+            cmpResult = IRBuildICmp(builder, IRIntSLE, lVal, rVal, "icmp_LE");
         } else if (ctx.GE() != null) {
-            cmpResult = IRBuildICmp(builder, 7, lVal, rVal, "icmp_GE");
+            cmpResult = IRBuildICmp(builder, IRIntSGE, lVal, rVal, "icmp_GE");
         } else if (ctx.GT() != null) {
-            cmpResult = IRBuildICmp(builder, 6, lVal, rVal, "icmp_GT");
+            cmpResult = IRBuildICmp(builder, IRIntSGT, lVal, rVal, "icmp_GT");
         }
 
         return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
@@ -351,9 +352,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef cmpResult = null;
 
         if (ctx.EQ() != null) {
-            cmpResult = IRBuildICmp(builder, 0, lVal, rVal, "icmp_EQ");
+            cmpResult = IRBuildICmp(builder, IRIntEQ, lVal, rVal, "icmp_EQ");
         } else if (ctx.NEQ() != null) {
-            cmpResult = IRBuildICmp(builder, 1, lVal, rVal, "icmp_NE");
+            cmpResult = IRBuildICmp(builder, IRIntNE, lVal, rVal, "icmp_NE");
         }
 
         return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
