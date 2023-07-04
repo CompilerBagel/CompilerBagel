@@ -1,9 +1,6 @@
 package IRBuilder;
 
-
-import Type.PointerType;
-import Type.Type;
-import Type.ArrayType;
+import Type.*;
 import com.sun.jdi.Value;
 
 import java.util.List;
@@ -12,13 +9,14 @@ import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
 import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
+import static Type.VoidType.IRVoidType;
 
 public class IRBuilder {
     private BaseBlock currentBaseBlock = null;
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
-
     private static final Type int1Type = IRInt1Type();
+    private static final Type voidType = IRVoidType();
 
     /**
      * -------- static methods --------
@@ -213,6 +211,26 @@ public class IRBuilder {
         return resRegister;
     }
 
+    public static ValueRef IRBuildCall(IRBuilder builder, FunctionBlock function, List<ValueRef> args, int argc, String varName) {
+        Type retType = ((FunctionType) function.getType()).getRetType();
+        ValueRef resRegister = new BaseRegister(varName, retType);
+        StringBuilder stringBuilder = new StringBuilder();
+        if (retType != voidType) {
+            stringBuilder.append(resRegister.getText()).append(" = ");
+        }
+        stringBuilder.append(CALL).append(" ").append(function.getText()).append("(");
+        if (argc > 0) {
+            stringBuilder.append(args.get(0).getTypeText()).append(" ").append(args.get(0).getText());
+        }
+        for (int i = 1; i < argc; i++) {
+            stringBuilder.append(", ")
+                    .append(args.get(i).getTypeText())
+                    .append(" ").append(args.get(i).getText());
+        }
+        stringBuilder.append(")");
+        builder.emit(stringBuilder.toString());
+        return resRegister;
+    }
 
 
     /**
