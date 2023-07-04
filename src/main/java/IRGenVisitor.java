@@ -78,9 +78,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
         }
         FunctionType functionType = new FunctionType(paramsType, returnType);
-        FunctionBlock functionBlock = IRAddFunction(module, funcName, functionType);
-        IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(functionBlock, funcName + "Entry"));
-        globalScope.define(funcName, functionBlock, functionType);
+        currentFunction = IRAddFunction(module, funcName, functionType);
+        IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(currentFunction, funcName + "Entry"));
+        globalScope.define(funcName, currentFunction, functionType);
 
         currentScope = new LocalScope(funcName + "Scope", currentScope);
         for(int i = 0; i < paramsCount; i++){
@@ -89,14 +89,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type paramType = defineType(paramTypeName);
             ValueRef paramPointer = IRBuildAlloca(builder, paramType, paramName);
             // todo: param
-            ValueRef param = IRGetParam(functionBlock, i);
+            ValueRef param = IRGetParam(currentFunction, i);
             IRBuildStore(builder, param, paramPointer);
             currentScope.define(paramName, paramPointer, paramType);
         }
-
-        currentFunction = IRAddFunction(module, funcName, functionType);
-        IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(currentFunction, funcName + "Entry"));
-        globalScope.define(funcName, currentFunction, functionType);
+        
         ValueRef ret = super.visitFuncDef(ctx);
         currentScope = currentScope.getEnclosingScope();
         return ret;
