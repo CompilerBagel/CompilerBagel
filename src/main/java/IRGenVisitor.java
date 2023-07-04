@@ -7,6 +7,7 @@ import Type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
@@ -28,7 +29,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private Scope currentScope = null;
     private int localScopeCounter = 0;
     private FunctionBlock currentFunction = null;
-
+    private Stack<BaseBlock> conditionStack = new Stack<>();
+    private Stack<BaseBlock> afterStack = new Stack<>();
     private ValueRef intZero = new ConstIntValueRef(0);
     private ValueRef floatZero = new ConstFloatValueRef(0);
 
@@ -368,10 +370,26 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
         
         IRPositionBuilderAtEnd(builder, bodyBlock);
+        conditionStack.push(condBlock);
+        afterStack.push(afterBlock);
         this.visit(ctx.stmt());
+        conditionStack.pop();
+        afterStack.pop();
         IRBuildBr(builder, afterBlock);
         
         IRPositionBuilderAtEnd(builder, afterBlock);
+        return null;
+    }
+    
+    @Override
+    public ValueRef visitBreakStmt(SysYParser.BreakStmtContext ctx) {
+        IRBuildBr(builder, afterStack.peek());
+        return null;
+    }
+    
+    @Override
+    public ValueRef visitContinueStmt(SysYParser.ContinueStmtContext ctx) {
+        IRBuildBr(builder, conditionStack.peek());
         return null;
     }
 }
