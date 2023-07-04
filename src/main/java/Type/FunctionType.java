@@ -13,6 +13,7 @@ import static Type.VoidType.IRVoidType;
 public class FunctionType implements Type{
     private final Type retType;
     private final List<Type> paramsType;
+
     private final int paramsCount;
     private static final Type voidType = IRVoidType();
 
@@ -57,7 +58,9 @@ public class FunctionType implements Type{
         stringBuilder.append(")");
         return stringBuilder.toString();
     }
-
+    public int getParamsCount() {
+        return paramsCount;
+    }
     public Type getParamType(int i) {
         return paramsType.get(i);
     }

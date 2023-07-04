@@ -10,10 +10,22 @@ public class FunctionBlock implements ValueRef{
     private final List<BaseBlock> baseBlocks;
     private final FunctionType type;
     private final String functionName;
+    private final List<ValueRef> paramsValueRef;
+
     public FunctionBlock(String functionName, FunctionType type) {
         this.functionName = functionName;
         this.type = type;
         this.baseBlocks = new ArrayList<>();
+        this.paramsValueRef = new ArrayList<>();
+        int count = 0;
+        for (Type paramType : type.getParamsType()) {
+            ValueRef valRegister = new BaseRegister(functionName + (count++), paramType);
+            paramsValueRef.add(valRegister);
+        }
+    }
+
+    public ValueRef getParam(int i) {
+        return paramsValueRef.get(i);
     }
 
     public void addBaseBlock(BaseBlock baseBlock) {
@@ -23,13 +35,30 @@ public class FunctionBlock implements ValueRef{
     public StringBuilder genIRCodes() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("define ").append(type.getRetType().getText()).append(" @").append(functionName)
-                .append(type.getParamsTable()).append(" {\n");
+                .append(getParamsTable()).append(" {\n");
         for (BaseBlock baseBlock : baseBlocks) {
             stringBuilder.append(baseBlock.getLabel()).append(":\n");
             stringBuilder.append(baseBlock.getCodeBuilder());
         }
         stringBuilder.append("}\n");
         return stringBuilder;
+    }
+
+    private String getParamsTable() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append('(');
+        int paramsCount = type.getParamsCount();
+        if (paramsCount > 0) {
+            stringBuilder.append(type.getParamType(0).getText());
+            stringBuilder.append(" ").append(paramsValueRef.get(0).getText());
+        }
+        for (int i = 1; i < paramsCount; i++) {
+            stringBuilder.append(", ")
+                    .append(type.getParamType(i).getText())
+                    .append(" ").append(paramsValueRef.get(i).getText());
+        }
+        stringBuilder.append(")");
+        return stringBuilder.toString();
     }
 
     @Override

@@ -232,6 +232,9 @@ public class IRBuilder {
         return resRegister;
     }
 
+    public static ValueRef IRGetParam(FunctionBlock function, int i) {
+        return function.getParam(i);
+    }
 
     /**
      * -------- member methods --------
