@@ -5,20 +5,20 @@ JAVAC = javac -g
 JAVA = java
 
 
-PFILE = $(shell find . -name "SysYParser.g4")
-LFILE = $(shell find . -name "SysYLexer.g4")
-JAVAFILE = $(shell find ./ -name "*.java")
+PFILE = $(shell find ./src/main/java/antlr/ -name "SysYParser.g4")
+LFILE = $(shell find ./src/main/java/antlr/ -name "SysYLexer.g4")
+JAVAFILE = $(shell find ./src/main/java/antlr/ -name "*.java")
 ANTLRPATH = $(shell find /usr/local/lib -name "antlr-*-complete.jar")
 
 antlr: $(LFILE) $(PFILE)
 	$(ANTLR) $(PFILE) $(LFILE)
 
 clean:
-	rm -f ./*.tokens
-	rm -f ./*.interp
-	rm -f ./*.java
-	rm -f ./*.class
-	rm -f ./SysYLexer.java src/SysYParser.java src/SysYParserBaseListener.java src/SysYParserBaseVisitor.java src/SysYParserListener.java src/SysYParserVisitor.java
+	rm -f ./src/main/java/antlr/*.tokens
+	rm -f ./src/main/java/antlr/*.interp
+	rm -f ./src/main/java/antlr/*.java
+	rm -f ./src/main/java/antlr/*.class
+	rm -f ./src/main/java/antlr/SysYLexer.java ./src/main/java/antlr/SysYParser.java ./src/main/java/antlr/SysYParserBaseListener.java ./src/main/java/antlr/SysYParserBaseVisitor.java ./src/main/java/antlr/SysYParserListener.java ./src/main/java/antlr/SysYParserVisitor.java
 	rm -rf classes
 
 
