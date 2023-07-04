@@ -1,8 +1,6 @@
 int c = 1;
 
 int main(){
-    int a = 1;
-    int b = !a;
-    int d = b + c;
-    return a * d;
+    int a[10];
+    return 0;
 }

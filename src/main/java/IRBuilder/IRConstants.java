@@ -18,7 +18,7 @@ public final class IRConstants {
     public static final String GLOBAL = "global";
     public static final String BR = "br";
     public static final String ICMP = "icmp";
-
+    public static final String GETPTR = "getelementptr";
     // for consistency with the LLVM API, there is no need to enumerate classes
     public static final int IRIntEQ = 0;
     public static final int IRIntNE = 1;

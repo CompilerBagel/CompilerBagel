@@ -3,6 +3,10 @@ package IRBuilder;
 
 import Type.PointerType;
 import Type.Type;
+import Type.ArrayType;
+import com.sun.jdi.Value;
+
+import java.util.List;
 
 import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
@@ -189,6 +193,27 @@ public class IRBuilder {
                 + lhs.getTypeText() + " " + lhs.getText() + ", " + rhs.getText());
         return resRegister;
     }
+
+    public static ValueRef IRBuildGEP(IRBuilder builder, ValueRef valueRef, List<ValueRef> indexs, int indexSize, String varName) {
+        Type baseType = ((PointerType) valueRef.getType()).getBaseType();
+        Type resType;
+        if (baseType instanceof ArrayType) {
+            resType = ((ArrayType) baseType).getElementType();
+        } else {
+            resType = baseType;
+        }
+        ValueRef resRegister = new BaseRegister(varName, resType);
+        StringBuilder indexStrBuilder = new StringBuilder();
+        for (ValueRef index : indexs) {
+            indexStrBuilder.append(", ").append(int32Type.getText())
+                    .append(" ").append(index.getText());
+        }
+        builder.emit(resRegister.getText() + " = " + GETPTR + " " + baseType.getText() + ", "
+                + valueRef.getTypeText() + " " + valueRef.getText() + indexStrBuilder.toString());
+        return resRegister;
+    }
+
+
 
     /**
      * -------- member methods --------
