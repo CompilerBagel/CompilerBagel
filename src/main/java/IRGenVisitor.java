@@ -4,8 +4,6 @@ import Scope.LocalScope;
 import Scope.Scope;
 import Type.FunctionType;
 import Type.Type;
-import antlr.SysYParser;
-import antlr.SysYParserBaseVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
