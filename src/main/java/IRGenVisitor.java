@@ -4,17 +4,14 @@ import Scope.LocalScope;
 import Scope.Scope;
 import Type.FunctionType;
 import Type.Type;
-import antlr.SysYParser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import antlr.SysYParserBaseVisitor;
-
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
-import static IRBuilder.IRModule.IRModuleCreateWithName;
 import static IRBuilder.IRModule.IRAddFunction;
+import static IRBuilder.IRModule.IRModuleCreateWithName;
 import static Type.FloatType.IRFloatType;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
@@ -43,6 +40,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         return super.visitProgram(ctx);
     }
 
+    private Type defineType(String typeName){
+        if(typeName.equals("int")) return int32Type;
+        else if(typeName.equals("float")) return floatType;
+        return IRVoidType();
+    }
+
     @Override
     public ValueRef visitFuncDef(SysYParser.FuncDefContext ctx){
         String funcName = ctx.IDENT().getText();
@@ -51,29 +54,35 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         if(ctx.funcFParams() != null)   paramsCount = ctx.funcFParams().funcFParam().size();
         List<Type> paramsType = new ArrayList<Type>(paramsCount);
         // todo: arrayType
-        if(ctx.funcType().getText().equals("int")){
-            returnType = IRInt32Type();
-        }else if(ctx.funcType().getText().equals("float")){
-            returnType = IRFloatType();
-        }else{
-            returnType = IRVoidType();
-        }
+        String returnTypeName = ctx.funcType().getText();
+        returnType = defineType(returnTypeName);
         for(int i = 0; i < paramsCount; i++){
             if(ctx.funcFParams().funcFParam(i).L_BRACKT(0) != null){
                 //paramsType.add(IRArrayType());
             }else{
-                if(ctx.funcFParams().funcFParam(i).bType().getText().equals("int")){
-                    paramsType.add(IRInt32Type());
-                }else if(ctx.funcFParams().funcFParam(i).bType().getText().equals("float")){
-                    paramsType.add(IRFloatType());
-                }
+                String paramTypeName = ctx.funcFParams().funcFParam(i).bType().getText();
+                paramsType.add(defineType(paramTypeName));
             }
         }
         FunctionType functionType = new FunctionType(paramsType, returnType);
         FunctionBlock functionBlock = IRAddFunction(module, funcName, functionType);
         IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(functionBlock, funcName + "Entry"));
         globalScope.define(funcName, functionBlock, functionType);
+
+        currentScope = new LocalScope(funcName + "Scope", currentScope);
+        for(int i = 0; i < paramsCount; i++){
+            String paramName = ctx.funcFParams().funcFParam(i).IDENT().getText();
+            String paramTypeName = ctx.funcFParams().funcFParam(i).bType().getText();
+            Type paramType = defineType(paramTypeName);
+            ValueRef paramPointer = IRBuildAlloca(builder, paramType, paramName);
+            // todo: param
+            ValueRef param = IRBuildAlloca(builder, paramType, String.valueOf(i));
+            IRBuildStore(builder, param, paramPointer);
+            currentScope.define(paramName, paramPointer, paramType);
+        }
+
         ValueRef ret = super.visitFuncDef(ctx);
+        currentScope = currentScope.getEnclosingScope();
         return ret;
     }
 
@@ -90,14 +99,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConstDecl(SysYParser.ConstDeclContext ctx){
         String typeName = ctx.bType().getText();
-        Type type;
+        Type type = defineType(typeName);
         ValueRef constVariable;
         ValueRef assign;
         if(typeName.equals("int")){
-            type = IRInt32Type();
             assign = intZero;
         }else{
-            type = IRFloatType();
             assign = floatZero;
         }
         for(SysYParser.ConstDefContext constDefContext: ctx.constDef()){
@@ -110,7 +117,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 IRSetInitializer(module, assign);
             }else{
                 constVariable = IRBuildAlloca(builder, type, constName);
-                IRBuildStore(builder, constVariable, assign);
+                IRBuildStore(builder, assign, constVariable);
             }
             currentScope.define(constName, constVariable, type);
         }
@@ -120,14 +127,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitVarDecl(SysYParser.VarDeclContext ctx){
         String typeName = ctx.bType().getText();
-        Type type;
+        Type type = defineType(typeName);
         ValueRef variable;
         ValueRef assign;
         if(typeName.equals("int")){
-            type = IRInt32Type();
             assign = intZero;
         }else{
-            type = IRFloatType();
             assign = floatZero;
         }
         for(SysYParser.VarDefContext varDefContext: ctx.varDef()){
@@ -140,7 +145,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 IRSetInitializer(module, assign);
             }else{
                 variable = IRBuildAlloca(builder, type, variableName);
-                IRBuildStore(builder, variable, assign);
+                IRBuildStore(builder, assign, variable);
             }
             currentScope.define(variableName, variable, type);
         }
@@ -153,14 +158,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         FunctionBlock functionBlock = (FunctionBlock) globalScope.getValueRef(funcName);
         FunctionType functionType = (FunctionType) globalScope.getType(funcName);
 
-        int argsNum = functionType.getParamsType().size();
-        ValueRef[] args = new ValueRef[argsNum];
-        for(int i = 0; i < argsNum; i++){
-            args[i] = ctx.funcRParams().param(i).accept(this);
+        int argc = functionType.getParamsType().size();
+        List<ValueRef> args = new ArrayList<ValueRef>(argc);
+        for(int i = 0; i < argc; i++){
+            args.add(i, ctx.funcRParams().param(i).accept(this));
         }
-        // todo: callfunc 具体怎么设计还需要商讨
-        // IRBuildCall(builder, functionBlock, args, argsNum, functionType.retType);
-        return null;
+        return IRBuildCall(builder, functionBlock, args, argc, funcName);
     }
 
     @Override
