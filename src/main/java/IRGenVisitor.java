@@ -107,8 +107,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConstDecl(SysYParser.ConstDeclContext ctx){
         String typeName = ctx.bType().getText();
-        Type type = defineType(typeName);
-        ValueRef constVariable;
         ValueRef assign;
         if(typeName.equals("int")){
             assign = intZero;
@@ -116,16 +114,34 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             assign = floatZero;
         }
         for(SysYParser.ConstDefContext constDefContext: ctx.constDef()){
+            Type type = defineType(typeName);
+            ValueRef constVariable;
             String constName = constDefContext.IDENT().getText();
+            ValueRef pointer = null;
+            int paramCount = 0;
+            int totalParamCount = 1;
+            for(SysYParser.ConstExpContext constExpContext: constDefContext.constExp()){
+                paramCount = Integer.parseInt(constExpContext.getText());
+                type = new ArrayType(type,paramCount);
+                totalParamCount *= paramCount;
+            }
             if(constDefContext.ASSIGN() != null){
                 assign = constDefContext.constInitVal().accept(this);
             }
             if(currentScope instanceof GlobalScope){
                 constVariable = IRAddGlobal(module, type, constName);
-                IRSetInitializer(module, assign);
+                if(paramCount == 0){
+                    IRSetInitializer(module, assign);
+                }else{
+                    // TODO
+                }
             }else{
                 constVariable = IRBuildAlloca(builder, type, constName);
-                IRBuildStore(builder, assign, constVariable);
+                if(paramCount == 0){
+                    IRBuildStore(builder, assign, constVariable);
+                }else{
+                    // TODO
+                }
             }
             currentScope.define(constName, constVariable, type);
         }
@@ -166,7 +182,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 }
             }else{
                 variable = IRBuildAlloca(builder, type, variableName);
-                IRBuildStore(builder, assign, variable);
+                if(paramCount == 0){
+                    IRBuildStore(builder, assign, variable);
+                }else{
+                    //TODO
+                }
             }
             currentScope.define(variableName, variable, type);
         }
