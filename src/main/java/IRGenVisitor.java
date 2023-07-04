@@ -5,11 +5,11 @@ import Scope.Scope;
 import Type.ArrayType;
 import Type.FunctionType;
 import Type.Type;
-
+import antlr.SysYParserBaseVisitor;
+import antlr.SysYParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
 import static IRBuilder.IRConstants.*;
@@ -128,7 +128,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if(currentScope instanceof GlobalScope){
                 constVariable = IRAddGlobal(module, type, constName);
                 if(paramCount == 0){
-                    IRSetInitializer(module, assign);
+                    IRSetInitializer(module, constVariable,assign);
                 }else{
                     // TODO
                 }
@@ -173,7 +173,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if(currentScope instanceof GlobalScope){
                 variable = IRAddGlobal(module, type, variableName);
                 if(paramCount == 0) {
-                    IRSetInitializer(module, assign);
+                    IRSetInitializer(module,variable, assign);
                 }else{
                     //TODO PointerPointer
                 }
