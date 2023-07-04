@@ -8,14 +8,11 @@ import antlr.*;
 import java.util.ArrayList;
 import java.util.List;
 import Type.ArrayType;
-
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
 import static IRBuilder.IRConstants.IRIntNE;
