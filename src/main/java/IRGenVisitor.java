@@ -13,6 +13,15 @@ import Type.ArrayType;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+
+import static IRBuilder.BaseBlock.IRAppendBasicBlock;
+import static IRBuilder.IRBuilder.*;
+import static IRBuilder.IRConstants.IRIntNE;
+import static IRBuilder.IRModule.IRModuleCreateWithName;
 import static IRBuilder.IRModule.IRAddFunction;
 import static IRBuilder.IRModule.IRModuleCreateWithName;
 import static Type.FloatType.IRFloatType;
@@ -31,7 +40,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private Scope currentScope = null;
     private int localScopeCounter = 0;
     private FunctionBlock currentFunction = null;
-
+    private Stack<BaseBlock> conditionStack = new Stack<>();
+    private Stack<BaseBlock> afterStack = new Stack<>();
     private ValueRef intZero = new ConstIntValueRef(0);
     private ValueRef floatZero = new ConstFloatValueRef(0);
 
@@ -86,6 +96,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             currentScope.define(paramName, paramPointer, paramType);
         }
 
+        currentFunction = IRAddFunction(module, funcName, functionType);
+        IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(currentFunction, funcName + "Entry"));
+        globalScope.define(funcName, currentFunction, functionType);
         ValueRef ret = super.visitFuncDef(ctx);
         currentScope = currentScope.getEnclosingScope();
         return ret;
@@ -301,7 +314,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         
         return lValPointer;
     }
-
+    
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx){
         ValueRef conditionVal = this.visit(ctx.cond());
@@ -309,23 +322,23 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
-
+        
         IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
-
+        
         IRPositionBuilderAtEnd(builder, trueBlock);
         this.visit(ctx.stmt(0));
         IRBuildBr(builder, afterBlock);
-
+        
         IRPositionBuilderAtEnd(builder, falseBlock);
         if (ctx.ELSE() != null) {
             this.visit(ctx.stmt(1));
         }
         IRBuildBr(builder, afterBlock);
-
+        
         IRPositionBuilderAtEnd(builder, afterBlock);
         return null;
     }
-
+    
     @Override
     public ValueRef visitLtCond(SysYParser.LtCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
@@ -368,7 +381,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef cmpResult = IRBuildICmp(builder, 10, lVal, rVal, "and_");
         return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
-
+    
     @Override
     public ValueRef visitOrCond(SysYParser.OrCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
@@ -376,5 +389,40 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         // TODO: icmpType = 11 -> or
         ValueRef cmpResult = IRBuildICmp(builder, 11, lVal, rVal, "or_");
         return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+    }
+    
+    @Override
+    public ValueRef visitWhileStmt(SysYParser.WhileStmtContext ctx) {
+        BaseBlock condBlock = IRAppendBasicBlock(currentFunction, "condBlock");
+        BaseBlock bodyBlock = IRAppendBasicBlock(currentFunction, "bodyBlock");
+        BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
+        
+        IRPositionBuilderAtEnd(builder, condBlock);
+        ValueRef conditionVal = this.visit(ctx.cond());
+        ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
+        IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
+        
+        IRPositionBuilderAtEnd(builder, bodyBlock);
+        conditionStack.push(condBlock);
+        afterStack.push(afterBlock);
+        this.visit(ctx.stmt());
+        conditionStack.pop();
+        afterStack.pop();
+        IRBuildBr(builder, afterBlock);
+        
+        IRPositionBuilderAtEnd(builder, afterBlock);
+        return null;
+    }
+    
+    @Override
+    public ValueRef visitBreakStmt(SysYParser.BreakStmtContext ctx) {
+        IRBuildBr(builder, afterStack.peek());
+        return null;
+    }
+    
+    @Override
+    public ValueRef visitContinueStmt(SysYParser.ContinueStmtContext ctx) {
+        IRBuildBr(builder, conditionStack.peek());
+        return null;
     }
 }
