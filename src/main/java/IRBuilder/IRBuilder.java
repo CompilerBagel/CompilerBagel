@@ -170,7 +170,7 @@ public class IRBuilder {
         //   ArrayType
         Type baseType = new PointerType(type);
         ValueRef resRegister = new GlobalRegister(globalVarName, baseType);
-        module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " + resRegister.getTypeText() + " ");
+        module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " +((PointerType)resRegister.getType()).getBaseType().getText() + " ");
         return resRegister;
     }
 
