@@ -194,9 +194,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
     @Override
     public ValueRef visitReturnStmt(SysYParser.ReturnStmtContext ctx){
-        ValueRef ret = ctx.exp().accept(this);
-        IRBuildRet(builder, ret);
-        return ret;
+        ValueRef result = null;
+        if (ctx.exp() != null) {
+            result = visit(ctx.exp());
+        }
+        return result;
     }
 
     @Override
