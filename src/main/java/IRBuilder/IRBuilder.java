@@ -1,7 +1,9 @@
 package IRBuilder;
 
-import Type.*;
-import com.sun.jdi.Value;
+import Type.ArrayType;
+import Type.FunctionType;
+import Type.PointerType;
+import Type.Type;
 
 import java.util.List;
 
@@ -144,8 +146,8 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(valueRef.getType());
         resRegister = new BaseRegister("temp", pointerType);
-        builder.emit(STORE + " " + pointer.getTypeText() + " " + pointer.getText() +
-                ", " + valueRef.getTypeText() + " " + valueRef.getText(), 4);
+        builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
+                ", " + pointer.getTypeText() + " " + pointer.getText() , 4);
         return resRegister;
     }
 
