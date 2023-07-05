@@ -5,11 +5,13 @@ import Scope.Scope;
 import Type.ArrayType;
 import Type.FunctionType;
 import Type.Type;
+
 import antlr.*;
+
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
 import static IRBuilder.IRConstants.*;
@@ -70,9 +72,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
         }
         FunctionType functionType = new FunctionType(paramsType, returnType);
-        FunctionBlock functionBlock = IRAddFunction(module, funcName, functionType);
-        IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(functionBlock, funcName + "Entry"));
-        globalScope.define(funcName, functionBlock, functionType);
+        currentFunction = IRAddFunction(module, funcName, functionType);
+        IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(currentFunction, funcName + "Entry"));
+        globalScope.define(funcName, currentFunction, functionType);
 
         currentScope = new LocalScope(funcName + "Scope", currentScope);
         for(int i = 0; i < paramsCount; i++){
@@ -81,14 +83,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type paramType = defineType(paramTypeName);
             ValueRef paramPointer = IRBuildAlloca(builder, paramType, paramName);
             // todo: param
-            ValueRef param = IRGetParam(functionBlock, i);
+            ValueRef param = IRGetParam(currentFunction, i);
             IRBuildStore(builder, param, paramPointer);
             currentScope.define(paramName, paramPointer, paramType);
         }
-
-        currentFunction = IRAddFunction(module, funcName, functionType);
-        IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(currentFunction, funcName + "Entry"));
-        globalScope.define(funcName, currentFunction, functionType);
+        
         ValueRef ret = super.visitFuncDef(ctx);
         currentScope = currentScope.getEnclosingScope();
         return ret;
@@ -131,7 +130,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if(currentScope instanceof GlobalScope){
                 constVariable = IRAddGlobal(module, type, constName);
                 if(paramCount == 0){
-                    IRSetInitializer(module, assign);
+                    IRSetInitializer(module, constVariable,assign);
                 }else{
                     // TODO
                 }
@@ -176,7 +175,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if(currentScope instanceof GlobalScope){
                 variable = IRAddGlobal(module, type, variableName);
                 if(paramCount == 0) {
-                    IRSetInitializer(module, assign);
+                    IRSetInitializer(module,variable, assign);
                 }else{
                     //TODO PointerPointer
                 }
@@ -209,9 +208,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
     @Override
     public ValueRef visitReturnStmt(SysYParser.ReturnStmtContext ctx){
-        ValueRef ret = ctx.exp().accept(this);
-        IRBuildRet(builder, ret);
-        return ret;
+        ValueRef result = null;
+        if (ctx.exp() != null) {
+            result = visit(ctx.exp());
+        }
+        return result;
     }
 
     @Override
