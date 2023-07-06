@@ -1,5 +1,8 @@
 package Type;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Arrays: can be represented as [Length x BaseType], e.g. [3 x i32].
  * BaseType: the type of the array element
@@ -11,10 +14,23 @@ package Type;
 public class ArrayType implements Type{
     private final int elementNumber;
     private final Type elementType;
+    private final List<Integer> elementDimension;
 
-    public ArrayType(Type elementType, int elementNumber) {
+    public ArrayType(Type elementType, int elementNumber){
         this.elementType = elementType;
         this.elementNumber = elementNumber;
+        if(elementType instanceof ArrayType){
+            elementDimension = ((ArrayType) elementType).getElementDimension();
+        }else{
+            elementDimension = new ArrayList<>();
+        }
+        elementDimension.add(0, elementNumber);
+    }
+
+    public ArrayType(Type elementType, int elementNumber, List<Integer> elementDimension) {
+        this.elementType = elementType;
+        this.elementNumber = elementNumber;
+        this.elementDimension = elementDimension;
     }
 
     @Override
@@ -29,4 +45,9 @@ public class ArrayType implements Type{
     public Type getElementType() {
         return elementType;
     }
+
+    public List<Integer> getElementDimension(){
+        return elementDimension;
+    }
+
 }

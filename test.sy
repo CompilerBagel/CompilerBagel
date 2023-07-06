@@ -1,24 +1,5 @@
-// test while-if
-int whileIf() {
-  int a;
-  a = 5;
-  int b;
-  b = 0;
-
-  if (a == 5) {
-    b = 25;
-  }
-  else if (a == 10) {
-    b = 42;
-  }
-  else {
-    b = a * 2;
-  }
-
-  return b;
-}
-
+int d[4][2] = {1, 2, {3}, {5}, 3, 8};
 int main(){
-  return whileIf();
-}
 
+    return 0;
+}

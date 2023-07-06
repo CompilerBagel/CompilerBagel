@@ -180,7 +180,7 @@ public class IRBuilder {
 
     public static void IRSetInitializer(IRModule module, ValueRef valueRef , List<ValueRef> constValueRefList){
         boolean flag = true;
-        for(int i = 0;i<constValueRefList.size();i++){
+        for(int i = 0;i < constValueRefList.size();i++){
             if(constValueRefList.get(i).getText() != "0"){
                 flag = false;
                 break;
@@ -190,7 +190,7 @@ public class IRBuilder {
             module.emit("zeroInitializer");
             return;
         }
-        Type baseType = ((PointerType) valueRef.getType()).getBaseType();
+        //Type baseType = ((PointerType) valueRef.getType()).getBaseType();
         StringBuilder emitStr = new StringBuilder();
         Type elementType = ((ArrayType) valueRef.getType()).getElementType();
         int paramCount = 1;

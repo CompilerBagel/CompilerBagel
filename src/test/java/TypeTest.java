@@ -18,14 +18,21 @@ public class TypeTest {
     @Test
     public void arrayTypeTest1() {
         Type array1 = new ArrayType(int32Type, 5);
+        List<Integer> elementDimension = new ArrayList<>();
+        elementDimension.add(5);
         assertEquals(array1.getText(), "[5 x i32]");
+        assertEquals(((ArrayType) array1).getElementDimension(), elementDimension);
     }
 
     @Test
     public void arrayTypeTest2() {
         Type array1 = new ArrayType(int32Type, 5);
         Type array2 = new ArrayType(array1, 2);
+        List<Integer> elementDimension = new ArrayList<>();
+        elementDimension.add(2);
+        elementDimension.add(5);
         assertEquals(array2.getText(), "[2 x [5 x i32]]");
+        assertEquals(((ArrayType) array2).getElementDimension(), elementDimension);
     }
 
     @Test
@@ -33,6 +40,20 @@ public class TypeTest {
         Type array1 = new ArrayType(floatType, 6);
         Type array2 = new ArrayType(array1, 2);
         assertEquals(array2.getText(), "[2 x [6 x float]]");
+    }
+
+    @Test
+    public void arrayTypeTest4(){
+        Type array1 = new ArrayType(int32Type, 2);
+        Type array2 = new ArrayType(array1, 3);
+        Type array3 = new ArrayType(array2, 4);
+        Type array4 = new ArrayType(array3, 5);
+        List<Integer> elementDimension = new ArrayList<>();
+        elementDimension.add(5);
+        elementDimension.add(4);
+        elementDimension.add(3);
+        elementDimension.add(2);
+        assertEquals(((ArrayType)array4).getElementDimension(), elementDimension);
     }
 
     @Test
