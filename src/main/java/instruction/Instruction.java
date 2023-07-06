@@ -12,4 +12,8 @@ public abstract class Instruction {
         this.operands = operands;
         this.basicBlock = basicBlock;
     }
+
+    public void setBasicBlock(BaseBlock basicBlock){
+        this.basicBlock = basicBlock;
+    }
 }
