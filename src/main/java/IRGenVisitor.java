@@ -5,11 +5,10 @@ import Scope.Scope;
 import Type.ArrayType;
 import Type.FunctionType;
 import Type.Type;
-
+import antlr.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
 import static IRBuilder.IRConstants.*;
@@ -119,8 +118,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             int totalParamCount = 1;
             for(SysYParser.ConstExpContext constExpContext: constDefContext.constExp()){
                 paramCount = Integer.parseInt(constExpContext.getText());
+                type = new ArrayType(type,paramCount);
                 totalParamCount *= paramCount;
-                type = new ArrayType(type, paramCount);
             }
             if(constDefContext.ASSIGN() != null){
                 assign = constDefContext.constInitVal().accept(this);
@@ -131,7 +130,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     IRSetInitializer(module, constVariable,assign);
                 }else{
                     // TODO
-
                 }
             }else{
                 constVariable = IRBuildAlloca(builder, type, constName);
@@ -139,18 +137,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     IRBuildStore(builder, assign, constVariable);
                 }else{
                     // TODO
-
                 }
             }
             currentScope.define(constName, constVariable, type);
         }
         return null;
     }
-
-    // 处理数组的赋值
-    List<ValueRef> init = new ArrayList<>();
-    List<Integer> elementDimension;
-    Integer curDim;
 
     @Override
     public ValueRef visitVarDecl(SysYParser.VarDeclContext ctx){
@@ -165,90 +157,34 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type type = defineType(typeName);
             ValueRef variable;
             String variableName = varDefContext.IDENT().getText();
-            List<Integer> paramCount = new ArrayList<>();
+            ValueRef pointer = null;
+            int paramCount = 0;
+            int totalParamCount = 1;
             for(SysYParser.ConstExpContext constExpContext: varDefContext.constExp()){
-                paramCount.add(Integer.parseInt(constExpContext.getText()));
+                paramCount = Integer.parseInt(constExpContext.getText());
+                type = new ArrayType(type,paramCount);
+                totalParamCount *= paramCount;
             }
-            for(int i = paramCount.size() - 1; i >= 0; i--){
-                type = new ArrayType(type, paramCount.get(i));
+
+            if(varDefContext.ASSIGN() != null){
+                assign = varDefContext.initVal().accept(this);
             }
-            init = new ArrayList<>();
-            elementDimension = ((ArrayType) type).getElementDimension();
-            curDim = 0;
             if(currentScope instanceof GlobalScope){
                 variable = IRAddGlobal(module, type, variableName);
-                if(paramCount.size() == 0) {
-                    if(varDefContext.ASSIGN() != null){
-                        assign = varDefContext.initVal().accept(this);
-                    }
+                if(paramCount == 0) {
                     IRSetInitializer(module,variable, assign);
                 }else{
                     //TODO PointerPointer
-                    if(varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
-                    for(int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
-                    IRSetInitializer(module, variable, init);
                 }
             }else{
                 variable = IRBuildAlloca(builder, type, variableName);
-                if(paramCount.size() == 0){
-                    if(varDefContext.ASSIGN() != null){
-                        assign = varDefContext.initVal().accept(this);
-                    }
+                if(paramCount == 0){
                     IRBuildStore(builder, assign, variable);
                 }else{
                     //TODO
-
-
                 }
             }
             currentScope.define(variableName, variable, type);
-        }
-        return null;
-    }
-
-    @Override
-    public ValueRef visitInitVal(SysYParser.InitValContext ctx){
-        // 单独处理exp()
-        if(ctx.exp() != null) return ctx.exp().accept(this);
-        // 处理initVal嵌套的情况
-        int layerDim = curDim;
-        boolean dump = false;
-        int count = 0;
-        int fullCount = 0;
-        for(SysYParser.InitValContext initValContext: ctx.initVal()){
-            if(initValContext.exp() != null) {
-                // 没有{}的处理
-                if(!dump){
-                    dump = true;
-                    curDim = elementDimension.size() - 1;
-                    count = 0;
-                    fullCount = elementDimension.get(curDim);
-                }
-                init.add(initValContext.exp().accept(this));
-            } else {
-                int tmpDim = curDim;
-                curDim = tmpDim + 1;
-                visitInitVal(initValContext);
-                curDim = tmpDim;
-            }
-            count ++;
-            if(count == fullCount){
-                dump = false;
-                curDim --;
-                if(curDim <= layerDim) curDim = layerDim;
-                fullCount = elementDimension.get(curDim);
-                int layerParamCount = 1;
-                for(int i = curDim; i < elementDimension.size(); i++) layerParamCount *= elementDimension.get(i);
-                count = init.size() % layerParamCount;
-            }
-        }
-        int totalParamCount = 1;
-        for(int i = curDim; i < elementDimension.size(); i++) {
-            totalParamCount *= elementDimension.get(i);
-        }
-        boolean empty = (ctx.initVal().size() == 0);
-        if(init.size() % totalParamCount != 0 || empty){
-            for(int i = init.size() % totalParamCount; i < totalParamCount; i++) init.add(intZero);
         }
         return null;
     }

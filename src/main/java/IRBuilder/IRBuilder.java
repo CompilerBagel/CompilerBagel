@@ -4,7 +4,10 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
+import instruction.Instruction;
+import instruction.LoadInstruction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static IRBuilder.IRConstants.*;
@@ -162,6 +165,10 @@ public class IRBuilder {
         ValueRef resRegister = new BaseRegister(varName, baseType);
         builder.emit(resRegister.getText() + " = " + LOAD + " " + baseType.getText() + ", "
                 + pointer.getTypeText() + " " + pointer.getText(), 4);
+        List<ValueRef> operands = new ArrayList<>();
+        operands.add(resRegister);
+        operands.add(pointer);
+        builder.appendInstr(new LoadInstruction(operands, builder.currentBaseBlock));
         return resRegister;
     }
 
@@ -299,4 +306,7 @@ public class IRBuilder {
         currentBaseBlock.emit(code, align);
     }
 
+    private void appendInstr(Instruction instr) {
+        currentBaseBlock.appendInstr(instr);
+    }
 }

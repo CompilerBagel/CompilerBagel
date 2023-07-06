@@ -1,10 +1,16 @@
 package IRBuilder;
 
+import instruction.Instruction;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class BaseBlock {
     public static int baseBlockCounter = 0;
     private final StringBuilder codeBuilder;
     private final String label;
     private final int baseBlockId;
+    private final List<Instruction> instructions;
 
     /** -------- static methods --------*/
     public static BaseBlock IRAppendBasicBlock(FunctionBlock function, String label) {
@@ -18,6 +24,7 @@ public class BaseBlock {
         this.codeBuilder = new StringBuilder();
         this.label = label;
         this.baseBlockId = baseBlockCounter++;
+        this.instructions = new ArrayList<>();
     }
 
     public void emit(String code) {
@@ -41,4 +48,7 @@ public class BaseBlock {
         return this.codeBuilder;
     }
 
+    public void appendInstr(Instruction instr) {
+        instructions.add(instr);
+    }
 }
