@@ -12,7 +12,10 @@ public abstract class Instruction {
         this.operands = operands;
         this.basicBlock = basicBlock;
     }
-
+    public Instruction(Instruction rhs){
+        this.operands = rhs.operands;
+        this.basicBlock = rhs.basicBlock;
+    }
     public void setBasicBlock(BaseBlock basicBlock){
         this.basicBlock = basicBlock;
     }
