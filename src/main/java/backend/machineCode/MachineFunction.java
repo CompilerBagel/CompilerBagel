@@ -1,6 +1,5 @@
 package backend.machineCode;
 
-import backend.reg.VirtualReg;
 import lombok.Data;
 
 import java.util.ArrayList;

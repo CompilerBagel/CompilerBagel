@@ -15,6 +15,8 @@ public class MachineOperand {
     private float immFloatValue;
     private boolean isImmFloat = false;
     
+    public MachineOperand(operandType t) { this.t = t;}
+    
     // type recognition
     public boolean isImm() { return t == operandType.imm;}
     public boolean isVirtualReg() { return t == operandType.virtualReg;}
