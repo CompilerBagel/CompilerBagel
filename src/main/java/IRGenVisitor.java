@@ -104,39 +104,43 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitConstDecl(SysYParser.ConstDeclContext ctx){
         String typeName = ctx.bType().getText();
         ValueRef assign;
-        if(typeName.equals("int")){
-            assign = intZero;
-        }else{
-            assign = floatZero;
-        }
         for(SysYParser.ConstDefContext constDefContext: ctx.constDef()){
             Type type = defineType(typeName);
             ValueRef constVariable;
             String constName = constDefContext.IDENT().getText();
-            ValueRef pointer = null;
-            int paramCount = 0;
-            int totalParamCount = 1;
+            // 初始化assign的值
+            if(typeName.equals("int")) assign = intZero;
+            else assign = floatZero;
+            // 求type，反向加载数组，迭代求解type
+            List<Integer> paramCount = new ArrayList<>();
             for(SysYParser.ConstExpContext constExpContext: constDefContext.constExp()){
-                paramCount = Integer.parseInt(constExpContext.getText());
-                type = new ArrayType(type,paramCount);
-                totalParamCount *= paramCount;
+                paramCount.add(Integer.parseInt(constExpContext.getText()));
             }
-            if(constDefContext.ASSIGN() != null){
-                assign = constDefContext.constInitVal().accept(this);
+            for(int i = paramCount.size() - 1; i >= 0; i--){
+                type = new ArrayType(type, paramCount.get(i));
             }
+            init = new ArrayList<>();
+            elementDimension = ((ArrayType) type).getElementDimension();
+            curDim = 0;
             if(currentScope instanceof GlobalScope){
                 constVariable = IRAddGlobal(module, type, constName);
-                if(paramCount == 0){
+                if(paramCount.size() == 0){
+                    if(constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
                     IRSetInitializer(module, constVariable,assign);
                 }else{
-                    // TODO
+                    // TODO: 验证vardecl的正确性之后再搬过来
+                    //if(constDefContext.ASSIGN() != null) visitInitVal(constDefContext.constInitVal());
+                    IRSetInitializer(module, constVariable, init);
                 }
             }else{
                 constVariable = IRBuildAlloca(builder, type, constName);
-                if(paramCount == 0){
+                if(paramCount.size() == 0){
+                    if(constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
                     IRBuildStore(builder, assign, constVariable);
                 }else{
                     // TODO
+                    //if(constDefContext.ASSIGN() != null) visitInitVal(constDefContext.constInitVal());
+                    IRSetInitializer(module, constVariable, init);
                 }
             }
             currentScope.define(constName, constVariable, type);
@@ -153,15 +157,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitVarDecl(SysYParser.VarDeclContext ctx){
         String typeName = ctx.bType().getText();
         ValueRef assign;
-        if(typeName.equals("int")){
-            assign = intZero;
-        }else{
-            assign = floatZero;
-        }
         for(SysYParser.VarDefContext varDefContext: ctx.varDef()){
             Type type = defineType(typeName);
             ValueRef variable;
             String variableName = varDefContext.IDENT().getText();
+            // 初始化assign的值
+            if(typeName.equals("int")) assign = intZero;
+            else assign = floatZero;
+            // 求type，反向加载数组，迭代求解type
             List<Integer> paramCount = new ArrayList<>();
             for(SysYParser.ConstExpContext constExpContext: varDefContext.constExp()){
                 paramCount.add(Integer.parseInt(constExpContext.getText()));
@@ -175,27 +178,22 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if(currentScope instanceof GlobalScope){
                 variable = IRAddGlobal(module, type, variableName);
                 if(paramCount.size() == 0) {
-                    if(varDefContext.ASSIGN() != null){
-                        assign = varDefContext.initVal().accept(this);
-                    }
+                    if(varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
                     IRSetInitializer(module,variable, assign);
                 }else{
-                    //TODO PointerPointer
                     if(varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
-                    for(int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
+                    //for(int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
                     IRSetInitializer(module, variable, init);
                 }
             }else{
                 variable = IRBuildAlloca(builder, type, variableName);
                 if(paramCount.size() == 0){
-                    if(varDefContext.ASSIGN() != null){
-                        assign = varDefContext.initVal().accept(this);
-                    }
+                    if(varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
                     IRBuildStore(builder, assign, variable);
                 }else{
                     //TODO
-
-
+                    if(varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
+                    IRSetInitializer(module, variable, init);
                 }
             }
             currentScope.define(variableName, variable, type);
