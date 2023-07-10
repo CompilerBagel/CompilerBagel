@@ -191,7 +191,7 @@ public class IRBuilder {
         // todo: addGlobalIns
         Type baseType = new PointerType(type);
         ValueRef resRegister = new GlobalRegister(globalVarName, baseType);
-        module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " +((PointerType)resRegister.getType()).getBaseType().getText() + " ");
+        module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " +((PointerType)resRegister.getType()).getBaseType().getText() + " " );
         return resRegister;
     }
 
@@ -213,15 +213,13 @@ public class IRBuilder {
             return;
         }
 
-        Type baseType= ((PointerType) valueRef.getType()).getBaseType();
+        Type elementType = ((PointerType) valueRef.getType()).getBaseType();
         StringBuilder emitStr = new StringBuilder();
-        Type elementType = ((ArrayType) baseType).getElementType();
         int paramCount = 1;
         List<Integer> paramList = new ArrayList<Integer>();
         while(elementType instanceof ArrayType){
             paramCount *= ((ArrayType) elementType).getElementNumber();
             paramList.add(((ArrayType) elementType).getElementNumber());
-            emitStr.append(elementType.getText());
             elementType = ((ArrayType) elementType).getElementType();
         }
         String typeStr = null;
