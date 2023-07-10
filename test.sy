@@ -1,5 +1,4 @@
-int d[4][2] = {1, 2, {3}, {5}, 3, 8};
-int main(){
 
-    return 0;
+int main(){
+    return 3 + 5;
 }
