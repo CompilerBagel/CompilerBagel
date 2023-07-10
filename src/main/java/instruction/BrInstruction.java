@@ -12,7 +12,6 @@ public class BrInstruction extends Instruction{
     private BaseBlock baseBlock1;
     private BaseBlock baseBlock2;
     public BrInstruction(List<ValueRef> operands, BaseBlock basicBlock) {
-
         super(operands, basicBlock);
         if(operands.size()==1) {
             this.baseBlock1 = (BaseBlock) operands.get(0);

@@ -2,14 +2,21 @@ package instruction;
 
 import IRBuilder.BaseBlock;
 import IRBuilder.ValueRef;
-import static IRBuilder.IRConstants.*;
+
 import java.util.List;
 
-public class CmpInstruction extends Instruction{
+import static IRBuilder.IRConstants.*;
+
+public class CalculateInstruction extends Instruction{
     String type;
-    public CmpInstruction(List<ValueRef> operands, BaseBlock basicBlock, String type) {
+    public CalculateInstruction(List<ValueRef> operands, BaseBlock basicBlock, String type) {
         super(operands, basicBlock);
         this.type = type;
+    }
+
+    public CalculateInstruction(CalculateInstruction rhs){
+        super(rhs);
+        this.type = rhs.type;
     }
 
     @Override
@@ -26,6 +33,8 @@ public class CmpInstruction extends Instruction{
                 return resRegister.getText() + " = " + MUL + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
             case DIV:
                 return resRegister.getText() + " = " + DIV + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
+            case SREM:
+                return resRegister.getType() + " = " + SREM + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
         }
         return null;
     }

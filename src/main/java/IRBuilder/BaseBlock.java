@@ -12,6 +12,9 @@ public class BaseBlock {
     private final int baseBlockId;
     private final List<Instruction> instructions;
 
+    private List<BaseBlock> predList = new ArrayList<>();
+    private List<BaseBlock> succList = new ArrayList<>();
+
     /** -------- static methods --------*/
     public static BaseBlock IRAppendBasicBlock(FunctionBlock function, String label) {
         BaseBlock baseBlock = new BaseBlock(label);
@@ -50,5 +53,13 @@ public class BaseBlock {
 
     public void appendInstr(Instruction instr) {
         instructions.add(instr);
+    }
+
+    public void addPredBaseBlock(BaseBlock pred){
+        predList.add(pred);
+    }
+
+    public void addSuccBaseBlock(BaseBlock succ){
+        succList.add(succ);
     }
 }
