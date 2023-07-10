@@ -74,7 +74,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         currentFunction = IRAddFunction(module, funcName, functionType);
         IRPositionBuilderAtEnd(builder, IRAppendBasicBlock(currentFunction, funcName + "Entry"));
         globalScope.define(funcName, currentFunction, functionType);
-
         currentScope = new LocalScope(funcName + "Scope", currentScope);
         for(int i = 0; i < paramsCount; i++){
             String paramName = ctx.funcFParams().funcFParam(i).IDENT().getText();
@@ -183,7 +182,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 variable = IRAddGlobal(module, type, variableName);
                 if(paramCount.size() == 0) {
                     if(varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
-                    IRSetInitializer(module,variable, assign);
+                    IRSetInitializer(module, variable, assign);
                 }else{
                     if(varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
                     //for(int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
@@ -200,6 +199,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     IRSetInitializer(module, variable, init);
                 }
             }
+            System.err.print("vardecl " + variableName + " type: " + type.getText());
+            if(type instanceof ArrayType) System.err.println(" array");
             currentScope.define(variableName, variable, type);
         }
         return null;
@@ -272,6 +273,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         if (ctx.exp() != null) {
             result = visit(ctx.exp());
         }
+        IRBuildRet(builder, result);
         return result;
     }
 
@@ -370,10 +372,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitLvalExp(SysYParser.LvalExpContext ctx){
         String variableName = ctx.lVal().IDENT().getText();
         ValueRef variable = currentScope.getValueRef(variableName);
-        ValueRef lValPointer = ctx.lVal().accept(this);
-        if(variable.getType() instanceof PointerType){
+        Type varType = currentScope.getType(variableName);
+        ValueRef lValPointer = visitLVal(ctx.lVal());
+        if(varType instanceof PointerType){
             return IRBuildLoad(builder, lValPointer, variableName);
-        }else if(variable.getType() instanceof ArrayType){
+        }else if(varType instanceof ArrayType){
             if(ctx.lVal().exp().size() > 0){
                 return IRBuildLoad(builder, lValPointer, variableName);
             }
@@ -387,13 +390,17 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitLVal(SysYParser.LValContext ctx){
         String lValName = ctx.IDENT().getText();
         ValueRef lValPointer = currentScope.getValueRef(lValName);
-        
+        Type lvalType = currentScope.getType(lValName);
         if (ctx.exp().size() == 0) {
             return lValPointer;
         } else {
+            //System.err.println(lValName);
             List<ValueRef> indexes = new ArrayList<>();
-            if(lValPointer.getType() instanceof  ArrayType) {
+            if(lvalType instanceof  ArrayType) {
+                //System.err.println("array");
                 indexes.add(intZero);
+            }else if(lvalType instanceof PointerType){
+                //System.err.println("pointer");
             }
             for(SysYParser.ExpContext expContext: ctx.exp()){
                 ValueRef index = expContext.accept(this);
