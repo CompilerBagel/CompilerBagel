@@ -4,11 +4,13 @@ import Scope.LocalScope;
 import Scope.Scope;
 import Type.ArrayType;
 import Type.FunctionType;
+import Type.PointerType;
 import Type.Type;
-//import antlr.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
 import static IRBuilder.IRConstants.*;
@@ -57,14 +59,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         int paramsCount = 0;
         if(ctx.funcFParams() != null)   paramsCount = ctx.funcFParams().funcFParam().size();
         List<Type> paramsType = new ArrayList<Type>(paramsCount);
-        // todo: arrayType
         String returnTypeName = ctx.funcType().getText();
         returnType = defineType(returnTypeName);
+        // func 参数
         for(int i = 0; i < paramsCount; i++){
+            String paramTypeName = ctx.funcFParams().funcFParam(i).bType().getText();
             if(ctx.funcFParams().funcFParam(i).L_BRACKT(0) != null){
-                //paramsType.add(IRArrayType());
+                paramsType.add(new PointerType(defineType(paramTypeName)));
             }else{
-                String paramTypeName = ctx.funcFParams().funcFParam(i).bType().getText();
                 paramsType.add(defineType(paramTypeName));
             }
         }
@@ -78,8 +80,10 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             String paramName = ctx.funcFParams().funcFParam(i).IDENT().getText();
             String paramTypeName = ctx.funcFParams().funcFParam(i).bType().getText();
             Type paramType = defineType(paramTypeName);
+            if(ctx.funcFParams().funcFParam(i).L_BRACKT().size() > 0){
+                paramType = new PointerType(paramType);
+            }
             ValueRef paramPointer = IRBuildAlloca(builder, paramType, paramName);
-            // todo: param
             ValueRef param = IRGetParam(currentFunction, i);
             IRBuildStore(builder, param, paramPointer);
             currentScope.define(paramName, paramPointer, paramType);
@@ -138,7 +142,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     if(constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
                     IRBuildStore(builder, assign, constVariable);
                 }else{
-                    // TODO
+                    // TODO: 验证vardecl的正确性之后再搬过来
                     //if(constDefContext.ASSIGN() != null) visitInitVal(constDefContext.constInitVal());
                     IRSetInitializer(module, constVariable, init);
                 }
@@ -191,7 +195,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     if(varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
                     IRBuildStore(builder, assign, variable);
                 }else{
-                    //TODO
+                    //TODO: 正确性验证
                     if(varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
                     IRSetInitializer(module, variable, init);
                 }
@@ -364,8 +368,19 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
     @Override
     public ValueRef visitLvalExp(SysYParser.LvalExpContext ctx){
+        String variableName = ctx.lVal().IDENT().getText();
+        ValueRef variable = currentScope.getValueRef(variableName);
         ValueRef lValPointer = ctx.lVal().accept(this);
-        return IRBuildLoad(builder, lValPointer, ctx.lVal().getText());
+        if(variable.getType() instanceof PointerType){
+            return IRBuildLoad(builder, lValPointer, variableName);
+        }else if(variable.getType() instanceof ArrayType){
+            if(ctx.lVal().exp().size() > 0){
+                return IRBuildLoad(builder, lValPointer, variableName);
+            }
+            return lValPointer;
+        }else{
+            return IRBuildLoad(builder, lValPointer, variableName);
+        }
     }
     
     @Override
@@ -376,9 +391,16 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         if (ctx.exp().size() == 0) {
             return lValPointer;
         } else {
-            // TODO: array
+            List<ValueRef> indexes = new ArrayList<>();
+            if(lValPointer.getType() instanceof  ArrayType) {
+                indexes.add(intZero);
+            }
+            for(SysYParser.ExpContext expContext: ctx.exp()){
+                ValueRef index = expContext.accept(this);
+                indexes.add(index);
+            }
+            lValPointer = IRBuildGEP(builder, lValPointer, indexes, indexes.size(), lValName);
         }
-        
         return lValPointer;
     }
     
