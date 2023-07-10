@@ -9,6 +9,7 @@ import instruction.LoadInstruction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
@@ -188,7 +189,7 @@ public class IRBuilder {
     public static void IRSetInitializer(IRModule module, ValueRef valueRef , List<ValueRef> constValueRefList){
         boolean flag = true;
         for(int i = 0;i < constValueRefList.size();i++){
-            if(constValueRefList.get(i).getText() != "0"){
+            if(!Objects.equals(constValueRefList.get(i).getText(), "0")){
                 flag = false;
                 break;
             }
@@ -197,11 +198,12 @@ public class IRBuilder {
             module.emit("zeroInitializer");
             return;
         }
-        //Type baseType = ((PointerType) valueRef.getType()).getBaseType();
+
+        Type baseType= ((PointerType) valueRef.getType()).getBaseType();
         StringBuilder emitStr = new StringBuilder();
-        Type elementType = ((ArrayType) valueRef.getType()).getElementType();
+        Type elementType = ((ArrayType) baseType).getElementType();
         int paramCount = 1;
-        List<Integer> paramList = null;
+        List<Integer> paramList = new ArrayList<Integer>();
         while(elementType instanceof ArrayType){
             paramCount *= ((ArrayType) elementType).getElementNumber();
             paramList.add(((ArrayType) elementType).getElementNumber());
@@ -216,15 +218,16 @@ public class IRBuilder {
         }
         int lastLength = paramList.get(paramList.size()-1);
         elementType = new ArrayType(elementType , lastLength);
-        int temp = paramCount % lastLength;
+        int temp = constValueRefList.size() / lastLength;
         int counter = 0;
         for(int i = 0;i<temp;i++){
             emitStr.append(elementType.getText() + " [");
-            for(int j = 0;i<lastLength;i++){
-                emitStr.append(typeStr+" "+constValueRefList.get(counter++).getText()+", ");
+            for(int j = 0;j<lastLength;j++){
                 if(j==lastLength-1){
                     emitStr.append(typeStr+" "+constValueRefList.get(counter++).getText());
+                    break;
                 }
+                emitStr.append(typeStr+" "+constValueRefList.get(counter++).getText()+", ");
             }
             emitStr.append("], ");
         }
