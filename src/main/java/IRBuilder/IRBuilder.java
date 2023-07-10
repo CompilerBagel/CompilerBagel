@@ -252,7 +252,7 @@ public class IRBuilder {
     }
 
     public static void IRBuildCondBr(IRBuilder builder, ValueRef condition, BaseBlock ifTrue, BaseBlock ifFalse) {
-        builder.appendInstr(new BrInstruction(generateList((condition, (ValueRef) ifTrue, (ValueRef) ifFalse)), builder.currentBaseBlock);
+        builder.appendInstr(new BrInstruction(generateList(condition, (ValueRef) ifTrue, (ValueRef) ifFalse), builder.currentBaseBlock));
         builder.emit(BR + " " + condition.getTypeText() + " " + condition.getText() + ", " +
                 "label %" + ifTrue.getLabel() + ", label %" + ifFalse.getLabel());
     }
