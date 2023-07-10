@@ -45,7 +45,7 @@ public class IRBuilder {
 
     public static ValueRef IRBuildAdd(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
         if (lhsValRef instanceof ConstIntValueRef && rhsValRef instanceof ConstIntValueRef) {
-            // todo:?
+            // todo: immediate number?
             return new ConstIntValueRef(Integer.valueOf(lhsValRef.getText()) + Integer.valueOf(rhsValRef.getText()));
         } else if (lhsValRef instanceof ConstFloatValueRef && rhsValRef instanceof ConstFloatValueRef) {
             return new ConstFloatValueRef(Float.valueOf(lhsValRef.getText()) + Float.valueOf(rhsValRef.getText()));
@@ -115,6 +115,7 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildNeg(IRBuilder builder, ValueRef valueRef, String name) {
+        // todo: neg
         return IRBuildSub(builder, new ConstIntValueRef(0), valueRef, name);
     }
 
@@ -133,6 +134,7 @@ public class IRBuilder {
             return new ConstIntValueRef(Integer.valueOf(valueRef.getText()));
         }
         ValueRef resRegister = new BaseRegister(name, type);
+        builder.appendInstr(new ZextInstruction(generateList(resRegister, valueRef, new ConstIntValueRef(0, type)), builder.currentBaseBlock));
         builder.emit(resRegister.getText() + " = " + ZEXT + " " + int1Type.getText() + " " + valueRef.getText() + " to " + type.getText());
         return resRegister;
     }
@@ -142,6 +144,7 @@ public class IRBuilder {
             return new ConstIntValueRef(Integer.valueOf(lhs.getText()) ^ 1);
         }
         ValueRef resRegister = new BaseRegister(name, rhs.getType());
+        // todo: Xor
         builder.emit(resRegister.getText() + " = " + XOR + " " + rhs.getTypeText() + " " + lhs.getText() + ", true");
         return resRegister;
     }
@@ -150,6 +153,7 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(type);
         resRegister = new BaseRegister(name, pointerType);
+        builder.appendInstr(new AllocaInstruction(generateList(resRegister), builder.currentBaseBlock));
         builder.emit(resRegister.getText() + " = " + ALLOCA + " " + type.getText(), 4);
         return resRegister;
     }
@@ -158,6 +162,7 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(valueRef.getType());
         resRegister = new BaseRegister("temp", pointerType);
+        builder.appendInstr(new StoreInstruction(generateList(valueRef, pointer), builder.currentBaseBlock));
         builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
                 ", " + pointer.getTypeText() + " " + pointer.getText(), 4);
         return resRegister;
@@ -182,8 +187,8 @@ public class IRBuilder {
     }
 
     public static ValueRef IRAddGlobal(IRModule module, Type type, String globalVarName) {
-        // TODO:
-        //   ArrayType
+        // TODO: ArrayType
+        // todo: addGlobalIns
         Type baseType = new PointerType(type);
         ValueRef resRegister = new GlobalRegister(globalVarName, baseType);
         module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " +((PointerType)resRegister.getType()).getBaseType().getText() + " ");
@@ -191,6 +196,7 @@ public class IRBuilder {
     }
 
     public static void IRSetInitializer(IRModule module, ValueRef GlobalVar , ValueRef ConstRef) {
+        // todo: addInit
         module.emit(ConstRef.getText());
     }
 
@@ -243,10 +249,12 @@ public class IRBuilder {
     }
 
     public static void IRBuildBr(IRBuilder builder, BaseBlock block) {
+        builder.appendInstr(new BrInstruction(generateList((ValueRef) block), builder.currentBaseBlock));
         builder.emit(BR + " label %" + block.getLabel());
     }
 
     public static void IRBuildCondBr(IRBuilder builder, ValueRef condition, BaseBlock ifTrue, BaseBlock ifFalse) {
+        builder.appendInstr(new BrInstruction(generateList((condition, (ValueRef) ifTrue, (ValueRef) ifFalse)), builder.currentBaseBlock);
         builder.emit(BR + " " + condition.getTypeText() + " " + condition.getText() + ", " +
                 "label %" + ifTrue.getLabel() + ", label %" + ifFalse.getLabel());
     }
@@ -260,6 +268,7 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildGEP(IRBuilder builder, ValueRef valueRef, List<ValueRef> indexs, int indexSize, String varName) {
+        // todo: gep
         Type baseType = ((PointerType) valueRef.getType()).getBaseType();
         Type resType;
         if (baseType instanceof ArrayType) {
@@ -279,6 +288,7 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildCall(IRBuilder builder, FunctionBlock function, List<ValueRef> args, int argc, String varName) {
+        // todo: call
         Type retType = ((FunctionType) function.getType()).getRetType();
         ValueRef resRegister = new BaseRegister(varName, retType);
         StringBuilder stringBuilder = new StringBuilder();

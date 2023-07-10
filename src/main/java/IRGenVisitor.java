@@ -185,7 +185,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     IRSetInitializer(module, variable, assign);
                 }else{
                     if(varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
-                    //for(int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
+                    for(int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
                     IRSetInitializer(module, variable, init);
                 }
             }else{
