@@ -152,9 +152,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     }
 
     // 处理数组的赋值
-    List<ValueRef> init = new ArrayList<>();
-    List<Integer> elementDimension;
-    Integer curDim;
+    List<ValueRef> init = new ArrayList<>(); // 存数组的初始值
+    List<Integer> elementDimension; // 数组每层的维度 a[4][6][3] {4, 6, 3}
+    Integer curDim; // 当前位于的层数 curDim = 0/1/2
 
     @Override
     public ValueRef visitVarDecl(SysYParser.VarDeclContext ctx){
@@ -199,8 +199,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     IRSetInitializer(module, variable, init);
                 }
             }
-            System.err.println("vardecl " + variableName + " type: " + type.getText());
-            if(type instanceof ArrayType) System.err.println(" array");
             currentScope.define(variableName, variable, type);
         }
         return null;
@@ -213,8 +211,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         // 处理initVal嵌套的情况
         int layerDim = curDim;
         boolean dump = false;
-        int count = 0;
-        int fullCount = 0;
+        int count = 0; // 本层已有的数目
+        int fullCount = 0; // 需要进到上一层的数目
         for(SysYParser.InitValContext initValContext: ctx.initVal()){
             if(initValContext.exp() != null) {
                 // 没有{}的处理
@@ -238,12 +236,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 if(curDim <= layerDim) curDim = layerDim;
                 fullCount = elementDimension.get(curDim);
                 int layerParamCount = 1;
-                for(int i = curDim; i < elementDimension.size(); i++) layerParamCount *= elementDimension.get(i);
-                count = init.size() % layerParamCount;
+                for(int i = curDim + 1; i < elementDimension.size(); i++) layerParamCount *= elementDimension.get(i);
+                count = init.size() / layerParamCount;
             }
         }
         int totalParamCount = 1;
-        for(int i = curDim; i < elementDimension.size(); i++) {
+        for(int i = layerDim; i < elementDimension.size(); i++) {
             totalParamCount *= elementDimension.get(i);
         }
         boolean empty = (ctx.initVal().size() == 0);
