@@ -11,6 +11,8 @@ public class FunctionBlock implements ValueRef{
     private final FunctionType type;
     private final String functionName;
     private final List<ValueRef> paramsValueRef;
+    private List<BaseBlock> caller; // call the function
+    private List<FunctionBlock> callee; // called by the function
 
     public FunctionBlock(String functionName, FunctionType type) {
         this.functionName = functionName;
@@ -78,5 +80,13 @@ public class FunctionBlock implements ValueRef{
 
     public Type getRetType() {
         return type.getRetType();
+    }
+
+    public void addCaller(BaseBlock callBlock){
+        caller.add(callBlock);
+    }
+
+    public void addCallee(FunctionBlock callFunction){
+        callee.add(callFunction);
     }
 }

@@ -3,7 +3,6 @@ package instruction;
 import IRBuilder.BaseBlock;
 import IRBuilder.FunctionBlock;
 import IRBuilder.ValueRef;
-import Type.Type;
 import Type.VoidType;
 
 import java.util.ArrayList;
@@ -31,14 +30,13 @@ public class CallInstruction extends Instruction{
 
     public CallInstruction(List<ValueRef> operands, BaseBlock basicBlock){
         super(operands,basicBlock);
-
         this.functionBlock = (FunctionBlock) operands.get(1);
         if(functionBlock.getRetType() instanceof VoidType){
             isVoid = true;
         }else{
             isVoid = false;
         }
-        for(int i = 2;i<operands.size();i++) {
+        for(int i = 2; i < operands.size();i++) {
             params.add(operands.get(i));
         }
     }

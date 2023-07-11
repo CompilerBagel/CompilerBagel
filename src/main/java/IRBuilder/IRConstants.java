@@ -33,6 +33,6 @@ public final class IRConstants {
     public static final int IRIntSLE = 9;
 
     public static final String[] ICMPCodes = {
-            "eq", "ne", "ugt", "uge", "ult", "ule", "sgt", "sge", "slt", "sle"
+            "eq", "ne", "ugt", "uge", "ult", "ule", "sgt", "sge", "slt", "sle", "and", "or"
     };
 }
