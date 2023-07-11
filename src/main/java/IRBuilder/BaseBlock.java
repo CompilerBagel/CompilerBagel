@@ -1,20 +1,20 @@
 package IRBuilder;
 
+import Type.Type;
 import instruction.Instruction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseBlock {
+public class BaseBlock implements ValueRef{
     public static int baseBlockCounter = 0;
     private final StringBuilder codeBuilder;
     private final String label;
     private final int baseBlockId;
     private final List<Instruction> instructions;
 
-    private List<BaseBlock> predList = new ArrayList<>();
-    private List<BaseBlock> succList = new ArrayList<>();
-    private List<FunctionBlock> funcCallList = new ArrayList<>();
+    private List<ValueRef> predList = new ArrayList<>();
+    private List<ValueRef> succList = new ArrayList<>();
 
     /** -------- static methods --------*/
     public static BaseBlock IRAppendBasicBlock(FunctionBlock function, String label) {
@@ -56,16 +56,30 @@ public class BaseBlock {
         instructions.add(instr);
     }
 
-    public void addPredBaseBlock(BaseBlock pred){
+    public void addPredBaseBlock(ValueRef pred){
         predList.add(pred);
     }
 
-    public void addSuccBaseBlock(BaseBlock succ){
+    public List<ValueRef> getPredList(){return predList;}
+
+    public void addSuccBaseBlock(ValueRef succ){
         succList.add(succ);
     }
 
-    public void addFuncCall(FunctionBlock function){
-        funcCallList.add(function);
+    public List<ValueRef> getSuccList(){return succList;}
+
+    public String getText(){
+        return "block " + baseBlockId;
     }
+
+    public String getTypeText(){
+        //
+        return "";
+    };
+
+    public Type getType(){
+        //
+        return null;
+    };
 
 }

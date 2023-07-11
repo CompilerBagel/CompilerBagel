@@ -162,7 +162,7 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(valueRef.getType());
         resRegister = new BaseRegister("temp", pointerType);
-        builder.appendInstr(new StoreInstruction(generateList(valueRef, pointer), builder.currentBaseBlock));
+        builder.appendInstr(new StoreInstruction(generateList(resRegister, valueRef, pointer), builder.currentBaseBlock));
         builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
                 ", " + pointer.getTypeText() + " " + pointer.getText(), 4);
         return resRegister;
@@ -275,10 +275,15 @@ public class IRBuilder {
         resType = new PointerType(resType);
         ValueRef resRegister = new BaseRegister(varName, resType);
         StringBuilder indexStrBuilder = new StringBuilder();
+        List<ValueRef> operands = new ArrayList<>();
+        operands.add(resRegister);
+        operands.add(valueRef);
         for (ValueRef index : indexs) {
+            operands.add(index);
             indexStrBuilder.append(", ").append(int32Type.getText())
                     .append(" ").append(index.getText());
         }
+        builder.appendInstr(new GetElemPtrInstruction(operands, builder.currentBaseBlock));
         builder.emit(resRegister.getText() + " = " + GETPTR + " " + baseType.getText() + ", "
                 + valueRef.getTypeText() + " " + valueRef.getText() + indexStrBuilder.toString());
         return resRegister;
@@ -307,8 +312,8 @@ public class IRBuilder {
                     .append(" ").append(args.get(i).getText());
         }
         builder.appendInstr(new CallInstruction(operands, builder.currentBaseBlock));
-        builder.currentBaseBlock.addFuncCall(function);
-        function.addCaller(builder.currentBaseBlock);
+        builder.currentBaseBlock.addSuccBaseBlock(function);
+        function.addCaller((ValueRef) builder.currentBaseBlock);
         stringBuilder.append(")");
         builder.emit(stringBuilder.toString());
         return resRegister;
