@@ -35,6 +35,8 @@ public class CalculateInstruction extends Instruction{
                 return resRegister.getText() + " = " + DIV + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
             case SREM:
                 return resRegister.getType() + " = " + SREM + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
+            case XOR:
+                return resRegister.getText() + " = " + XOR + " " + rhsValRef.getTypeText() + " " + lhsValRef.getText() + ", true";
         }
         return null;
     }

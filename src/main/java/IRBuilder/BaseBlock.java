@@ -14,6 +14,7 @@ public class BaseBlock {
 
     private List<BaseBlock> predList = new ArrayList<>();
     private List<BaseBlock> succList = new ArrayList<>();
+    private List<FunctionBlock> funcCallList = new ArrayList<>();
 
     /** -------- static methods --------*/
     public static BaseBlock IRAppendBasicBlock(FunctionBlock function, String label) {
@@ -62,4 +63,9 @@ public class BaseBlock {
     public void addSuccBaseBlock(BaseBlock succ){
         succList.add(succ);
     }
+
+    public void addFuncCall(FunctionBlock function){
+        funcCallList.add(function);
+    }
+
 }

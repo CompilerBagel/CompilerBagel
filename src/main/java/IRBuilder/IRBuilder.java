@@ -115,7 +115,7 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildNeg(IRBuilder builder, ValueRef valueRef, String name) {
-        // todo: neg
+        // appendInstruction in sub
         return IRBuildSub(builder, new ConstIntValueRef(0), valueRef, name);
     }
 
@@ -144,7 +144,7 @@ public class IRBuilder {
             return new ConstIntValueRef(Integer.valueOf(lhs.getText()) ^ 1);
         }
         ValueRef resRegister = new BaseRegister(name, rhs.getType());
-        // todo: Xor
+        builder.appendInstr(new CalculateInstruction(generateList(resRegister, lhs, rhs), builder.currentBaseBlock, XOR));
         builder.emit(resRegister.getText() + " = " + XOR + " " + rhs.getTypeText() + " " + lhs.getText() + ", true");
         return resRegister;
     }
@@ -188,7 +188,7 @@ public class IRBuilder {
 
     public static ValueRef IRAddGlobal(IRModule module, Type type, String globalVarName) {
         // TODO: ArrayType
-        // todo: addGlobalIns
+        // todo: addGlobalInt
         Type baseType = new PointerType(type);
         ValueRef resRegister = new GlobalRegister(globalVarName, baseType);
         module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " +((PointerType)resRegister.getType()).getBaseType().getText() + " " );
@@ -212,7 +212,6 @@ public class IRBuilder {
             module.emit("zeroInitializer");
             return;
         }
-
         Type elementType = ((PointerType) valueRef.getType()).getBaseType();
         StringBuilder emitStr = new StringBuilder();
         int paramCount = 1;
@@ -286,23 +285,30 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildCall(IRBuilder builder, FunctionBlock function, List<ValueRef> args, int argc, String varName) {
-        // todo: call
         Type retType = ((FunctionType) function.getType()).getRetType();
         ValueRef resRegister = new BaseRegister(varName, retType);
         StringBuilder stringBuilder = new StringBuilder();
+        List<ValueRef> operands = new ArrayList<>();
+        operands.add(resRegister);
+        operands.add(function);
         if (retType != voidType) {
             stringBuilder.append(resRegister.getText()).append(" = ");
         }
         stringBuilder.append(CALL).append(" ").append(function.getRetType().getText())
                 .append(" ").append(function.getText()).append("(");
         if (argc > 0) {
+            operands.add(args.get(0));
             stringBuilder.append(args.get(0).getTypeText()).append(" ").append(args.get(0).getText());
         }
         for (int i = 1; i < argc; i++) {
+            operands.add(args.get(i));
             stringBuilder.append(", ")
                     .append(args.get(i).getTypeText())
                     .append(" ").append(args.get(i).getText());
         }
+        builder.appendInstr(new CallInstruction(operands, builder.currentBaseBlock));
+        builder.currentBaseBlock.addFuncCall(function);
+        function.addCaller(builder.currentBaseBlock);
         stringBuilder.append(")");
         builder.emit(stringBuilder.toString());
         return resRegister;
