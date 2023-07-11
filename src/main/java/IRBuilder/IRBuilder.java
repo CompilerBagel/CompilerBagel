@@ -265,7 +265,6 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildGEP(IRBuilder builder, ValueRef valueRef, List<ValueRef> indexs, int indexSize, String varName) {
-        // todo: gep
         Type baseType = ((PointerType) valueRef.getType()).getBaseType();
         Type resType;
         if (baseType instanceof ArrayType) {
@@ -273,6 +272,7 @@ public class IRBuilder {
         } else {
             resType = baseType;
         }
+        resType = new PointerType(resType);
         ValueRef resRegister = new BaseRegister(varName, resType);
         StringBuilder indexStrBuilder = new StringBuilder();
         for (ValueRef index : indexs) {
