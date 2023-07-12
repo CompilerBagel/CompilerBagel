@@ -2,12 +2,13 @@ package instruction;
 
 import IRBuilder.BaseBlock;
 import IRBuilder.ValueRef;
+import Type.ArrayType;
+import Type.PointerType;
 import Type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
-import Type.PointerType;
-import Type.ArrayType;
+
 import static IRBuilder.IRConstants.GETPTR;
 import static Type.Int32Type.IRInt32Type;
 
@@ -24,7 +25,7 @@ public class GetElemPtrInstruction extends Instruction{
     public GetElemPtrInstruction(List<ValueRef> operands, BaseBlock basicBlock) {
         super(operands, basicBlock);
         base = operands.get(1);
-        for(int i = 2;i<operands.size();i++){
+        for(int i = 2; i < operands.size();i++){
             indexs.add(operands.get(i));
         }
     }
