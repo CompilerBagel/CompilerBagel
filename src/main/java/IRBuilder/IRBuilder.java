@@ -161,12 +161,16 @@ public class IRBuilder {
     public static ValueRef IRBuildStore(IRBuilder builder, ValueRef valueRef, ValueRef pointer) {
         ValueRef resRegister;
         PointerType pointerType = null;
-        if (valueRef.getType() == int32Type && pointer.getType() == floatType) {
-
-        } else if (valueRef.getType() == floatType && pointer.getType() == int32Type) {
-
+        if (valueRef.getType() == int32Type && ((PointerType) pointer.getType()).getBaseType() == floatType) {
+            System.err.println("SiToFp");
+            valueRef = typeTrans(builder, valueRef, SiToFp);
+            pointerType = new PointerType(valueRef.getType());
+        } else if (valueRef.getType() == floatType && ((PointerType) pointer.getType()).getBaseType() == int32Type) {
+            System.err.println("FpToSi");
+            valueRef = typeTrans(builder, valueRef, FpToSi);
+            pointerType = new PointerType(valueRef.getType());
         } else {
-
+            pointerType = new PointerType(valueRef.getType());
         }
         resRegister = new BaseRegister("temp", pointerType);
         builder.appendInstr(new StoreInstruction(generateList(resRegister, valueRef, pointer), builder.currentBaseBlock));
@@ -174,6 +178,30 @@ public class IRBuilder {
                 ", " + pointer.getTypeText() + " " + pointer.getText(), 4);
         return resRegister;
     }
+
+    public static ValueRef typeTrans(IRBuilder builder, ValueRef origin, int type) {
+        PointerType pointerType = null;
+        ValueRef resRegister = null;
+        if (type == FpToSi && origin.getType() == floatType) {
+            pointerType = new PointerType(int32Type);
+            resRegister = new BaseRegister("conv", pointerType);
+            builder.emit(resRegister.getText() + " = fptosi float " +
+                    origin.getText() + " to i32");
+            builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock
+                    , FpToSi));
+        } else if (type == SiToFp && origin.getType() == int32Type) {
+            pointerType = new PointerType(floatType);
+            resRegister = new BaseRegister("conv", pointerType);
+            builder.emit(resRegister.getText() + " = sitofp i32 "
+                    + origin.getText() + " to float");
+            builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock,
+                    SiToFp));
+        } else {
+            System.err.println("typeTrans wrong!");
+        }
+        return resRegister;
+    }
+
 
     /**
      * Fetch the value from memory
