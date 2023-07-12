@@ -160,7 +160,14 @@ public class IRBuilder {
 
     public static ValueRef IRBuildStore(IRBuilder builder, ValueRef valueRef, ValueRef pointer) {
         ValueRef resRegister;
-        PointerType pointerType = new PointerType(valueRef.getType());
+        PointerType pointerType = null;
+        if (valueRef.getType() == int32Type && pointer.getType() == floatType) {
+
+        } else if (valueRef.getType() == floatType && pointer.getType() == int32Type) {
+
+        } else {
+
+        }
         resRegister = new BaseRegister("temp", pointerType);
         builder.appendInstr(new StoreInstruction(generateList(resRegister, valueRef, pointer), builder.currentBaseBlock));
         builder.emit(STORE + " " + valueRef.getTypeText() + " " + valueRef.getText() +
@@ -191,24 +198,24 @@ public class IRBuilder {
         // todo: addGlobalInt
         Type baseType = new PointerType(type);
         ValueRef resRegister = new GlobalRegister(globalVarName, baseType);
-        module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " +((PointerType)resRegister.getType()).getBaseType().getText() + " " );
+        module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " + ((PointerType) resRegister.getType()).getBaseType().getText() + " ");
         return resRegister;
     }
 
-    public static void IRSetInitializer(IRModule module, ValueRef GlobalVar , ValueRef ConstRef) {
+    public static void IRSetInitializer(IRModule module, ValueRef GlobalVar, ValueRef ConstRef) {
         // todo: addInit
         module.emit(ConstRef.getText());
     }
 
-    public static void IRSetInitializer(IRModule module, ValueRef valueRef , List<ValueRef> constValueRefList){
+    public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList) {
         boolean flag = true;
-        for(int i = 0;i < constValueRefList.size();i++){
-            if(!Objects.equals(constValueRefList.get(i).getText(), "0")){
+        for (int i = 0; i < constValueRefList.size(); i++) {
+            if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
                 flag = false;
                 break;
             }
         }
-        if(flag){
+        if (flag) {
             module.emit("zeroInitializer");
             return;
         }
@@ -216,29 +223,29 @@ public class IRBuilder {
         StringBuilder emitStr = new StringBuilder();
         int paramCount = 1;
         List<Integer> paramList = new ArrayList<Integer>();
-        while(elementType instanceof ArrayType){
+        while (elementType instanceof ArrayType) {
             paramCount *= ((ArrayType) elementType).getElementNumber();
             paramList.add(((ArrayType) elementType).getElementNumber());
             elementType = ((ArrayType) elementType).getElementType();
         }
         String typeStr = null;
-        if(elementType == int32Type){
+        if (elementType == int32Type) {
             typeStr = int32Type.getText();
-        }else{
+        } else {
             typeStr = floatType.getText();
         }
-        int lastLength = paramList.get(paramList.size()-1);
-        elementType = new ArrayType(elementType , lastLength);
+        int lastLength = paramList.get(paramList.size() - 1);
+        elementType = new ArrayType(elementType, lastLength);
         int temp = constValueRefList.size() / lastLength;
         int counter = 0;
-        for(int i = 0;i<temp;i++){
+        for (int i = 0; i < temp; i++) {
             emitStr.append(elementType.getText() + " [");
-            for(int j = 0;j<lastLength;j++){
-                if(j==lastLength-1){
-                    emitStr.append(typeStr+" "+constValueRefList.get(counter++).getText());
+            for (int j = 0; j < lastLength; j++) {
+                if (j == lastLength - 1) {
+                    emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText());
                     break;
                 }
-                emitStr.append(typeStr+" "+constValueRefList.get(counter++).getText()+", ");
+                emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText() + ", ");
             }
             emitStr.append("], ");
         }
@@ -341,20 +348,20 @@ public class IRBuilder {
         currentBaseBlock.appendInstr(instr);
     }
 
-    private static List<ValueRef> generateList(ValueRef valueRef){
+    private static List<ValueRef> generateList(ValueRef valueRef) {
         List<ValueRef> list = new ArrayList<>();
         list.add(valueRef);
         return list;
     }
 
-    private static List<ValueRef> generateList(ValueRef left, ValueRef right){
+    private static List<ValueRef> generateList(ValueRef left, ValueRef right) {
         List<ValueRef> list = new ArrayList<>();
         list.add(left);
         list.add(right);
         return list;
     }
 
-    private static List<ValueRef> generateList(ValueRef resRegister, ValueRef left, ValueRef right){
+    private static List<ValueRef> generateList(ValueRef resRegister, ValueRef left, ValueRef right) {
         List<ValueRef> list = new ArrayList<>();
         list.add(resRegister);
         list.add(left);
