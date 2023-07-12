@@ -1,6 +1,15 @@
+int c;
 int main() {
-    if (5 > 3) {
-        return 1;
+    int a = 5, b = 4;
+    if (a >= b) {
+        c = a;
+    } else {
+        c = b;
     }
-    return 0;
+    int d = c;
+    while(d > 0) {
+        d = d - 1;
+        c = c + 1;
+    }
+    return c;
 }
