@@ -34,19 +34,18 @@ public class MCStore extends MachineCode {
     
     @Override
     public void replaceDef(final MachineOperand oldOperand, final MachineOperand newOperand) {
-    
+        if (oldOperand.equals(this.dest)) {
+            this.dest = newOperand;
+        }
+        if (oldOperand.equals(this.offset)) {
+            this.offset = newOperand;
+        }
     }
     
     @Override
     public void replaceUse(final MachineOperand oldOperand, final MachineOperand newOperand) {
         if (oldOperand.equals(this.src)) {
             this.src = newOperand;
-        }
-        if (oldOperand.equals(this.dest)) {
-            this.dest = newOperand;
-        }
-        if (oldOperand.equals(this.offset)) {
-            this.offset = newOperand;
         }
     }
     
