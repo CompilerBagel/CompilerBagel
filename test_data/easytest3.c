@@ -5,6 +5,6 @@ int main() {
     int b = a - g;
     a = a - b;
     b = b * a;
-    int e = 100 / b;
+    int e = 100 + b;
     return e;
 }
