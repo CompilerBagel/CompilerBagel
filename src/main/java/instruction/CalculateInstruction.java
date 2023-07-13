@@ -31,8 +31,8 @@ public class CalculateInstruction extends Instruction{
                 return resRegister.getText() + " = " + SUB + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
             case MUL:
                 return resRegister.getText() + " = " + MUL + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
-            case DIV:
-                return resRegister.getText() + " = " + DIV + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
+            case SDIV:
+                return resRegister.getText() + " = " + SDIV + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
             case SREM:
                 return resRegister.getType() + " = " + SREM + " " + resRegister.getTypeText() + " " + lhsValRef.getText() + ", " + rhsValRef.getText();
             case XOR:

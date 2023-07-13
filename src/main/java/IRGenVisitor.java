@@ -131,7 +131,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRAddGlobal(module, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
-                    IRSetInitializer(module, constVariable, assign);
+                    IRSetInitializer(module, constVariable, assign, constName);
                 } else {
                     // TODO: 验证vardecl的正确性之后再搬过来
                     //if(constDefContext.ASSIGN() != null) visitInitVal(constDefContext.constInitVal());
@@ -184,7 +184,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 variable = IRAddGlobal(module, type, variableName);
                 if (paramCount.size() == 0) {
                     if (varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
-                    IRSetInitializer(module, variable, assign);
+                    IRSetInitializer(module, variable, assign, variableName);
                 } else {
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
                     for (int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
@@ -318,7 +318,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         if (ctx.MUL() != null) {
             return IRBuildCalc(builder, left, right, "mul_", MUL);
         } else if (ctx.DIV() != null) {
-            return IRBuildCalc(builder, left, right, "div_", DIV);
+            return IRBuildCalc(builder, left, right, "sdiv_", SDIV);
         } else if (ctx.MOD() != null) {
             return IRBuildSRem(builder, left, right, "srem_");
         }
@@ -359,6 +359,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         }
 
         return null;
+    }
+
+    @Override
+    public ValueRef visitExpParenthesis(SysYParser.ExpParenthesisContext ctx) {
+        return this.visit(ctx.exp());
     }
 
     @Override
@@ -501,6 +506,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         BaseBlock bodyBlock = IRAppendBasicBlock(currentFunction, "bodyBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
 
+        IRBuildBr(builder,condBlock);
+
         IRPositionBuilderAtEnd(builder, condBlock);
         ValueRef conditionVal = this.visit(ctx.cond());
         ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
@@ -510,9 +517,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         conditionStack.push(condBlock);
         afterStack.push(afterBlock);
         this.visit(ctx.stmt());
+        IRBuildBr(builder, condBlock);
         conditionStack.pop();
         afterStack.pop();
-        IRBuildBr(builder, afterBlock);
 
         IRPositionBuilderAtEnd(builder, afterBlock);
         return null;
