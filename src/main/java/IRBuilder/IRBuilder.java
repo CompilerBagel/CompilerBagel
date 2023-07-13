@@ -278,6 +278,19 @@ public class IRBuilder {
         return resRegister;
     }
 
+    public static ValueRef IRBuildAnd(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text){
+        ValueRef resRegister = new BaseRegister(text, int1Type);
+        builder.emit(resRegister.getText() + " = " + AND + " " + resRegister.getTypeText()+ " " + lhs.getText() + ", " + rhs.getText());
+        return resRegister;
+    }
+
+    public static ValueRef IRBuildOr(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text){
+        ValueRef resRegister = new BaseRegister(text, int1Type);
+        builder.emit(resRegister.getText() + " = " + OR + " " + resRegister.getTypeText() + " " + lhs.getText() + ", " + rhs.getText());
+        return resRegister;
+    }
+
+
     public static ValueRef IRBuildGEP(IRBuilder builder, ValueRef valueRef, List<ValueRef> indexs, int indexSize, String varName) {
         Type baseType = ((PointerType) valueRef.getType()).getBaseType();
         Type resType;

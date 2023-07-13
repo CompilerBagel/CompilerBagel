@@ -6,7 +6,7 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
-import antlr.*;
+//import antlr.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -352,7 +352,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             case "!":
                 operand = IRBuildICmp(builder, 1, new ConstIntValueRef(0), operand, "icmp_");
                 operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
-                operand = IRBuildZExt(builder, operand, int32Type, "zext_");
+                //operand = IRBuildZExt(builder, operand, int32Type, "zext_");
                 return operand;
             default:
                 break;
@@ -465,8 +465,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.GT() != null) {
             cmpResult = IRBuildICmp(builder, IRIntSGT, lVal, rVal, "icmp_GT");
         }
-
-        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        return cmpResult;
+        //return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
     @Override
@@ -480,24 +480,38 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.NEQ() != null) {
             cmpResult = IRBuildICmp(builder, IRIntNE, lVal, rVal, "icmp_NE");
         }
-
-        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        return cmpResult;
+        //return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
     @Override
     public ValueRef visitAndCond(SysYParser.AndCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
-        ValueRef cmpResult = IRBuildICmp(builder, 10, lVal, rVal, "and_");
-        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        if(lVal.getType() != int1Type){
+            lVal = IRBuildICmp(builder, IRIntNE, lVal, intZero, "icmp_NE");
+        }
+        if(rVal.getType() != int1Type){
+            rVal = IRBuildICmp(builder, IRIntNE, rVal, intZero, "imcp_NE");
+        }
+        ValueRef cmpResult = IRBuildAnd(builder, lVal, rVal, "and_");
+        return cmpResult;
+        //return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
     @Override
     public ValueRef visitOrCond(SysYParser.OrCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
-        ValueRef cmpResult = IRBuildICmp(builder, 11, lVal, rVal, "or_");
-        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        if(lVal.getType() != int1Type){
+            lVal = IRBuildICmp(builder, IRIntNE, lVal, intZero, "icmp_NE");
+        }
+        if(rVal.getType() != int1Type){
+            rVal = IRBuildICmp(builder, IRIntNE, rVal, intZero, "imcp_NE");
+        }
+        ValueRef cmpResult = IRBuildOr(builder,  lVal, rVal, "or_");
+        return cmpResult;
+        //return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
     @Override
