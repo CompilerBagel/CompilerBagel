@@ -131,7 +131,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRAddGlobal(module, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
-                    IRSetInitializer(module, constVariable, assign);
+                    IRSetInitializer(module, constVariable, assign, constName);
                 } else {
                     // TODO: 验证vardecl的正确性之后再搬过来
                     //if(constDefContext.ASSIGN() != null) visitInitVal(constDefContext.constInitVal());
@@ -184,7 +184,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 variable = IRAddGlobal(module, type, variableName);
                 if (paramCount.size() == 0) {
                     if (varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
-                    IRSetInitializer(module, variable, assign);
+                    IRSetInitializer(module, variable, assign, variableName);
                 } else {
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
                     for (int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());

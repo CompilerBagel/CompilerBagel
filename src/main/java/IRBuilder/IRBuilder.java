@@ -139,11 +139,9 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = null;
         if (valueRef.getType() == int32Type && ((PointerType) pointer.getType()).getBaseType() == floatType) {
-            System.err.println("SiToFp");
             valueRef = typeTrans(builder, valueRef, SiToFp);
             pointerType = new PointerType(valueRef.getType());
         } else if (valueRef.getType() == floatType && ((PointerType) pointer.getType()).getBaseType() == int32Type) {
-            System.err.println("FpToSi");
             valueRef = typeTrans(builder, valueRef, FpToSi);
             pointerType = new PointerType(valueRef.getType());
         } else {
@@ -202,23 +200,26 @@ public class IRBuilder {
         //todo: array type
         Type baseType = new PointerType(type);
         ValueRef resRegister = new GlobalRegister(globalVarName, baseType);
-        module.addGlobalSymbol(resRegister);
+        Symbol globalSym = new Symbol(globalVarName, type);
+        module.addGlobalSymbol(globalVarName, globalSym);
         module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " + ((PointerType) resRegister.getType()).getBaseType().getText() + " ");
         return resRegister;
     }
 
-    public static void IRSetInitializer(IRModule module, ValueRef GlobalVar, ValueRef ConstRef) {
-        // todo: addInit
-
-        module.emit(ConstRef.getText());
+    public static void IRSetInitializer(IRModule module, ValueRef globalVar, ValueRef constRef, String globalName) {
+        int initValue = Integer.valueOf(constRef.getText());
+        module.getGlobalSymbol(globalName).setInitValue(initValue);
+        module.emit(constRef.getText());
     }
 
     public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList) {
         boolean flag = true;
+        List<Float> initValue = new ArrayList<>();
         for (int i = 0; i < constValueRefList.size(); i++) {
             if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
                 flag = false;
-                break;
+                initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
+                //break;
             }
         }
         if (flag) {
