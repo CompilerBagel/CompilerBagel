@@ -1,12 +1,15 @@
 package backend;
 
+import IRBuilder.BaseBlock;
 import IRBuilder.FunctionBlock;
 import IRBuilder.IRModule;
 import backend.machineCode.MachineBlock;
+import backend.machineCode.MachineFunction;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +18,8 @@ public class codeGen {
     
     private IRModule module;
     private List<MachineBlock> blocks;
+    private HashMap<FunctionBlock, MachineFunction> funcMap;
+    private HashMap<BaseBlock, MachineBlock> blockMap;
     
     public static List<MachineBlock> serializeBlocks(List<MachineBlock> blocks) {
         List<MachineBlock> sequence = new ArrayList<>();
@@ -68,4 +73,23 @@ public class codeGen {
         }
     }
     
+    public void MachineCodeGen() {
+        List<FunctionBlock> functionBlocks = module.getFunctionBlocks();
+        for (FunctionBlock functionBlock : functionBlocks) {
+            MachineFunction machineFunction = new MachineFunction(functionBlock.getFunctionName());
+            funcMap.put(functionBlock, machineFunction);
+        }
+        
+        for (FunctionBlock func: functionBlocks) {
+            List<BaseBlock> funcBlocks = func.getBaseBlocks();
+            for (BaseBlock block: funcBlocks) {
+                MachineBlock machineBlock = new MachineBlock(block.getLabel(), funcMap.get(func));
+                blockMap.put(block, machineBlock);
+                blocks.add(machineBlock);
+            }
+        }
+        // TODO: arg relation
+        // TODO: block succ
+        serializeBlocks(blocks);
+    }
 }
