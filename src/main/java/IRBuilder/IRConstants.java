@@ -9,7 +9,7 @@ public final class IRConstants {
     public static final String ADD = "add";
     public static final String SUB = "sub";
     public static final String MUL = "mul";
-    public static final String DIV = "div";
+    public static final String SDIV = "sdiv";
     public static final String SREM = "srem";
     public static final String XOR = "xor";
     public static final String ZEXT = "zext";

@@ -54,7 +54,7 @@ public class IRBuilder {
                     return new ConstIntValueRef(lhs - rhs);
                 case MUL:
                     return new ConstIntValueRef(lhs * rhs);
-                case DIV:
+                case SDIV:
                     return new ConstIntValueRef(lhs / rhs);
                 default:
                     System.err.println("IRBuildCalc wrong!");
@@ -69,7 +69,7 @@ public class IRBuilder {
                     return new ConstFloatValueRef(lhs - rhs);
                 case MUL:
                     return new ConstFloatValueRef(lhs * rhs);
-                case DIV:
+                case SDIV:
                     return new ConstFloatValueRef(lhs / rhs);
                 default:
                     System.err.println("IRBuildCalc wrong!");
