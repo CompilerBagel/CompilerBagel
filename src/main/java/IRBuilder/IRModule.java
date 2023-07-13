@@ -13,6 +13,8 @@ public class IRModule {
     private final List<FunctionBlock> functionBlocks;
     private final String name;
 
+    private List<ValueRef> globalSymbol = new ArrayList<>();
+
     /** -------- static methods --------*/
     public static IRModule IRModuleCreateWithName(String name) {
         return new IRModule(name);
@@ -55,5 +57,13 @@ public class IRModule {
     }
     public void emitWithoutLF(String code){
         this.stringBuilder.append(code);
+    }
+
+    public void addGlobalSymbol(ValueRef sym){
+        globalSymbol.add(sym);
+    }
+
+    public List<ValueRef> getGlobalSymbol(){
+        return globalSymbol;
     }
 }

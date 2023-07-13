@@ -80,9 +80,9 @@ public class IRBuilder {
         if (lhsValRef.getType() == floatType || rhsValRef.getType() == floatType) {
             resType = floatType;
         }
-        if(lhsValRef.getType() == int32Type && rhsValRef.getType() == floatType){
+        if (lhsValRef.getType() == int32Type && rhsValRef.getType() == floatType) {
             lhsValRef = typeTrans(builder, lhsValRef, SiToFp);
-        } else if (lhsValRef.getType() == floatType && rhsValRef.getType() == int32Type){
+        } else if (lhsValRef.getType() == floatType && rhsValRef.getType() == int32Type) {
             rhsValRef = typeTrans(builder, rhsValRef, SiToFp);
         }
         resRegister = new BaseRegister(name, resType);
@@ -199,16 +199,17 @@ public class IRBuilder {
     }
 
     public static ValueRef IRAddGlobal(IRModule module, Type type, String globalVarName) {
-        // TODO: ArrayType
-        // todo: addGlobalInt
+        //todo: array type
         Type baseType = new PointerType(type);
         ValueRef resRegister = new GlobalRegister(globalVarName, baseType);
+        module.addGlobalSymbol(resRegister);
         module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " + ((PointerType) resRegister.getType()).getBaseType().getText() + " ");
         return resRegister;
     }
 
     public static void IRSetInitializer(IRModule module, ValueRef GlobalVar, ValueRef ConstRef) {
         // todo: addInit
+
         module.emit(ConstRef.getText());
     }
 
@@ -359,10 +360,10 @@ public class IRBuilder {
         return list;
     }
 
-    private static List<ValueRef> generateList(ValueRef left, ValueRef right) {
+    private static List<ValueRef> generateList(ValueRef origin, ValueRef res) {
         List<ValueRef> list = new ArrayList<>();
-        list.add(left);
-        list.add(right);
+        list.add(origin);
+        list.add(res);
         return list;
     }
 
