@@ -19,9 +19,6 @@ public class MachineFunction {
     
     // stack
     private int frameSize; // 栈帧大小
-    // TODO: choose esp+ebp or frameSize
-    /*private int esp;
-    private int ebp;*/
     
     public void moveFrame(int size) { frameSize += size; }
 }

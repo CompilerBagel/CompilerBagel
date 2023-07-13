@@ -15,5 +15,6 @@ public class MachineBlock {
     private boolean isExitBlock; // 是否为出口基本块
     
     private ArrayList<MachineBlock> predList = new ArrayList<>(); // 前驱列表
-    private ArrayList<MachineBlock> succList = new ArrayList<>(); // 后继列表
+    private MachineBlock trueSucc;
+    private MachineBlock falseSucc;
 }
