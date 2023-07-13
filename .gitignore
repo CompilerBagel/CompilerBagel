@@ -2,4 +2,9 @@
 /.vscode
 /gen
 /src/main/java/test.ll
-/test.sy
+/test.c
+/test.ll
+/ans
+/test.bc
+/sample.ans
+/sample.out

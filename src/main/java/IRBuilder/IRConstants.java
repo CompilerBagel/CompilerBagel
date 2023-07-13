@@ -20,6 +20,7 @@ public final class IRConstants {
     public static final String ICMP = "icmp";
     public static final String GETPTR = "getelementptr";
     public static final String CALL = "call";
+
     // for consistency with the LLVM API, there is no need to enumerate classes
     public static final int IRIntEQ = 0;
     public static final int IRIntNE = 1;
@@ -33,6 +34,10 @@ public final class IRConstants {
     public static final int IRIntSLE = 9;
 
     public static final String[] ICMPCodes = {
-            "eq", "ne", "ugt", "uge", "ult", "ule", "sgt", "sge", "slt", "sle"
+            "eq", "ne", "ugt", "uge", "ult", "ule", "sgt", "sge", "slt", "sle", "and", "or"
     };
+
+    // type transition
+    public static final int FpToSi = 1;
+    public static final int SiToFp = 2;
 }
