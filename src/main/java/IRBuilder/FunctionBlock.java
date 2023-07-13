@@ -19,6 +19,8 @@ public class FunctionBlock implements ValueRef{
         this.type = type;
         this.baseBlocks = new ArrayList<>();
         this.paramsValueRef = new ArrayList<>();
+        this.caller = new ArrayList<>();
+        this.callee = new ArrayList<>();
         int count = 0;
         for (Type paramType : type.getParamsType()) {
             ValueRef valRegister = new BaseRegister(functionName + (count++), paramType);
