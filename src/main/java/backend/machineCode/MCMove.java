@@ -6,6 +6,11 @@ public class MCMove extends MachineCode {
     private MachineOperand src;
     private MachineOperand dest;
     
+    public MCMove(MachineOperand src, MachineOperand dest) {
+        this.src = src;
+        this.dest = dest;
+    }
+    
     /**
      * Move.
      * instruction: mv rd, rs1

@@ -1,10 +1,17 @@
 package backend;
 
 import IRBuilder.BaseBlock;
+import IRBuilder.ConstIntValueRef;
 import IRBuilder.FunctionBlock;
+import IRBuilder.IRConstants;
 import IRBuilder.IRModule;
+import IRBuilder.ValueRef;
+import backend.machineCode.MCMove;
 import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineFunction;
+import backend.machineCode.MachineOperand;
+import instruction.CalculateInstruction;
+import instruction.Instruction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +27,7 @@ public class codeGen {
     private List<MachineBlock> blocks;
     private HashMap<FunctionBlock, MachineFunction> funcMap;
     private HashMap<BaseBlock, MachineBlock> blockMap;
+    private HashMap<String, MachineOperand> operandMap;
     
     public static List<MachineBlock> serializeBlocks(List<MachineBlock> blocks) {
         List<MachineBlock> sequence = new ArrayList<>();
@@ -86,10 +94,65 @@ public class codeGen {
                 MachineBlock machineBlock = new MachineBlock(block.getLabel(), funcMap.get(func));
                 blockMap.put(block, machineBlock);
                 blocks.add(machineBlock);
+                parseBlock(block, machineBlock);
+            }
+            // TODO: arg relation
+            // TODO: block succ
+            serializeBlocks(blocks);
+        }
+    }
+    
+    public void parseBlock(BaseBlock block, MachineBlock machineBlock) {
+        List<Instruction> instructions = block.getInstructions();
+        for (Instruction instr: instructions) {
+            if (instr instanceof CalculateInstruction) {
+                parseCalculateInstr((CalculateInstruction) instr, machineBlock);
             }
         }
-        // TODO: arg relation
-        // TODO: block succ
-        serializeBlocks(blocks);
+    }
+    
+    public void parseCalculateInstr(CalculateInstruction instr, MachineBlock block) {
+        switch (instr.getType()) {
+            case IRConstants.ADD:
+            case IRConstants.SUB: {
+                MachineOperand dest = parseOperand(instr.getOperands().get(0), block);
+                MachineOperand left = parseOperand(instr.getOperands().get(1), block);
+                MachineOperand right = parseOperand(instr.getOperands().get(2), block);
+                int result = 0;
+                if (left.isImm() && right.isImm()) {
+                    switch (instr.getType()) {
+                        case IRConstants.ADD:
+                            result = left.getImmValue() + right.getImmValue();
+                            break;
+                        case IRConstants.SUB:
+                            result = left.getImmValue() - right.getImmValue();
+                            break;
+                    }
+                    MachineOperand src = new MachineOperand(result);
+                    MCMove move = new MCMove(src, dest);
+                    block.getMachineCodes().add(move);
+                }
+                break;
+            }
+            case IRConstants.MUL: {
+                MachineOperand dest = parseOperand(instr.getOperands().get(0), block);
+                MachineOperand left = parseOperand(instr.getOperands().get(1), block);
+                MachineOperand right = parseOperand(instr.getOperands().get(2), block);
+                // TODO: MUL
+                break;
+            } // TODO： DIV
+        }
+    }
+    
+    public MachineOperand parseOperand(ValueRef operand, MachineBlock block) {
+        if (!operandMap.containsKey(operand.getText())) {
+            if (operand instanceof ConstIntValueRef) {
+                int integer = Integer.parseInt(operand.getText());
+                return new MachineOperand(integer);
+            }
+        } else {
+            return operandMap.get(operand.getText());
+        }
+        return null;
     }
 }
