@@ -72,13 +72,18 @@ public class IRBuilder {
                 case DIV:
                     return new ConstFloatValueRef(lhs / rhs);
                 default:
-                    System.err.println("IRBuildeCalc wrong!");
+                    System.err.println("IRBuildCalc wrong!");
             }
         }
         ValueRef resRegister;
         Type resType = int32Type;
         if (lhsValRef.getType() == floatType || rhsValRef.getType() == floatType) {
             resType = floatType;
+        }
+        if(lhsValRef.getType() == int32Type && rhsValRef.getType() == floatType){
+            lhsValRef = typeTrans(builder, lhsValRef, SiToFp);
+        } else if (lhsValRef.getType() == floatType && rhsValRef.getType() == int32Type){
+            rhsValRef = typeTrans(builder, rhsValRef, SiToFp);
         }
         resRegister = new BaseRegister(name, resType);
         builder.appendInstr(new CalculateInstruction(generateList(resRegister, lhsValRef, rhsValRef), builder.currentBaseBlock, calcType));
