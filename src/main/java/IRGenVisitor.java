@@ -316,9 +316,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef right = visit(ctx.exp(1));
 
         if (ctx.MUL() != null) {
-            return IRBuildMul(builder, left, right, "mul_");
+            return IRBuildCalc(builder, left, right, "mul_", MUL);
         } else if (ctx.DIV() != null) {
-            return IRBuildDiv(builder, left, right, "div_");
+            return IRBuildCalc(builder, left, right, "div_", DIV);
         } else if (ctx.MOD() != null) {
             return IRBuildSRem(builder, left, right, "srem_");
         }
@@ -332,9 +332,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef right = visit(ctx.exp(1));
 
         if (ctx.PLUS() != null) {
-            return IRBuildAdd(builder, left, right, "add_");
+            return IRBuildCalc(builder, left, right, "add_", ADD);
         } else if (ctx.MINUS() != null) {
-            return IRBuildSub(builder, left, right, "sub_");
+            return IRBuildCalc(builder, left, right, "sub_", SUB);
         }
 
         return null;
