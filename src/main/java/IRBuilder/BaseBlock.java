@@ -45,7 +45,7 @@ public class BaseBlock implements ValueRef{
     }
 
     public String getLabel() {
-        return this.label;
+        return this.label + baseBlockId;
     }
 
     public StringBuilder getCodeBuilder() {
