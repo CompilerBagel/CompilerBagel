@@ -9,6 +9,7 @@ public class MachineBlock {
     
     private MachineCode startCode;
     private MachineCode endCode;
+    private List<MachineCode> machineCodes;
     private boolean isEntryBlock; // 是否为入口基本块
     private boolean isExitBlock; // 是否为出口基本块
     
@@ -31,5 +32,9 @@ public class MachineBlock {
     
     public List<MachineBlock> getPredList() {
         return predList;
+    }
+    
+    public List<MachineCode> getMachineCodes() {
+        return machineCodes;
     }
 }
