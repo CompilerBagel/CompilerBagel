@@ -40,4 +40,8 @@ public class CalculateInstruction extends Instruction{
         }
         return null;
     }
+    
+    public String getType() {
+        return type;
+    }
 }
