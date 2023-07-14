@@ -17,10 +17,10 @@ public class FunctionBlock implements ValueRef{
     public FunctionBlock(String functionName, FunctionType type) {
         this.functionName = functionName;
         this.type = type;
-        this.baseBlocks = new ArrayList<>();
-        this.paramsValueRef = new ArrayList<>();
-        this.caller = new ArrayList<>();
-        this.callee = new ArrayList<>();
+        this.baseBlocks = new ArrayList<BaseBlock>();
+        this.paramsValueRef = new ArrayList<ValueRef>();
+        this.caller = new ArrayList<ValueRef>();
+        this.callee = new ArrayList<ValueRef>();
         int count = 0;
         for (Type paramType : type.getParamsType()) {
             ValueRef valRegister = new BaseRegister(functionName + (count++), paramType);

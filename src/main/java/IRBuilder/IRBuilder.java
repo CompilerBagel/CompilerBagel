@@ -107,12 +107,15 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildZExt(IRBuilder builder, ValueRef valueRef, Type type, String name) {
+        if(valueRef.getType() == type){
+            return valueRef;
+        }
         if (valueRef instanceof ConstIntValueRef) {
             return new ConstIntValueRef(Integer.valueOf(valueRef.getText()));
         }
         ValueRef resRegister = new BaseRegister(name, type);
         builder.appendInstr(new ZextInstruction(generateList(resRegister, valueRef, new ConstIntValueRef(0, type)), builder.currentBaseBlock));
-        builder.emit(resRegister.getText() + " = " + ZEXT + " " + int1Type.getText() + " " + valueRef.getText() + " to " + type.getText());
+        builder.emit(resRegister.getText() + " = " + ZEXT + " " + valueRef.getTypeText() + " " + valueRef.getText() + " to " + type.getText());
         return resRegister;
     }
 
@@ -279,15 +282,17 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildAnd(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text){
-        ValueRef resRegister = new BaseRegister(text, int1Type);
-        builder.emit(resRegister.getText() + " = " + AND + " " + resRegister.getTypeText()+ " " + lhs.getText() + ", " + rhs.getText());
+        ValueRef resRegister = new BaseRegister(text, lhs.getType());
+        builder.emit(resRegister.getText() + " = " + AND + " " + lhs.getTypeText()+ " " + lhs.getText() + ", " + rhs.getText());
         return resRegister;
+
     }
 
     public static ValueRef IRBuildOr(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text){
-        ValueRef resRegister = new BaseRegister(text, int1Type);
-        builder.emit(resRegister.getText() + " = " + OR + " " + resRegister.getTypeText() + " " + lhs.getText() + ", " + rhs.getText());
+        ValueRef resRegister = new BaseRegister(text, lhs.getType());
+        builder.emit(resRegister.getText() + " = " + OR + " " + lhs.getTypeText() + " " + lhs.getText() + ", " + rhs.getText());
         return resRegister;
+
     }
 
 

@@ -488,30 +488,30 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitAndCond(SysYParser.AndCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
-        if(lVal.getType() != int1Type){
-            lVal = IRBuildICmp(builder, IRIntNE, lVal, intZero, "icmp_NE");
-        }
-        if(rVal.getType() != int1Type){
-            rVal = IRBuildICmp(builder, IRIntNE, rVal, intZero, "imcp_NE");
-        }
+//        if(lVal.getType() != int1Type){
+//            lVal = IRBuildICmp(builder, IRIntNE, lVal, intZero, "icmp_NE");
+//        }
+//        if(rVal.getType() != int1Type){
+//            rVal = IRBuildICmp(builder, IRIntNE, rVal, intZero, "imcp_NE");
+//        }
         ValueRef cmpResult = IRBuildAnd(builder, lVal, rVal, "and_");
-        return cmpResult;
-        //return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+//        return cmpResult;
+        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
     @Override
     public ValueRef visitOrCond(SysYParser.OrCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
-        if(lVal.getType() != int1Type){
-            lVal = IRBuildICmp(builder, IRIntNE, lVal, intZero, "icmp_NE");
-        }
-        if(rVal.getType() != int1Type){
-            rVal = IRBuildICmp(builder, IRIntNE, rVal, intZero, "imcp_NE");
-        }
+//        if(lVal.getType() != int1Type){
+//            lVal = IRBuildICmp(builder, IRIntNE, lVal, intZero, "icmp_NE");
+//        }
+//        if(rVal.getType() != int1Type){
+//            rVal = IRBuildICmp(builder, IRIntNE, rVal, intZero, "imcp_NE");
+//        }
         ValueRef cmpResult = IRBuildOr(builder,  lVal, rVal, "or_");
-        return cmpResult;
-        //return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+//        return cmpResult;
+        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
     @Override
