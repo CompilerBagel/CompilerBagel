@@ -6,7 +6,7 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
-//import antlr.*;
+import antlr.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -352,7 +352,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             case "!":
                 operand = IRBuildICmp(builder, 1, new ConstIntValueRef(0), operand, "icmp_");
                 operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
-                //operand = IRBuildZExt(builder, operand, int32Type, "zext_");
+                operand = IRBuildZExt(builder, operand, int32Type, "zext_");
                 return operand;
             default:
                 break;
@@ -465,8 +465,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.GT() != null) {
             cmpResult = IRBuildICmp(builder, IRIntSGT, lVal, rVal, "icmp_GT");
         }
-        return cmpResult;
-        //return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+//        return cmpResult;
+        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
     @Override
@@ -480,8 +480,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.NEQ() != null) {
             cmpResult = IRBuildICmp(builder, IRIntNE, lVal, rVal, "icmp_NE");
         }
-        return cmpResult;
-        //return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+//        return cmpResult;
+        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
     @Override
