@@ -7,11 +7,13 @@ import IRBuilder.IRConstants;
 import IRBuilder.IRModule;
 import IRBuilder.ValueRef;
 import backend.machineCode.MCMove;
+import backend.machineCode.MCReturn;
 import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineFunction;
 import backend.machineCode.MachineOperand;
 import instruction.CalculateInstruction;
 import instruction.Instruction;
+import instruction.RetInstruction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +31,7 @@ public class codeGen {
     private HashMap<BaseBlock, MachineBlock> blockMap;
     private HashMap<String, MachineOperand> operandMap;
     
-    public static List<MachineBlock> serializeBlocks(List<MachineBlock> blocks) {
+    public static void serializeBlocks(List<MachineBlock> blocks) {
         List<MachineBlock> sequence = new ArrayList<>();
         Set<MachineBlock> done = new HashSet<>(); // 已经序列化的基本块
         
@@ -41,7 +43,6 @@ public class codeGen {
             serializeBlock(block, sequence, done, blockComparator);
         }
         
-        return sequence;
     }
     
     private static void serializeBlock(MachineBlock block, List<MachineBlock> sequence, Set<MachineBlock> done,
@@ -107,6 +108,8 @@ public class codeGen {
         for (Instruction instr: instructions) {
             if (instr instanceof CalculateInstruction) {
                 parseCalculateInstr((CalculateInstruction) instr, machineBlock);
+            } else if (instr instanceof RetInstruction) {
+                parseReturnInstr((RetInstruction) instr, machineBlock);
             }
         }
     }
@@ -115,9 +118,9 @@ public class codeGen {
         switch (instr.getType()) {
             case IRConstants.ADD:
             case IRConstants.SUB: {
-                MachineOperand dest = parseOperand(instr.getOperands().get(0), block);
-                MachineOperand left = parseOperand(instr.getOperands().get(1), block);
-                MachineOperand right = parseOperand(instr.getOperands().get(2), block);
+                MachineOperand dest = parseOperand(instr.getOperands().get(0));
+                MachineOperand left = parseOperand(instr.getOperands().get(1));
+                MachineOperand right = parseOperand(instr.getOperands().get(2));
                 int result = 0;
                 if (left.isImm() && right.isImm()) {
                     switch (instr.getType()) {
@@ -135,16 +138,16 @@ public class codeGen {
                 break;
             }
             case IRConstants.MUL: {
-                MachineOperand dest = parseOperand(instr.getOperands().get(0), block);
-                MachineOperand left = parseOperand(instr.getOperands().get(1), block);
-                MachineOperand right = parseOperand(instr.getOperands().get(2), block);
+                MachineOperand dest = parseOperand(instr.getOperands().get(0));
+                MachineOperand left = parseOperand(instr.getOperands().get(1));
+                MachineOperand right = parseOperand(instr.getOperands().get(2));
                 // TODO: MUL
                 break;
             } // TODO： DIV
         }
     }
     
-    public MachineOperand parseOperand(ValueRef operand, MachineBlock block) {
+    public MachineOperand parseOperand(ValueRef operand) {
         if (!operandMap.containsKey(operand.getText())) {
             if (operand instanceof ConstIntValueRef) {
                 int integer = Integer.parseInt(operand.getText());
@@ -154,5 +157,16 @@ public class codeGen {
             return operandMap.get(operand.getText());
         }
         return null;
+    }
+    
+    public void parseReturnInstr(RetInstruction instr, MachineBlock block) {
+        List<ValueRef> rets = instr.getOperands();
+        if (rets.size() != 0) {
+            MachineOperand src = parseOperand(rets.get(0));
+            
+        } else {
+            MCReturn ret = new MCReturn();
+            block.getMachineCodes().add(ret);
+        }
     }
 }
