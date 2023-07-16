@@ -350,7 +350,9 @@ public class IRBuilder {
         builder.emit(stringBuilder.toString());
         return resRegister;
     }
-
+//    public static ValueRef IRBuildPhi(IRBuilder builder, Type type , String Name){
+//
+//    }
     public static ValueRef IRGetParam(FunctionBlock function, int i) {
         return function.getParam(i);
     }
