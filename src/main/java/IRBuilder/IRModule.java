@@ -55,6 +55,28 @@ public class IRModule {
         this.stringBuilder = new StringBuilder();
         this.stringBuilder.append("; ModuleID = '").append(name).append("'\n");
         this.stringBuilder.append("source_filename = \"").append(name).append("\"\n\n");
+        declare();
+    }
+
+    private void declare() {
+        stringBuilder.append("declare i32 @getint()\n");
+        stringBuilder.append("declare i32 @getch()\n");
+        stringBuilder.append("declare float @getfloat()\n");
+        stringBuilder.append("declare i32 @getarray(i32* %0)\n");
+        stringBuilder.append("declare i32 @getfarray(float* %0)\n");
+
+        stringBuilder.append("declare void @putint(i32 %0)\n");
+        stringBuilder.append("declare void @putch(i32 %0)\n");
+        stringBuilder.append("declare void @putarray(i32 %0, i32* %1)\n");
+        stringBuilder.append("declare void @putfloat(float %0)\n");
+        stringBuilder.append("declare void @putfarray(i32 %0, float* %1)\n");
+
+        stringBuilder.append("declare void @putf(i32* %0, ...)\n");
+        stringBuilder.append("declare void @before_main()\n");
+        stringBuilder.append("declare void @after_main()\n");
+        stringBuilder.append("declare void @_sysy_starttime(i32 %0)\n");
+        stringBuilder.append("declare void @_sysy_stoptime(i32 %0)\n");
+        stringBuilder.append("\n");
     }
 
     public void addFunction(FunctionBlock function) {
