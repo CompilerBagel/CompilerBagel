@@ -7,13 +7,18 @@ import IRBuilder.FunctionBlock;
 import IRBuilder.IRConstants;
 import IRBuilder.IRModule;
 import IRBuilder.ValueRef;
+import Type.Type;
+import backend.machineCode.MCBinaryInteger;
+import backend.machineCode.MCCall;
 import backend.machineCode.MCMove;
 import backend.machineCode.MCReturn;
+import backend.machineCode.MCStore;
 import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineFunction;
 import backend.machineCode.MachineOperand;
 import backend.reg.PhysicsReg;
 import instruction.CalculateInstruction;
+import instruction.CallInstruction;
 import instruction.Instruction;
 import instruction.RetInstruction;
 
@@ -25,13 +30,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static Type.FloatType.IRFloatType;
+import static Type.Int1Type.IRInt1Type;
+import static Type.Int32Type.IRInt32Type;
+import static Type.VoidType.IRVoidType;
+
 public class codeGen {
-    
+    private static final Type int32Type = IRInt32Type();
+    private static final Type floatType = IRFloatType();
+    private static final Type int1Type = IRInt1Type();
+    private static final Type voidType = IRVoidType();
+    private static final PhysicsReg spReg = new PhysicsReg("sp");
     private IRModule module;
     private List<MachineBlock> blocks;
     private HashMap<FunctionBlock, MachineFunction> funcMap;
     private HashMap<BaseBlock, MachineBlock> blockMap;
     private HashMap<String, MachineOperand> operandMap;
+    private final int tmpImmCount = 0;
+    
     
     public static void serializeBlocks(List<MachineBlock> blocks) {
         List<MachineBlock> sequence = new ArrayList<>();
@@ -112,6 +128,8 @@ public class codeGen {
                 parseCalculateInstr((CalculateInstruction) instr, machineBlock);
             } else if (instr instanceof RetInstruction) {
                 parseReturnInstr((RetInstruction) instr, machineBlock);
+            } else if (instr instanceof CallInstruction) {
+                parseCallInstr((CallInstruction) instr, machineBlock);
             }
         }
     }
@@ -154,9 +172,71 @@ public class codeGen {
         if (rets.size() != 0) {
             MachineOperand src = parseOperand(rets.get(0));
             MCMove move = new MCMove(src, new PhysicsReg("a0"));
+            block.getMachineCodes().add(move);
         }
         MCReturn ret = new MCReturn();
         block.getMachineCodes().add(ret);
+    }
+    
+    public void parseCallInstr(CallInstruction instr, MachineBlock block) {
+        List<ValueRef> operands = instr.getOperands();
+        int aRegIndex = 10; // a0-a7 <-> x10-x17
+        int stackCount = 0;
+        List<MachineOperand> uses = new ArrayList<>();
+        for (ValueRef param: instr.getParams()) {
+            Type type = param.getType();
+            if (!(type.equals(IRFloatType()))) {
+                MachineOperand src = parseOperand(param);
+                if (aRegIndex <= 17) {
+                    PhysicsReg reg = new PhysicsReg(aRegIndex);
+                    MCMove move = new MCMove(src, reg);
+                    uses.add(reg);
+                    block.getMachineCodes().add(move);
+                    aRegIndex ++;
+                } else {
+                    MachineOperand offset = new MachineOperand(-(stackCount + 1) * 4);
+                    MCStore store = new MCStore(src, spReg, offset);
+                    if (src.isImm()) { // 如果是立即数，必须先存在虚拟寄存器，然后再压栈
+                        BaseRegister virtualReg = new BaseRegister("tmpImm_" + tmpImmCount, IRInt32Type());
+                        MCMove move = new MCMove(src, virtualReg);
+                        store.setSrc(virtualReg);
+                        block.getMachineCodes().add(move);
+                    }
+                    block.getMachineCodes().add(store);
+                    stackCount ++;
+                }
+            } else {
+                // TODO: call with float arg
+            }
+        }
+        
+        // 压栈后，修改sp值
+        if (aRegIndex > 17) {
+            MachineOperand offset = new MachineOperand(stackCount * 4);
+            MCBinaryInteger sub = new MCBinaryInteger(spReg, spReg, offset, IRConstants.SUB);
+            block.getMachineCodes().add(sub);
+        }
+        
+        MCCall call = new MCCall(funcMap.get((FunctionBlock) operands.get(1)));
+        block.getMachineCodes().add(call);
+        call.getUse().addAll(uses);
+        for (int i = 10; i < 17; i ++) {
+            call.getDef().add(new PhysicsReg(i));
+        }
+        
+        // 调用结束，恢复sp值
+        if (stackCount != 0) {
+            MachineOperand offset = new MachineOperand(stackCount * 4);
+            MCBinaryInteger add = new MCBinaryInteger(spReg, spReg, offset, IRConstants.ADD);
+            block.getMachineCodes().add(add);
+        }
+        
+        // 如果有返回值，需要用mv指令取出
+        if (!instr.isVoid()) {
+            MachineOperand dest = parseOperand(operands.get(0));
+            MCMove move = new MCMove(new PhysicsReg("a1"), dest);
+            block.getMachineCodes().add(move);
+        }
     }
     
     public MachineOperand parseOperand(ValueRef operand) {

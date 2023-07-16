@@ -20,6 +20,10 @@ public class MachineFunction {
         argMoveMap = new HashMap<>();
     }
     
+    public String getFuncName() {
+        return funcName;
+    }
+    
     public void initSavedRegs() { savedRegs.clear();}
     
     // stack

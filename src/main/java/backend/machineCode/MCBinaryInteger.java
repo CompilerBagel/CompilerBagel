@@ -10,6 +10,13 @@ public class MCBinaryInteger extends MachineCode {
     private MachineOperand right;
     private String binaryOp;
     
+    public MCBinaryInteger(MachineOperand dest, MachineOperand left, MachineOperand right, String binaryOp) {
+        this.dest = dest;
+        this.left = left;
+        this.right = right;
+        this.binaryOp = binaryOp;
+    }
+    
     /**
      * add, sub, mul, div
      * @return str

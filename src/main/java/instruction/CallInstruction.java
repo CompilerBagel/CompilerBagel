@@ -40,6 +40,10 @@ public class CallInstruction extends Instruction{
             params.add(operands.get(i));
         }
     }
+    
+    public ArrayList<ValueRef> getParams() {
+        return params;
+    }
 
     @Override
     public String toString() {
