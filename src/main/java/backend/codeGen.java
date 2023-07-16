@@ -1,6 +1,7 @@
 package backend;
 
 import IRBuilder.BaseBlock;
+import IRBuilder.BaseRegister;
 import IRBuilder.ConstIntValueRef;
 import IRBuilder.FunctionBlock;
 import IRBuilder.IRConstants;
@@ -11,6 +12,7 @@ import backend.machineCode.MCReturn;
 import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineFunction;
 import backend.machineCode.MachineOperand;
+import backend.reg.PhysicsReg;
 import instruction.CalculateInstruction;
 import instruction.Instruction;
 import instruction.RetInstruction;
@@ -147,26 +149,30 @@ public class codeGen {
         }
     }
     
+    public void parseReturnInstr(RetInstruction instr, MachineBlock block) {
+        List<ValueRef> rets = instr.getOperands();
+        if (rets.size() != 0) {
+            MachineOperand src = parseOperand(rets.get(0));
+            MCMove move = new MCMove(src, new PhysicsReg("a0"));
+        }
+        MCReturn ret = new MCReturn();
+        block.getMachineCodes().add(ret);
+    }
+    
     public MachineOperand parseOperand(ValueRef operand) {
         if (!operandMap.containsKey(operand.getText())) {
             if (operand instanceof ConstIntValueRef) {
                 int integer = Integer.parseInt(operand.getText());
-                return new MachineOperand(integer);
+                MachineOperand intOp = new MachineOperand(integer);
+                operandMap.put(operand.getText(), intOp);
+                return intOp;
+            } else if (operand instanceof BaseRegister) {
+                operandMap.put(operand.getText(), (MachineOperand) operand);
+                return (MachineOperand) operand;
             }
         } else {
             return operandMap.get(operand.getText());
         }
         return null;
-    }
-    
-    public void parseReturnInstr(RetInstruction instr, MachineBlock block) {
-        List<ValueRef> rets = instr.getOperands();
-        if (rets.size() != 0) {
-            MachineOperand src = parseOperand(rets.get(0));
-            
-        } else {
-            MCReturn ret = new MCReturn();
-            block.getMachineCodes().add(ret);
-        }
     }
 }
