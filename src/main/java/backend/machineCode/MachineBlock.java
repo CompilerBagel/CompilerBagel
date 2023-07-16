@@ -37,4 +37,12 @@ public class MachineBlock {
     public List<MachineCode> getMachineCodes() {
         return machineCodes;
     }
+    
+    public String getBlockName() {
+        return blockName;
+    }
+    
+    public MachineFunction getBlockFunc() {
+        return blockFunc;
+    }
 }
