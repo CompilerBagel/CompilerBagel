@@ -19,4 +19,7 @@ public abstract class Instruction {
     public void setBasicBlock(BaseBlock basicBlock){
         this.basicBlock = basicBlock;
     }
+    public List<ValueRef> getOperands() {
+        return operands;
+    }
 }

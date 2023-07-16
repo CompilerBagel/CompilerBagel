@@ -16,6 +16,10 @@ public class MachineOperand {
     private boolean isImmFloat = false;
     
     public MachineOperand(operandType t) { this.t = t;}
+    public MachineOperand(int immValue) {
+        this.t = operandType.imm;
+        this.immValue = immValue;
+    }
     
     // type recognition
     public boolean isImm() { return t == operandType.imm;}

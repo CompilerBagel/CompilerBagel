@@ -81,5 +81,9 @@ public class BaseBlock implements ValueRef{
         //
         return null;
     };
+    
+    public List<Instruction> getInstructions() {
+        return instructions;
+    }
 
 }

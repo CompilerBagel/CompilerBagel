@@ -60,6 +60,10 @@ public class IRModule {
     public void addFunction(FunctionBlock function) {
         functionBlocks.add(function);
     }
+    
+    public List<FunctionBlock> getFunctionBlocks() {
+        return functionBlocks;
+    }
 
     public void emit(String code) {
         this.stringBuilder.append(code).append("\n");

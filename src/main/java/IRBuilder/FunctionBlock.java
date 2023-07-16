@@ -35,6 +35,14 @@ public class FunctionBlock implements ValueRef{
     public void addBaseBlock(BaseBlock baseBlock) {
         baseBlocks.add(baseBlock);
     }
+    
+    public String getFunctionName() {
+        return functionName;
+    }
+    
+    public List<BaseBlock> getBaseBlocks() {
+        return baseBlocks;
+    }
 
     public StringBuilder genIRCodes() {
         StringBuilder stringBuilder = new StringBuilder();
