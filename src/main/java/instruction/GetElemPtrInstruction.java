@@ -24,10 +24,10 @@ public class GetElemPtrInstruction extends Instruction{
 
     public GetElemPtrInstruction(List<ValueRef> operands, BaseBlock basicBlock) {
         super(operands, basicBlock);
-        base = operands.get(1);
-        indexs = new ArrayList<ValueRef>();
+        this.base = operands.get(1);
+        this.indexs = new ArrayList<ValueRef>();
         for(int i = 2; i < operands.size();i++){
-            indexs.add(operands.get(i));
+            this.indexs.add(operands.get(i));
         }
     }
 

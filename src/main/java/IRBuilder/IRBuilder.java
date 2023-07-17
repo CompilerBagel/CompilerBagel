@@ -222,11 +222,11 @@ public class IRBuilder {
             if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
                 flag = false;
                 initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
-                //break;
+//                break;
             }
         }
         if (flag) {
-            module.emit("zeroInitializer");
+            module.emit("zeroinitializer");
             return;
         }
         Type elementType = ((PointerType) valueRef.getType()).getBaseType();
@@ -248,16 +248,31 @@ public class IRBuilder {
         elementType = new ArrayType(elementType, lastLength);
         int temp = constValueRefList.size() / lastLength;
         int counter = 0;
+        int counter1 = 0;
         for (int i = 0; i < temp; i++) {
-            emitStr.append(elementType.getText() + " [");
-            for (int j = 0; j < lastLength; j++) {
-                if (j == lastLength - 1) {
-                    emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText());
+            emitStr.append(elementType.getText());
+            boolean flg = true;
+            for(int j = 0; j < lastLength; j++){
+                if(!constValueRefList.get(counter1++).getText().equals("0")){
+                    flg = false;
                     break;
                 }
-                emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText() + ", ");
             }
-            emitStr.append("], ");
+            if (flg){
+                emitStr.append(" zeroinitializer,");
+                counter =counter1;
+            }else {
+                emitStr.append(" [");
+                for (int j = 0; j < lastLength; j++) {
+                    if (j == lastLength - 1) {
+                        emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText());
+                        break;
+                    }
+                    emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText() + ", ");
+                }
+                counter1 = counter;
+                emitStr.append("], ");
+            }
         }
         module.emit(emitStr.toString());
     }
