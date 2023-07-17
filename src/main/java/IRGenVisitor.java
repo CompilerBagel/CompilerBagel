@@ -28,6 +28,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
     private static final Type int1Type = IRInt1Type();
+    private static final Type voidType = IRVoidType();
     private GlobalScope globalScope = null;
     private Scope currentScope = null;
     private int localScopeCounter = 0;
@@ -45,7 +46,82 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitProgram(SysYParser.ProgramContext ctx) {
         globalScope = new GlobalScope("globalScope", null);
         currentScope = globalScope;
+        addLibs(globalScope);
         return super.visitProgram(ctx);
+    }
+
+    private void addLibs(GlobalScope globalScope){
+        FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
+        globalScope.define("getint", addLib("getint", getIntType), getIntType);
+
+        FunctionType getchType = new FunctionType(new ArrayList<>(), int32Type);
+        globalScope.define("getch", addLib("getch", getchType), getchType);
+
+        FunctionType getFloatType = new FunctionType(new ArrayList<>(), floatType);
+        globalScope.define("getfloat", addLib("getfloat", getFloatType), getFloatType);
+
+        List<Type> getArrayTypeParams = new ArrayList<>();
+        getArrayTypeParams.add(new PointerType(int32Type));
+        FunctionType getArrayType = new FunctionType(getArrayTypeParams, int32Type);
+        globalScope.define("getarray", addLib("getarray", getArrayType), getArrayType);
+
+        List<Type> getFArrayTypeParams = new ArrayList<>();
+        getFArrayTypeParams.add(new PointerType(floatType));
+        FunctionType getFArrayType = new FunctionType(getFArrayTypeParams, floatType);
+        globalScope.define("getfarray", addLib("getfarray", getFArrayType), getFArrayType);
+
+        List<Type> putIntTypeParams = new ArrayList<>();
+        putIntTypeParams.add(int32Type);
+        FunctionType putIntType = new FunctionType(putIntTypeParams, voidType);
+        globalScope.define("putint", addLib("putint", putIntType), putIntType);
+
+        List<Type> putChTypeParams = new ArrayList<>();
+        putChTypeParams.add(int32Type);
+        FunctionType putChType = new FunctionType(putChTypeParams, voidType);
+        globalScope.define("putch", addLib("putch", putChType), putChType);
+
+        List<Type> putArrayTypeParams = new ArrayList<>();
+        putArrayTypeParams.add(int32Type);
+        putArrayTypeParams.add(new PointerType(int32Type));
+        FunctionType putArrayType = new FunctionType(putArrayTypeParams, voidType);
+        globalScope.define("putarray", addLib("putarray", putArrayType), putArrayType);
+
+        List<Type> putFloatTypeParams = new ArrayList<>();
+        putFloatTypeParams.add(floatType);
+        FunctionType putFloatType = new FunctionType(putFloatTypeParams, voidType);
+        globalScope.define("putfloat", addLib("putfloat", putFloatType), putFloatType);
+
+        List<Type> putFArrayTypeParams = new ArrayList<>();
+        putFArrayTypeParams.add(int32Type);
+        putFArrayTypeParams.add(new PointerType(floatType));
+        FunctionType putFArrayType = new FunctionType(putFArrayTypeParams, voidType);
+        globalScope.define("putfarray", addLib("putfarray", putFArrayType), putFArrayType);
+
+        // todo: putf
+
+        FunctionType beforeMainType = new FunctionType(new ArrayList<>(), voidType);
+        globalScope.define("before_main", addLib("before_main", beforeMainType), beforeMainType);
+
+        FunctionType afterMainType = new FunctionType(new ArrayList<>(), voidType);
+        globalScope.define("after_main", addLib("after_main", afterMainType), afterMainType);
+
+        List<Type> startTimeTypeParams = new ArrayList<>();
+        startTimeTypeParams.add(int32Type);
+        FunctionType startTimeType = new FunctionType(startTimeTypeParams, voidType);
+        globalScope.define("start_time", addLib("start_time", startTimeType), startTimeType);
+
+        List<Type> endTimeTypeParams = new ArrayList<>();
+        endTimeTypeParams.add(int32Type);
+        FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
+        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
+
+    }
+
+    private FunctionBlock addLib(String libName, FunctionType libType){
+        FunctionBlock function = new FunctionBlock(libName, libType);
+        Symbol funcSym = new Symbol(libName, libType);
+        module.addGlobalSymbol(libName, funcSym);
+        return function;
     }
 
     private Type defineType(String typeName) {
@@ -258,7 +334,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         String funcName = ctx.IDENT().getText();
         FunctionBlock functionBlock = (FunctionBlock) globalScope.getValueRef(funcName);
         FunctionType functionType = (FunctionType) globalScope.getType(funcName);
-
         int argc = functionType.getParamsType().size();
         List<ValueRef> args = new ArrayList<>(argc);
         for (int i = 0; i < argc; i++) {
