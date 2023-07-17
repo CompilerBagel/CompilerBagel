@@ -277,7 +277,7 @@ public class IRBuilder {
             }else {
                 emitStr.append(" [");
                 for (int j = 0; j < lastLength; j++) {
-                    ValueRef temp1 = constValueRefList.get(counter++);
+
 
                     if (j == lastLength - 1) {
                         emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText());
