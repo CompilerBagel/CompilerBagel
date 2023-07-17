@@ -12,7 +12,7 @@ public class PhysicsReg extends Reg {
     
     private final static HashMap<String, Integer> nameMap = new HashMap<>();
     private final static HashMap<Integer, String> indexMap = new HashMap<>();
-    
+    private static final PhysicsReg[] physicsRegs = new PhysicsReg[32];
     static {
         nameMap.put("zero", 0);
         nameMap.put("ra", 1);
@@ -64,5 +64,12 @@ public class PhysicsReg extends Reg {
         super(operandType.physicsReg);
         this.index = nameMap.get(regName);
         this.regName = regName;
+    }
+
+    public static PhysicsReg getPhysicReg(int index) {
+        if (physicsRegs[index] == null) {
+            physicsRegs[index] = new PhysicsReg(index);
+        }
+        return physicsRegs[index];
     }
 }

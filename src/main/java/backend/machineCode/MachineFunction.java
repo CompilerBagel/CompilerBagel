@@ -8,7 +8,7 @@ public class MachineFunction {
     // TODO: data structure to be discussed
     private LinkedList<MachineBlock> machineBlocks;
     private String funcName;
-    private ArrayList<MachineOperand> savedRegs;
+    private final ArrayList<MachineOperand> savedRegs;
     private ArrayList<MachineCode> argList;
     private HashMap<MachineCode, MachineCode> argMoveMap; // register change when function call
     
