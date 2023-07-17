@@ -209,19 +209,29 @@ public class IRBuilder {
         return resRegister;
     }
 
+    public static ValueRef IRAddLocal(IRModule module, Type type, String localVarName){
+        Type baseType = new PointerType(type);
+        ValueRef resRegister = new GlobalRegister(localVarName, baseType);
+        //symbol
+        module.emitWithoutLF(resRegister.getText() + " = " + LOCAL + " " + ((PointerType) resRegister.getType()).getBaseType().getText() + " ");
+        return resRegister;
+    }
+
     public static void IRSetInitializer(IRModule module, ValueRef globalVar, ValueRef constRef, String globalName) {
         int initValue = Integer.valueOf(constRef.getText());
         module.getGlobalSymbol(globalName).setInitValue(initValue);
         module.emit(constRef.getText());
     }
 
+
+
     public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList) {
         boolean flag = true;
-        List<Float> initValue = new ArrayList<>();
+//        List<Float> initValue = new ArrayList<>();
         for (int i = 0; i < constValueRefList.size(); i++) {
             if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
                 flag = false;
-                initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
+//                initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
 //                break;
             }
         }
@@ -249,6 +259,9 @@ public class IRBuilder {
         int temp = constValueRefList.size() / lastLength;
         int counter = 0;
         int counter1 = 0;
+        for(int i = 0;i<paramList.size()-1;i++){
+            emitStr.append("[");
+        }
         for (int i = 0; i < temp; i++) {
             emitStr.append(elementType.getText());
             boolean flg = true;
@@ -264,6 +277,8 @@ public class IRBuilder {
             }else {
                 emitStr.append(" [");
                 for (int j = 0; j < lastLength; j++) {
+                    ValueRef temp1 = constValueRefList.get(counter++);
+
                     if (j == lastLength - 1) {
                         emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText());
                         break;
@@ -271,8 +286,16 @@ public class IRBuilder {
                     emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText() + ", ");
                 }
                 counter1 = counter;
-                emitStr.append("], ");
+                if(i==temp-1){
+                    emitStr.append("]");
+                }else{
+                    emitStr.append("], ");
+                }
+
             }
+        }
+        for(int i = 0;i<paramList.size()-1;i++){
+            emitStr.append("]");
         }
         module.emit(emitStr.toString());
     }

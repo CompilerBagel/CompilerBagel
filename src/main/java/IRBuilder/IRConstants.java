@@ -16,6 +16,7 @@ public final class IRConstants {
     public static final String ALLOCA = "alloca";
     public static final String STORE = "store";
     public static final String GLOBAL = "global";
+    public static final String LOCAL = "private unnamed_addr constant";
     public static final String BR = "br";
     public static final String ICMP = "icmp";
     public static final String GETPTR = "getelementptr";

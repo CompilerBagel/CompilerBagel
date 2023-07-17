@@ -268,13 +268,16 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 }
             } else {
                 variable = IRBuildAlloca(builder, type, variableName);
+                //TODO: check
+
                 if (paramCount.size() == 0) {
                     if (varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
                     IRBuildStore(builder, assign, variable);
                 } else {
+                    ValueRef initVariable = IRAddLocal(module , type , "_const.main."+variableName);
                     //TODO: 正确性验证
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
-                    IRSetInitializer(module, variable, init);
+                    IRSetInitializer(module, initVariable, init);
                 }
             }
             currentScope.define(variableName, variable, type);
