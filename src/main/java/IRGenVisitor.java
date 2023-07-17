@@ -248,7 +248,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             // 求type，反向加载数组，迭代求解type
             List<Integer> paramCount = new ArrayList<>();
             for (SysYParser.ConstExpContext constExpContext : varDefContext.constExp()) {
-                paramCount.add(Integer.parseInt(constExpContext.getText()));
+                ValueRef temp = this.visit(constExpContext.exp());
+
+                paramCount.add(Integer.parseInt(temp.getText()));
             }
             for (int i = paramCount.size() - 1; i >= 0; i--) {
                 type = new ArrayType(type, paramCount.get(i));
@@ -263,7 +265,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     IRSetInitializer(module, variable, assign, variableName);
                 } else {
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
-                    for (int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
+//                    for (int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
                     IRSetInitializer(module, variable, init);
                 }
             } else {
@@ -274,10 +276,49 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     if (varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
                     IRBuildStore(builder, assign, variable);
                 } else {
-                    ValueRef initVariable = IRAddLocal(module , type , "_const.main."+variableName);
+
                     //TODO: 正确性验证
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
-                    IRSetInitializer(module, initVariable, init);
+                    boolean flag = true;
+                    for(int i = 0;i<init.size();i++){
+                        if(!(init.get(i) instanceof ConstIntValueRef)){
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if(flag){
+                        ValueRef initVariable = IRAddLocal(module , type , "_const.main."+variableName);
+                        IRSetInitializer(module, initVariable, init);
+                    }else{
+                        List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
+                        for(int i = 0;i<init.size();i++){
+
+                            int totalCount = init.size();
+                            int temp = 1;
+                            int counter = i;
+
+                            arrayPtr.add(new ConstIntValueRef(0));
+                            for(int j = 0;j<elementDimension.size();j++){
+                                totalCount/=elementDimension.get(j);
+                                arrayPtr.add(new ConstIntValueRef(counter/totalCount));
+                                counter -= (counter/totalCount)*totalCount;
+                            }
+                            int counter1 = 1;
+                            List<ValueRef> paramList = new ArrayList<ValueRef>();
+                            paramList.add(intZero);
+                            paramList.add(arrayPtr.get(counter1++));
+                            ValueRef elementPtr = IRBuildGEP(builder,variable,paramList,2,"array");
+                            for(int j = 0;j<elementDimension.size()-1;j++){
+                                paramList.clear();
+                                paramList.add(intZero);
+                                paramList.add(arrayPtr.get(counter1++));
+                                elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array");
+                            }
+
+                            IRBuildStore(builder, init.get(i),elementPtr);
+                            arrayPtr.clear();
+                        }
+                    }
                 }
             }
             currentScope.define(variableName, variable, type);
