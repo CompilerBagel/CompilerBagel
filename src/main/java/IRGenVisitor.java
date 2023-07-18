@@ -279,17 +279,17 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
                     //TODO: 正确性验证
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
-                    boolean flag = true;
-                    for(int i = 0;i<init.size();i++){
-                        if(!(init.get(i) instanceof ConstIntValueRef)){
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if(flag){
-                        ValueRef initVariable = IRAddLocal(module , type , "_const.main."+variableName);
-                        IRSetInitializer(module, initVariable, init);
-                    }else{
+//                    boolean flag = true;
+//                    for(int i = 0;i<init.size();i++){
+//                        if(!(init.get(i) instanceof ConstIntValueRef)){
+//                            flag = false;
+//                            break;
+//                        }
+//                    }
+//                    if(flag){
+//                        ValueRef initVariable = IRAddLocal(module , type , "__const.main."+variable.getText().substring(1));
+//                        IRSetInitializer(module, initVariable, init);
+//                    }else{
                         List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
                         for(int i = 0;i<init.size();i++){
 
@@ -317,7 +317,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
                             IRBuildStore(builder, init.get(i),elementPtr);
                             arrayPtr.clear();
-                        }
+//                        }
                     }
                 }
             }
