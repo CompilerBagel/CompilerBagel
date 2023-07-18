@@ -263,7 +263,9 @@ public class IRBuilder {
             emitStr.append("[");
         }
         for (int i = 0; i < temp; i++) {
-            emitStr.append(elementType.getText());
+            if(paramList.size()!=1){
+                emitStr.append(elementType.getText());
+            }
             boolean flg = true;
             for(int j = 0; j < lastLength; j++){
                 if(!constValueRefList.get(counter1++).getText().equals("0")){
