@@ -100,5 +100,18 @@ public class PhysicsReg extends Reg {
         }
     }
 
+    public PhysicsReg getPhysicsReg(int index) {
+        isAvailable[index] = false;
+        return physicsRegs[index];
+    }
+
+    public void giveBackReg(int index) {
+        isAvailable[index] = true;
+    }
+
+    public boolean isAvailableReg(int index) {
+        return isAvailable[index];
+    }
+
 
 }

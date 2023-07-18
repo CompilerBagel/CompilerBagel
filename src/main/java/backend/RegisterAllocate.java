@@ -3,6 +3,7 @@ package backend;
 import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineFunction;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class RegisterAllocate {
@@ -16,6 +17,17 @@ public class RegisterAllocate {
     public void allocate() {
         // TODO:
     }
+
+    public void easyAllocate() {
+        for (MachineFunction function: functions) {
+            funcEasyAllocate(function);
+        }
+    }
+
+    private void funcEasyAllocate(MachineFunction function) {
+        LinkedList<MachineBlock> blocks;
+    }
+
 
 
 }
