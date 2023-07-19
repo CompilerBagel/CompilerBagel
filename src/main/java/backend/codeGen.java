@@ -1,12 +1,6 @@
 package backend;
 
-import IRBuilder.BaseBlock;
-import IRBuilder.BaseRegister;
-import IRBuilder.ConstIntValueRef;
-import IRBuilder.FunctionBlock;
-import IRBuilder.IRConstants;
-import IRBuilder.IRModule;
-import IRBuilder.ValueRef;
+import IRBuilder.*;
 import Type.Type;
 import backend.machineCode.*;
 import backend.reg.PhysicsReg;
@@ -230,64 +224,26 @@ public class codeGen {
     }
     
     public void parseCallInstr(CallInstruction instr, MachineBlock block) {
-        List<ValueRef> operands = instr.getOperands();
-        int aRegIndex = 10; // a0-a7 <-> x10-x17
-        int stackCount = 0;
-        List<MachineOperand> uses = new ArrayList<>();
-        for (ValueRef param: instr.getParams()) {
-            Type type = param.getType();
-            if (!(type.equals(IRFloatType()))) {
-                MachineOperand src = parseOperand(param);
-                if (aRegIndex <= 17) {
-                    PhysicsReg reg = new PhysicsReg(aRegIndex);
-                    MCMove move = new MCMove(src, reg);
-                    uses.add(reg);
-                    block.getMachineCodes().add(move);
-                    aRegIndex ++;
-                } else {
-                    MachineOperand offset = new MachineOperand(-(stackCount + 1) * 4);
-                    MCStore store = new MCStore(src, spReg, offset);
-                    if (src.isImm()) { // 如果是立即数，必须先存在虚拟寄存器，然后再压栈
-                        BaseRegister virtualReg = new BaseRegister("tmpImm_" + tmpImmCount, IRInt32Type());
-                        MCMove move = new MCMove(src, virtualReg);
-                        store.setSrc(virtualReg);
-                        block.getMachineCodes().add(move);
-                    }
-                    block.getMachineCodes().add(store);
-                    stackCount ++;
-                }
+        BaseRegister dest = (BaseRegister) instr.getOperands().get(0);
+        List<ValueRef> params = instr.getParams();
+        if (dest.getIsDef()) { // always true?
+            dest.setIsDef(true);
+        }
+        List<MachineOperand> operands = new ArrayList<>();
+        for (ValueRef param: params) {
+            BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
+            MachineOperand src;
+            if (!(param instanceof ConstIntValueRef) && !(param instanceof ConstFloatValueRef)) {
+                src = new PhysicsReg("s0");
             } else {
-                // TODO: call with float arg
+                src = new MachineOperand(Integer.parseInt(param.getText()));
             }
+            MCLoad load = new MCLoad(src, vReg, new MachineOperand(0));
+            block.getMachineCodes().add(load);
+            operands.add(vReg);
         }
-        
-        // 压栈后，修改sp值
-        if (aRegIndex > 17) {
-            MachineOperand offset = new MachineOperand(stackCount * 4);
-            MCBinaryInteger sub = new MCBinaryInteger(spReg, spReg, offset, IRConstants.SUB);
-            block.getMachineCodes().add(sub);
-        }
-        
-        MCCall call = new MCCall(funcMap.get((FunctionBlock) operands.get(1)));
+        MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
         block.getMachineCodes().add(call);
-        call.getUse().addAll(uses);
-        for (int i = 10; i < 17; i ++) {
-            call.getDef().add(new PhysicsReg(i));
-        }
-        
-        // 调用结束，恢复sp值
-        if (stackCount != 0) {
-            MachineOperand offset = new MachineOperand(stackCount * 4);
-            MCBinaryInteger add = new MCBinaryInteger(spReg, spReg, offset, IRConstants.ADD);
-            block.getMachineCodes().add(add);
-        }
-        
-        // 如果有返回值，需要用mv指令取出
-        if (!instr.isVoid()) {
-            MachineOperand dest = parseOperand(operands.get(0));
-            MCMove move = new MCMove(new PhysicsReg("a1"), dest);
-            block.getMachineCodes().add(move);
-        }
     }
 
     public void parseAllocaInstr(AllocaInstruction instr, MachineBlock block){

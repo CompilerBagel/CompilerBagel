@@ -1,5 +1,7 @@
 package backend.machineCode;
 
+import instruction.Instruction;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,6 +14,7 @@ public class MachineFunction {
     private final ArrayList<MachineOperand> savedRegs;
     private ArrayList<MachineCode> argList;
     private HashMap<MachineCode, MachineCode> argMoveMap; // register change when function call
+    private HashMap<MachineOperand, Integer> offsetMap;
     
     public MachineFunction(String funcName) {
         this.funcName = funcName;
@@ -30,7 +33,12 @@ public class MachineFunction {
     // stack
     private int frameSize; // 栈帧大小
     
-    public void moveFrame(int size) { frameSize += size; }
+    public void moveFrame(int size) {
+        frameSize -= size;
+    }
+    public int getFrameSize() {
+        return frameSize;
+    }
 
     public LinkedList<MachineBlock> getMachineBlocks() {
         return machineBlocks;
