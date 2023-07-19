@@ -6,7 +6,7 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
-//import antlr.*;
+import antlr.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private Stack<BaseBlock> afterStack = new Stack<>();
     private ValueRef intZero = new ConstIntValueRef(0);
     private ValueRef floatZero = new ConstFloatValueRef(0);
-
+    private boolean arrayAddr = false;
     public IRModule getModule() {
         return module;
     }
@@ -507,16 +507,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef variable = currentScope.getValueRef(variableName);
         Type varType = currentScope.getType(variableName);
         ValueRef lValPointer = visitLVal(ctx.lVal());
-        if (varType instanceof PointerType) {
-            return IRBuildLoad(builder, lValPointer, variableName);
-        } else if (varType instanceof ArrayType) {
-            if (ctx.lVal().exp().size() > 0) {
-                return IRBuildLoad(builder, lValPointer, variableName);
-            }
+        if(arrayAddr){
+            arrayAddr = false;
             return lValPointer;
-        } else {
-            return IRBuildLoad(builder, lValPointer, variableName);
         }
+        return IRBuildLoad(builder,lValPointer,variableName);
     }
 
     @Override
@@ -561,6 +556,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 indexes.add(intZero);
                 indexes.add(intZero);
                 lValPointer = IRBuildGEP(builder, lValPointer, indexes, indexes.size(), lValName);
+
+                arrayAddr = true;
                 return lValPointer;
             }
             for (SysYParser.ExpContext expContext : ctx.exp()) {
@@ -572,6 +569,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 indexes.add(index);
                 lValPointer = IRBuildGEP(builder, lValPointer, indexes, indexes.size(), lValName);
             }
+        }
+        if(lValPointer.getType() instanceof ArrayType || (lValPointer.getType() instanceof PointerType) && (((PointerType)lValPointer.getType()).getBaseType() instanceof ArrayType||((PointerType)lValPointer.getType()).getBaseType() instanceof PointerType)){
+            arrayAddr = true;
         }
         return lValPointer;
     }

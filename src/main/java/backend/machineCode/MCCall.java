@@ -28,11 +28,4 @@ public class MCCall extends MachineCode {
     public void replaceUse(final MachineOperand oldOperand, final MachineOperand newOperand) {
     
     }
-    
-    @Override
-    public ArrayList<MachineOperand> allocatePhyRegs() {
-        ArrayList<MachineOperand> regs = new ArrayList<>();
-        regs.add(new PhysicsReg("a0"));
-        return regs;
-    }
 }

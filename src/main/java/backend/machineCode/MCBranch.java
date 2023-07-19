@@ -27,9 +27,4 @@ public class MCBranch extends MachineCode {
     public void replaceUse(final MachineOperand oldOperand, final MachineOperand newOperand) {
     
     }
-    
-    @Override
-    public ArrayList<MachineOperand> allocatePhyRegs() {
-        return null;
-    }
 }

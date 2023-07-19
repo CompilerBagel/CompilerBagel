@@ -121,11 +121,10 @@ public class RegisterAllocate {
                 for (MachineOperand def : defs) {
                     PhysicsReg allocatedReg = getReg(def);
                     if (allocatedReg != null) {
-                        code.replaceDef(def, allocatedReg);
-                        // def.userRemove(code);
-//                        if (def.noUser()) {
-//
-//                        }
+                        def.setPhysicsReg(allocatedReg);
+                        if (def.noUser()) {
+                            allocatedReg.giveBack();
+                        }
                     } else {
                         // spill
                     }
@@ -133,8 +132,13 @@ public class RegisterAllocate {
                 for (MachineOperand use : uses) {
                     PhysicsReg allocatedReg = getReg(use);
                     if (allocatedReg != null) {
-                        code.replaceDef(use, allocatedReg);
-                        // use.remove(code);
+                        use.setPhysicsReg(allocatedReg);
+                        use.removeUse(code);
+                        if (use.noUser()) {
+                            allocatedReg.giveBack();
+                        }
+                    } else {
+                        // spill
                     }
                 }
             }
