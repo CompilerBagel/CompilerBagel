@@ -3,8 +3,9 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.IOException;
-import antlr.*;
+//import antlr.*;
 import static IRBuilder.IRModule.PrintModuleToFile;
+import backend.codeGen;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -13,6 +14,7 @@ public class Main {
         }
         String source = args[0];
         String dest = args[1];
+        String mcDest = args[2];
 
         CharStream input = CharStreams.fromFileName(source);
         // Lexer
@@ -26,5 +28,9 @@ public class Main {
         irGenVisitorVisitor.visit(tree);
 
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
+
+        codeGen code = new codeGen();
+        code.MachineCodeGen(irGenVisitorVisitor.getModule());
+        code.PrintCodeToFile(mcDest);
     }
 }

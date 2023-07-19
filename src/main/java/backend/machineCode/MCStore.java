@@ -60,7 +60,7 @@ public class MCStore extends MachineCode {
     @Override
     public ArrayList<MachineOperand> allocatePhyRegs() {
         ArrayList<MachineOperand> phyRegs = new ArrayList<>();
-        if (this.src.isPhysicsReg()) {
+/*        if (this.src.isPhysicsReg()) {
             phyRegs.add(this.src);
         }
         if (this.dest.isPhysicsReg()) {
@@ -68,7 +68,7 @@ public class MCStore extends MachineCode {
         }
         if (this.offset.isPhysicsReg()) {
             phyRegs.add(this.offset);
-        }
+        }*/
         return phyRegs;
     }
 }

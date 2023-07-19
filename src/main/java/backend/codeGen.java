@@ -8,20 +8,13 @@ import IRBuilder.IRConstants;
 import IRBuilder.IRModule;
 import IRBuilder.ValueRef;
 import Type.Type;
-import backend.machineCode.MCBinaryInteger;
-import backend.machineCode.MCCall;
-import backend.machineCode.MCMove;
-import backend.machineCode.MCReturn;
-import backend.machineCode.MCStore;
-import backend.machineCode.MachineBlock;
-import backend.machineCode.MachineFunction;
-import backend.machineCode.MachineOperand;
+import backend.machineCode.*;
 import backend.reg.PhysicsReg;
-import instruction.CalculateInstruction;
-import instruction.CallInstruction;
-import instruction.Instruction;
-import instruction.RetInstruction;
+import instruction.*;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,10 +23,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
 import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
+import static backend.machineCode.MachineConstants.*;
 
 public class codeGen {
     private static final Type int32Type = IRInt32Type();
@@ -41,10 +36,10 @@ public class codeGen {
     private static final Type int1Type = IRInt1Type();
     private static final Type voidType = IRVoidType();
     private static final PhysicsReg spReg = new PhysicsReg("sp");
-    private IRModule module;
-    private List<MachineBlock> blocks;
+    private static IRModule module;
+    private List<MachineBlock> blocks = new ArrayList<>();
     private HashMap<FunctionBlock, MachineFunction> funcMap;
-    private HashMap<BaseBlock, MachineBlock> blockMap;
+    private static HashMap<BaseBlock, MachineBlock> blockMap;
     private HashMap<String, MachineOperand> operandMap;
     private final int tmpImmCount = 0;
     
@@ -100,7 +95,11 @@ public class codeGen {
         }
     }
     
-    public void MachineCodeGen() {
+    public void MachineCodeGen(IRModule irModule) {
+        module = irModule;
+        funcMap = new HashMap<>();
+        blockMap = new HashMap<>();
+        operandMap = new HashMap<>();
         List<FunctionBlock> functionBlocks = module.getFunctionBlocks();
         for (FunctionBlock functionBlock : functionBlocks) {
             MachineFunction machineFunction = new MachineFunction(functionBlock.getFunctionName());
@@ -135,35 +134,87 @@ public class codeGen {
     }
     
     public void parseCalculateInstr(CalculateInstruction instr, MachineBlock block) {
-        switch (instr.getType()) {
-            case IRConstants.ADD:
-            case IRConstants.SUB: {
-                MachineOperand dest = parseOperand(instr.getOperands().get(0));
-                MachineOperand left = parseOperand(instr.getOperands().get(1));
-                MachineOperand right = parseOperand(instr.getOperands().get(2));
-                int result = 0;
-                if (left.isImm() && right.isImm()) {
-                    switch (instr.getType()) {
-                        case IRConstants.ADD:
-                            result = left.getImmValue() + right.getImmValue();
-                            break;
-                        case IRConstants.SUB:
-                            result = left.getImmValue() - right.getImmValue();
-                            break;
-                    }
-                    MachineOperand src = new MachineOperand(result);
-                    MCMove move = new MCMove(src, dest);
-                    block.getMachineCodes().add(move);
-                }
-                break;
+        MachineOperand dest = parseOperand(instr.getOperands().get(0));
+        MachineOperand left = parseOperand(instr.getOperands().get(1));
+        MachineOperand right = parseOperand(instr.getOperands().get(2));
+
+        if(left.isImm() && right.isImm()){
+            int result = 0;
+            switch (instr.getType()){
+                case IRConstants.ADD:
+                    result = left.getImmValue() + right.getImmValue();
+                    break;
+                case IRConstants.SUB:
+                    result = left.getImmValue() - right.getImmValue();
+                    break;
+                case IRConstants.MUL:
+                    result = left.getImmValue() * right.getImmValue();
+                    break;
+                case IRConstants.SDIV:
+                    result = left.getImmValue() / right.getImmValue();
+                    break;
+                default:
+                    assert(false);
+                    break;
             }
-            case IRConstants.MUL: {
-                MachineOperand dest = parseOperand(instr.getOperands().get(0));
-                MachineOperand left = parseOperand(instr.getOperands().get(1));
-                MachineOperand right = parseOperand(instr.getOperands().get(2));
-                // TODO: MUL
-                break;
-            } // TODO： DIV
+            MachineOperand src = new MachineOperand(result);
+            MCMove move = new MCMove(src, dest);
+
+            setDefUse(src, move);
+            setDefUse(dest, move);
+            block.getMachineCodes().add(move);
+
+        }else if(left.isImm() || right.isImm()){
+            MachineOperand src = left.isImm() ? right : left;
+            MachineOperand imm = left.isImm() ? left : right;
+            MCBinaryInteger code = null;
+            switch (instr.getType()){
+                case IRConstants.ADD:
+                    code = new MCBinaryInteger(dest, src, imm, ADDIW);
+                    break;
+                case IRConstants.SUB:
+                    code = new MCBinaryInteger(dest, src, imm, SUBIW);
+                    break;
+                case IRConstants.MUL:
+                    //todo: add li, mulw的参数都是寄存器
+                    code = new MCBinaryInteger(dest, src, imm, MULW);
+                    break;
+                case IRConstants.SDIV:
+                    //todo: add li
+                    code = new MCBinaryInteger(dest, src, imm, DIVW);
+                    break;
+                default:
+                    break;
+            }
+            assert(code != null);
+            setDefUse(dest, code);
+            setDefUse(src, code);
+            setDefUse(imm, code);
+
+            block.getMachineCodes().add(code);
+        }else{
+            MachineCode code = null;
+            switch (instr.getType()){
+                case IRConstants.ADD:
+                    code = new MCBinaryInteger(dest, left, right, ADDW);
+                    break;
+                case IRConstants.SUB:
+                    code = new MCBinaryInteger(dest, left, right, SUBW);
+                    break;
+                case IRConstants.MUL:
+                    code = new MCBinaryInteger(dest, left, right, MULW);
+                    break;
+                case IRConstants.SDIV:
+                    code = new MCBinaryInteger(dest, left, right, DIVW);
+                    break;
+                default:
+                    break;
+            }
+            assert(code != null);
+            setDefUse(dest, code);
+            setDefUse(left, code);
+            setDefUse(right, code);
+            block.getMachineCodes().add(code);
         }
     }
     
@@ -238,21 +289,73 @@ public class codeGen {
             block.getMachineCodes().add(move);
         }
     }
+
+    public void parseAllocaInstr(AllocaInstruction instr, MachineBlock block){
+
+    }
+
+    public void parseBrInstr(BrInstruction instr, MachineBlock block){
+
+    }
+
+    public void parseZextInstr(ZextInstruction instr, MachineBlock block){
+
+    }
+
+    public void parseCondInstr(CondInstruction instr, MachineBlock block){
+
+    }
     
     public MachineOperand parseOperand(ValueRef operand) {
         if (!operandMap.containsKey(operand.getText())) {
             if (operand instanceof ConstIntValueRef) {
                 int integer = Integer.parseInt(operand.getText());
                 MachineOperand intOp = new MachineOperand(integer);
+                intOp.setIdentity(operand.getText());
                 operandMap.put(operand.getText(), intOp);
                 return intOp;
             } else if (operand instanceof BaseRegister) {
                 operandMap.put(operand.getText(), (MachineOperand) operand);
-                return (MachineOperand) operand;
+                MachineOperand machineOperand = (MachineOperand) operand;
+                machineOperand.setIdentity(operand.getText());
+                return machineOperand;
             }
+            // todo: globalRegister
         } else {
-            return operandMap.get(operand.getText());
+            MachineOperand op = operandMap.get(operand.getText());
+            op.setIsDef(true);
+            return op;
         }
         return null;
     }
+
+    public void setDefUse(MachineOperand operand, MachineCode code){
+        if(operand.getIsDef()){
+            operand.addUse(code);
+        }else{
+            operand.setDef(code);
+        }
+    }
+
+    public void PrintCodeToFile(String dest) {
+        StringBuilder builder = new StringBuilder();
+        for(FunctionBlock function: module.getFunctionBlocks()){
+            for(BaseBlock block: function.getBaseBlocks()){
+                MachineBlock machineBlock = blockMap.get(block);
+                for(MachineCode code: machineBlock.getMachineCodes()){
+                    builder.append(code.toString());
+                    builder.append("\n");
+                }
+            }
+        }
+        try{
+            BufferedWriter out = new BufferedWriter(new FileWriter(dest));
+            out.write(builder.toString());
+            out.close();
+        }catch (IOException e){
+            System.err.println("failed to print machine code.");
+        }
+    }
+
+
 }

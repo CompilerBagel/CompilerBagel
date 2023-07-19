@@ -20,6 +20,7 @@ public class MachineBlock {
     public MachineBlock(String blockName, MachineFunction blockFunc) {
         this.blockName = blockName;
         this.blockFunc = blockFunc;
+        machineCodes = new ArrayList<>();
     }
     
     public MachineBlock getTrueSucc() {

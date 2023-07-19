@@ -100,5 +100,9 @@ public class PhysicsReg extends Reg {
         }
     }
 
+    public String toString(){
+        return regName;
+    }
+
 
 }
