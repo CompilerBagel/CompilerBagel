@@ -38,7 +38,11 @@ public class IRBuilder {
 
     public static void IRBuildRet(IRBuilder builder, ValueRef valueRef) {
         builder.currentBaseBlock.appendInstr(new RetInstruction(generateList(valueRef), builder.currentBaseBlock));
-        builder.emit(RET + " " + valueRef.getTypeText() + " " + valueRef.getText());
+        if(valueRef == null){
+            builder.emit(RET + " " + "void");
+        }else {
+            builder.emit(RET + " " + valueRef.getTypeText() + " " + valueRef.getText());
+        }
     }
 
     // TODO: Add concrete functions that generates IR.You need to call builder.emit()
@@ -54,7 +58,7 @@ public class IRBuilder {
                     return new ConstIntValueRef(lhs - rhs);
                 case MUL:
                     return new ConstIntValueRef(lhs * rhs);
-                case DIV:
+                case SDIV:
                     return new ConstIntValueRef(lhs / rhs);
                 default:
                     System.err.println("IRBuildCalc wrong!");
@@ -69,7 +73,7 @@ public class IRBuilder {
                     return new ConstFloatValueRef(lhs - rhs);
                 case MUL:
                     return new ConstFloatValueRef(lhs * rhs);
-                case DIV:
+                case SDIV:
                     return new ConstFloatValueRef(lhs / rhs);
                 default:
                     System.err.println("IRBuildCalc wrong!");
@@ -107,12 +111,15 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildZExt(IRBuilder builder, ValueRef valueRef, Type type, String name) {
+        if(valueRef.getType() == type){
+            return valueRef;
+        }
         if (valueRef instanceof ConstIntValueRef) {
             return new ConstIntValueRef(Integer.valueOf(valueRef.getText()));
         }
         ValueRef resRegister = new BaseRegister(name, type);
         builder.appendInstr(new ZextInstruction(generateList(resRegister, valueRef, new ConstIntValueRef(0, type)), builder.currentBaseBlock));
-        builder.emit(resRegister.getText() + " = " + ZEXT + " " + int1Type.getText() + " " + valueRef.getText() + " to " + type.getText());
+        builder.emit(resRegister.getText() + " = " + ZEXT + " " + valueRef.getTypeText() + " " + valueRef.getText() + " to " + type.getText());
         return resRegister;
     }
 
@@ -139,11 +146,9 @@ public class IRBuilder {
         ValueRef resRegister;
         PointerType pointerType = null;
         if (valueRef.getType() == int32Type && ((PointerType) pointer.getType()).getBaseType() == floatType) {
-            System.err.println("SiToFp");
             valueRef = typeTrans(builder, valueRef, SiToFp);
             pointerType = new PointerType(valueRef.getType());
         } else if (valueRef.getType() == floatType && ((PointerType) pointer.getType()).getBaseType() == int32Type) {
-            System.err.println("FpToSi");
             valueRef = typeTrans(builder, valueRef, FpToSi);
             pointerType = new PointerType(valueRef.getType());
         } else {
@@ -202,27 +207,40 @@ public class IRBuilder {
         //todo: array type
         Type baseType = new PointerType(type);
         ValueRef resRegister = new GlobalRegister(globalVarName, baseType);
-        module.addGlobalSymbol(resRegister);
+        Symbol globalSym = new Symbol(globalVarName, type);
+        module.addGlobalSymbol(globalVarName, globalSym);
         module.emitWithoutLF(resRegister.getText() + " = " + GLOBAL + " " + ((PointerType) resRegister.getType()).getBaseType().getText() + " ");
         return resRegister;
     }
 
-    public static void IRSetInitializer(IRModule module, ValueRef GlobalVar, ValueRef ConstRef) {
-        // todo: addInit
-
-        module.emit(ConstRef.getText());
+    public static ValueRef IRAddLocal(IRModule module, Type type, String localVarName){
+        Type baseType = new PointerType(type);
+        ValueRef resRegister = new GlobalRegister(localVarName, baseType);
+        //symbol
+        module.emitWithoutLF(resRegister.getText() + " = " + LOCAL + " " + ((PointerType) resRegister.getType()).getBaseType().getText() + " ");
+        return resRegister;
     }
+
+    public static void IRSetInitializer(IRModule module, ValueRef globalVar, ValueRef constRef, String globalName) {
+        int initValue = Integer.valueOf(constRef.getText());
+        module.getGlobalSymbol(globalName).setInitValue(initValue);
+        module.emit(constRef.getText());
+    }
+
+
 
     public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList) {
         boolean flag = true;
+//        List<Float> initValue = new ArrayList<>();
         for (int i = 0; i < constValueRefList.size(); i++) {
             if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
                 flag = false;
-                break;
+//                initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
+//                break;
             }
         }
         if (flag) {
-            module.emit("zeroInitializer");
+            module.emit("zeroinitializer");
             return;
         }
         Type elementType = ((PointerType) valueRef.getType()).getBaseType();
@@ -244,27 +262,58 @@ public class IRBuilder {
         elementType = new ArrayType(elementType, lastLength);
         int temp = constValueRefList.size() / lastLength;
         int counter = 0;
+        int counter1 = 0;
+        for(int i = 0;i<paramList.size()-1;i++){
+            emitStr.append("[");
+        }
         for (int i = 0; i < temp; i++) {
-            emitStr.append(elementType.getText() + " [");
-            for (int j = 0; j < lastLength; j++) {
-                if (j == lastLength - 1) {
-                    emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText());
+            if(paramList.size()!=1){
+                emitStr.append(elementType.getText());
+            }
+
+            boolean flg = true;
+            for(int j = 0; j < lastLength; j++){
+                if(!constValueRefList.get(counter1++).getText().equals("0")){
+                    flg = false;
                     break;
                 }
-                emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText() + ", ");
             }
-            emitStr.append("], ");
+            if (flg){
+                emitStr.append(" zeroinitializer,");
+                counter =counter1;
+            }else {
+                emitStr.append(" [");
+                for (int j = 0; j < lastLength; j++) {
+
+
+                    if (j == lastLength - 1) {
+                        emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText());
+                        break;
+                    }
+                    emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText() + ", ");
+                }
+                counter1 = counter;
+                if(i==temp-1){
+                    emitStr.append("]");
+                }else{
+                    emitStr.append("], ");
+                }
+
+            }
+        }
+        for(int i = 0;i<paramList.size()-1;i++){
+            emitStr.append("]");
         }
         module.emit(emitStr.toString());
     }
 
     public static void IRBuildBr(IRBuilder builder, BaseBlock block) {
-        builder.appendInstr(new BrInstruction(generateList((ValueRef) block), builder.currentBaseBlock));
+        builder.appendInstr(new BrInstruction(generateList(block), builder.currentBaseBlock));
         builder.emit(BR + " label %" + block.getLabel());
     }
 
     public static void IRBuildCondBr(IRBuilder builder, ValueRef condition, BaseBlock ifTrue, BaseBlock ifFalse) {
-        builder.appendInstr(new BrInstruction(generateList(condition, (ValueRef) ifTrue, (ValueRef) ifFalse), builder.currentBaseBlock));
+        builder.appendInstr(new BrInstruction(generateList(condition, ifTrue, ifFalse), builder.currentBaseBlock));
         builder.emit(BR + " " + condition.getTypeText() + " " + condition.getText() + ", " +
                 "label %" + ifTrue.getLabel() + ", label %" + ifFalse.getLabel());
     }
@@ -276,6 +325,21 @@ public class IRBuilder {
                 + lhs.getTypeText() + " " + lhs.getText() + ", " + rhs.getText());
         return resRegister;
     }
+
+    public static ValueRef IRBuildAnd(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text){
+        ValueRef resRegister = new BaseRegister(text, lhs.getType());
+        builder.emit(resRegister.getText() + " = " + AND + " " + lhs.getTypeText()+ " " + lhs.getText() + ", " + rhs.getText());
+        return resRegister;
+
+    }
+
+    public static ValueRef IRBuildOr(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text){
+        ValueRef resRegister = new BaseRegister(text, lhs.getType());
+        builder.emit(resRegister.getText() + " = " + OR + " " + lhs.getTypeText() + " " + lhs.getText() + ", " + rhs.getText());
+        return resRegister;
+
+    }
+
 
     public static ValueRef IRBuildGEP(IRBuilder builder, ValueRef valueRef, List<ValueRef> indexs, int indexSize, String varName) {
         Type baseType = ((PointerType) valueRef.getType()).getBaseType();
@@ -331,7 +395,9 @@ public class IRBuilder {
         builder.emit(stringBuilder.toString());
         return resRegister;
     }
-
+//    public static ValueRef IRBuildPhi(IRBuilder builder, Type type , String Name){
+//
+//    }
     public static ValueRef IRGetParam(FunctionBlock function, int i) {
         return function.getParam(i);
     }

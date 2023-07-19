@@ -34,7 +34,7 @@ public class MCBinaryInteger extends MachineCode {
             case IRConstants.MUL:  // mul rd, rs1, rs2
                 sb.append("mul ");
                 break;
-            case IRConstants.DIV:  // div rd, rs1, rs2
+            case IRConstants.SDIV:  // div rd, rs1, rs2
                 sb.append("div ");
                 break;
         }

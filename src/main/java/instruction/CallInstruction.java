@@ -36,6 +36,7 @@ public class CallInstruction extends Instruction{
         }else{
             isVoid = false;
         }
+        params = new ArrayList<ValueRef>();
         for(int i = 2; i < operands.size();i++) {
             params.add(operands.get(i));
         }

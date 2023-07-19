@@ -9,17 +9,22 @@ public final class IRConstants {
     public static final String ADD = "add";
     public static final String SUB = "sub";
     public static final String MUL = "mul";
-    public static final String DIV = "div";
+    public static final String SDIV = "sdiv";
     public static final String SREM = "srem";
     public static final String XOR = "xor";
     public static final String ZEXT = "zext";
     public static final String ALLOCA = "alloca";
     public static final String STORE = "store";
     public static final String GLOBAL = "global";
+    public static final String LOCAL = "private unnamed_addr constant";
+
     public static final String BR = "br";
     public static final String ICMP = "icmp";
     public static final String GETPTR = "getelementptr";
     public static final String CALL = "call";
+
+    public static final String AND = "and";
+    public static final String OR = "or";
 
     // for consistency with the LLVM API, there is no need to enumerate classes
     public static final int IRIntEQ = 0;
@@ -34,7 +39,7 @@ public final class IRConstants {
     public static final int IRIntSLE = 9;
 
     public static final String[] ICMPCodes = {
-            "eq", "ne", "ugt", "uge", "ult", "ule", "sgt", "sge", "slt", "sle", "and", "or"
+            "eq", "ne", "ugt", "uge", "ult", "ule", "sgt", "sge", "slt", "sle"
     };
 
     // type transition

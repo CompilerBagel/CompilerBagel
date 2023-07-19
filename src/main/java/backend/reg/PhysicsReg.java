@@ -9,10 +9,12 @@ public class PhysicsReg extends Reg {
     public PhysicsReg(final operandType t) {
         super(t);
     }
-    
+    public static int regNum = 32;
     private final static HashMap<String, Integer> nameMap = new HashMap<>();
     private final static HashMap<Integer, String> indexMap = new HashMap<>();
-    
+    private static final PhysicsReg[] physicsRegs = new PhysicsReg[32];
+    private static final boolean[] isAvailable = new boolean[32];
+
     static {
         nameMap.put("zero", 0);
         nameMap.put("ra", 1);
@@ -52,6 +54,11 @@ public class PhysicsReg extends Reg {
             int index = entry.getValue();
             indexMap.put(index, name);
         }
+
+        for (int i = 0; i < regNum; i++) {
+            isAvailable[i] = true;
+        }
+
     }
     
     public PhysicsReg(int index) {
@@ -65,4 +72,54 @@ public class PhysicsReg extends Reg {
         this.index = nameMap.get(regName);
         this.regName = regName;
     }
+
+    public static PhysicsReg getPhysicReg(int index) {
+        if (physicsRegs[index] == null) {
+            physicsRegs[index] = new PhysicsReg(index);
+        }
+        return physicsRegs[index];
+    }
+
+    public static void setAvailable(int index, boolean available) {
+        isAvailable[index] = available;
+    }
+
+    public static PhysicsReg getAvailableReg() {
+        for (int i = 0; i < regNum; i++) {
+            if (isAvailable[i]) {
+                isAvailable[i] = false;
+                return getPhysicReg(i);
+            }
+        }
+        return null;
+    }
+
+    public static void resetAvailableRegs() {
+        for (int i = 0; i < regNum; i++) {
+            isAvailable[i] = true;
+        }
+    }
+
+    public static PhysicsReg getPhysicsReg(int index) {
+        isAvailable[index] = false;
+        return physicsRegs[index];
+    }
+
+    public static void giveBackReg(int index) {
+        isAvailable[index] = true;
+    }
+
+    public static void giveBackRegA() {
+        for (int i = 10; i <= 17; i++) {
+            isAvailable[i] = true;
+        }
+    }
+    public static boolean isAvailableReg(int index) {
+        return isAvailable[index];
+    }
+
+    public void giveBack() {
+        isAvailable[index] = true;
+    }
+
 }
