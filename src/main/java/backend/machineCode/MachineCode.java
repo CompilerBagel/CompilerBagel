@@ -61,4 +61,8 @@ public abstract class MachineCode {
     
     // register allocation
     public abstract ArrayList<MachineOperand> allocatePhyRegs();
+
+    public String toString() {
+        return null;
+    }
 }
