@@ -38,7 +38,11 @@ public class IRBuilder {
 
     public static void IRBuildRet(IRBuilder builder, ValueRef valueRef) {
         builder.currentBaseBlock.appendInstr(new RetInstruction(generateList(valueRef), builder.currentBaseBlock));
-        builder.emit(RET + " " + valueRef.getTypeText() + " " + valueRef.getText());
+        if(valueRef == null){
+            builder.emit(RET + " " + "void");
+        }else {
+            builder.emit(RET + " " + valueRef.getTypeText() + " " + valueRef.getText());
+        }
     }
 
     // TODO: Add concrete functions that generates IR.You need to call builder.emit()

@@ -168,6 +168,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         ValueRef ret = super.visitFuncDef(ctx);
         currentScope = currentScope.getEnclosingScope();
+
+        if (returnType.equals(voidType)) {
+            IRBuildRet(builder, null);
+        } else {
+            IRBuildRet(builder, intZero);
+        }
+
         return ret;
     }
 
@@ -554,6 +561,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 indexes.add(intZero);
                 indexes.add(intZero);
                 lValPointer = IRBuildGEP(builder, lValPointer, indexes, indexes.size(), lValName);
+                return lValPointer;
             }
             for (SysYParser.ExpContext expContext : ctx.exp()) {
                 List<ValueRef> indexes = new ArrayList<>();
