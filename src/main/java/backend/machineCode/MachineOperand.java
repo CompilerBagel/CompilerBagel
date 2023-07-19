@@ -50,10 +50,17 @@ public class MachineOperand {
         isDef = true;
     }
     public void addUse(MachineCode use) { this.useList.add(use); }
+
+    public void removeUse(MachineCode use) {this.useList.remove(use);}
     public void replaceDef(MachineCode oldDef, MachineCode newDef) {
         assert(def == oldDef);
         def = newDef;
     }
+
+    public boolean noUser() {
+        return useList.size() == 0;
+    }
+
     public void replaceUse(MachineCode oldUse, MachineCode newUse) {
         for (int i = 0; i < useList.size(); i++) {
             // find the oldUse in useList

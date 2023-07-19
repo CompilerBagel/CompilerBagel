@@ -27,6 +27,7 @@ funcEntry1:
   store i32 %sub_15, i32* %p12, align 4
   %p17 = load i32, i32* %p12, align 4
   ret i32 %p17
+  ret i32 0
 }
 define i32 @main() {
 mainEntry2:
@@ -38,4 +39,5 @@ mainEntry2:
   store i32 %func22, i32* %b18, align 4
   %b24 = load i32, i32* %b18, align 4
   ret i32 %b24
+  ret i32 0
 }
