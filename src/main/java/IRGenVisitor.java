@@ -261,6 +261,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if (currentScope instanceof GlobalScope) {
                 variable = IRAddGlobal(module, type, variableName);
                 if (paramCount.size() == 0) {
+
                     if (varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
                     IRSetInitializer(module, variable, assign, variableName);
                 } else {
@@ -290,6 +291,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 //                        ValueRef initVariable = IRAddLocal(module , type , "__const.main."+variable.getText().substring(1));
 //                        IRSetInitializer(module, initVariable, init);
 //                    }else{
+
                         List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
                         for(int i = 0;i<init.size();i++){
 
