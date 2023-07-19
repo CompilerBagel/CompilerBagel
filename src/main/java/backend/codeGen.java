@@ -130,6 +130,14 @@ public class codeGen {
             }
         }
     }
+
+    public void parseAllocaInstr(AllocaInstruction instr, MachineBlock block){
+
+    }
+
+    public void parseBrInstr(BrInstruction instr, MachineBlock block){
+
+    }
     
     public void parseCalculateInstr(CalculateInstruction instr, MachineBlock block) {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
@@ -174,11 +182,22 @@ public class codeGen {
                     code = new MCBinaryInteger(dest, src, imm, SUBIW);
                     break;
                 case IRConstants.MUL:
-                    //todo: add li, mulw的参数都是寄存器
-                    code = new MCBinaryInteger(dest, src, imm, MULW);
+                    // add register to store the imm(mul operand can only be register)
+                    BaseRegister mulReg = new BaseRegister("li", int32Type);
+                    MachineOperand mulRegOp = parseOperand(mulReg);
+                    MCLi mulLi = new MCLi(mulRegOp, imm);
+                    block.getMachineCodes().add(mulLi);
+                    mulRegOp.setDef(mulLi);
+                    imm.addUse(mulLi);
+                    code = new MCBinaryInteger(dest, src, mulRegOp, MULW);
                     break;
                 case IRConstants.SDIV:
-                    //todo: add li
+                    BaseRegister divReg = new BaseRegister("li", int32Type);
+                    MachineOperand divRegOp = parseOperand(divReg);
+                    MCLi divLi = new MCLi(divRegOp, imm);
+                    block.getMachineCodes().add(divLi);
+                    divRegOp.setDef(divLi);
+                    imm.addUse(divLi);
                     code = new MCBinaryInteger(dest, src, imm, DIVW);
                     break;
                 default:
@@ -216,17 +235,6 @@ public class codeGen {
         }
     }
     
-    public void parseReturnInstr(RetInstruction instr, MachineBlock block) {
-        List<ValueRef> rets = instr.getOperands();
-        if (rets.size() != 0) {
-            MachineOperand src = parseOperand(rets.get(0));
-            MCMove move = new MCMove(src, new PhysicsReg("a0"));
-            block.getMachineCodes().add(move);
-        }
-        MCReturn ret = new MCReturn();
-        block.getMachineCodes().add(ret);
-    }
-    
     public void parseCallInstr(CallInstruction instr, MachineBlock block) {
         BaseRegister dest = (BaseRegister) instr.getOperands().get(0);
         List<ValueRef> params = instr.getParams();
@@ -244,22 +252,55 @@ public class codeGen {
         block.getMachineCodes().add(call);
     }
 
-    public void parseAllocaInstr(AllocaInstruction instr, MachineBlock block){
+    public void parseCondInstr(CondInstruction instr, MachineBlock block){
 
     }
 
-    public void parseBrInstr(BrInstruction instr, MachineBlock block){
+    public void parseGetElemPtrInstr(GetElemPtrInstruction instr, MachineBlock block) {
 
+    }
+
+    public void parseLoadInstr(LoadInstruction instr, MachineBlock block) {
+        MachineOperand dest = parseOperand(instr.getOperands().get(0));
+        MachineOperand src = parseOperand(instr.getOperands().get(1));
+        //todo: calculate offset
+        MCLoad load = new MCLoad(dest, src);
+        block.getMachineCodes().add(load);
+        setDefUse(dest, load);
+        setDefUse(src, load);
+    }
+
+    public void parsePhiInstr(PhiInstruction instr, MachineBlock block){
+
+    }
+
+    public void parseReturnInstr(RetInstruction instr, MachineBlock block) {
+        List<ValueRef> rets = instr.getOperands();
+        if (rets.size() != 0) {
+            MachineOperand src = parseOperand(rets.get(0));
+            MCMove move = new MCMove(src, new PhysicsReg("a0"));
+            block.getMachineCodes().add(move);
+        }
+        MCReturn ret = new MCReturn();
+        block.getMachineCodes().add(ret);
+    }
+
+    public void parseStoreInstr(StoreInstruction instr, MachineBlock block) {
+        MachineOperand src = parseOperand(instr.getOperands().get(1));
+        MachineOperand dest = parseOperand(instr.getOperands().get(2));
+        //todo: calculate offset
+        //MachineOperand offest = new MachineOperand(0);
+        MCStore store = new MCStore(src, dest);
+        block.getMachineCodes().add(store);
+        setDefUse(src, store);
+        setDefUse(dest, store);
     }
 
     public void parseZextInstr(ZextInstruction instr, MachineBlock block){
 
     }
 
-    public void parseCondInstr(CondInstruction instr, MachineBlock block){
 
-    }
-    
     public MachineOperand parseOperand(ValueRef operand) {
         if (!operandMap.containsKey(operand.getText())) {
             if (operand instanceof ConstIntValueRef) {
@@ -277,7 +318,6 @@ public class codeGen {
             // todo: globalRegister
         } else {
             MachineOperand op = operandMap.get(operand.getText());
-            op.setIsDef(true);
             return op;
         }
         return null;

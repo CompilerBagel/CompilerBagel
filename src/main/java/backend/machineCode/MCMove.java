@@ -43,16 +43,5 @@ public class MCMove extends MachineCode {
             this.dest = newOperand;
         }
     }
-    
-    @Override
-    public ArrayList<MachineOperand> allocatePhyRegs() {
-        ArrayList<MachineOperand> phyRegs = new ArrayList<>();
-/*        if (this.src.isPhysicsReg()) {
-            phyRegs.add(this.src);
-        }
-        if (this.dest.isPhysicsReg()) {
-            phyRegs.add(this.dest);
-        }*/
-        return phyRegs;
-    }
+
 }

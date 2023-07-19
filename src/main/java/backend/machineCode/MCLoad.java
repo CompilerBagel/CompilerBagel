@@ -54,19 +54,6 @@ public class MCLoad extends MachineCode {
             this.offset = newOperand;
         }
     }
-    
-    @Override
-    public ArrayList<MachineOperand> allocatePhyRegs() {
-        ArrayList<MachineOperand> phyRegs = new ArrayList<>();
-        if (this.src.isPhysicsReg()) {
-            phyRegs.add(this.src);
-        }
-        if (this.dest.isPhysicsReg()) {
-            phyRegs.add(this.dest);
-        }
-        if (this.offset.isPhysicsReg()) {
-            phyRegs.add(this.offset);
-        }
-        return phyRegs;
-    }
+
+
 }

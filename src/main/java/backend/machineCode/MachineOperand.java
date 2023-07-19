@@ -45,12 +45,22 @@ public class MachineOperand {
         this.t = operandType.virtualReg;
     }
 
-    public void setDef(MachineCode def) { this.def = def; }
+    public void setDef(MachineCode def) {
+        this.def = def;
+        isDef = true;
+    }
     public void addUse(MachineCode use) { this.useList.add(use); }
+
+    public void removeUse(MachineCode use) {this.useList.remove(use);}
     public void replaceDef(MachineCode oldDef, MachineCode newDef) {
         assert(def == oldDef);
         def = newDef;
     }
+
+    public boolean noUser() {
+        return useList.size() == 0;
+    }
+
     public void replaceUse(MachineCode oldUse, MachineCode newUse) {
         for (int i = 0; i < useList.size(); i++) {
             // find the oldUse in useList
@@ -62,7 +72,6 @@ public class MachineOperand {
         assert(false);
     }
     public boolean getIsDef() { return isDef; }
-    public void setIsDef(boolean isDef) { this.isDef = isDef; }
     
     // register allocation
     private double weight = 0.0;

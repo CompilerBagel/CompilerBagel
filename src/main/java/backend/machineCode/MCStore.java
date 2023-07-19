@@ -6,6 +6,11 @@ public class MCStore extends MachineCode {
     private MachineOperand src;
     private MachineOperand offset = new MachineOperand(0);
     private MachineOperand dest;
+
+    public MCStore(MachineOperand src, MachineOperand dest) {
+        this.src = src;
+        this.dest = dest;
+    }
     
     public MCStore(MachineOperand src, MachineOperand dest, MachineOperand offset) {
         this.src = src;
@@ -55,20 +60,5 @@ public class MCStore extends MachineCode {
         if (oldOperand.equals(this.src)) {
             this.src = newOperand;
         }
-    }
-    
-    @Override
-    public ArrayList<MachineOperand> allocatePhyRegs() {
-        ArrayList<MachineOperand> phyRegs = new ArrayList<>();
-/*        if (this.src.isPhysicsReg()) {
-            phyRegs.add(this.src);
-        }
-        if (this.dest.isPhysicsReg()) {
-            phyRegs.add(this.dest);
-        }
-        if (this.offset.isPhysicsReg()) {
-            phyRegs.add(this.offset);
-        }*/
-        return phyRegs;
     }
 }
