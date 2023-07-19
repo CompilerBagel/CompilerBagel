@@ -58,9 +58,7 @@ public abstract class MachineCode {
     // optimization for operand
     public abstract void replaceDef(MachineOperand oldOperand, MachineOperand newOperand);
     public abstract void replaceUse(MachineOperand oldOperand, MachineOperand newOperand);
-    
-    // register allocation
-    public abstract ArrayList<MachineOperand> allocatePhyRegs();
+
 
     public String toString() {
         return null;

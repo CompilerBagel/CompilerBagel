@@ -122,4 +122,8 @@ public class PhysicsReg extends Reg {
         isAvailable[index] = true;
     }
 
+    public String toString() {
+        return regName;
+    }
+
 }
