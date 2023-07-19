@@ -168,6 +168,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         ValueRef ret = super.visitFuncDef(ctx);
         currentScope = currentScope.getEnclosingScope();
+
+        if (returnType.equals(voidType)) {
+            IRBuildRet(builder, null);
+        } else {
+            IRBuildRet(builder, intZero);
+        }
+
         return ret;
     }
 
@@ -531,9 +538,31 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
             lValPointer = IRBuildGEP(builder, lValPointer, indexes, indexes.size(), lValName);
         }*/
-        if (ctx.exp().size() == 0) {
+
+//        if(lvalType.getText().equals(new PointerType(int32Type).getText())){
+//            lValPointer = IRBuildLoad(builder,lValPointer,lValName);
+//        }
+        if(lvalType == int32Type || lvalType == floatType){
             return lValPointer;
-        } else {
+        }
+        if(lvalType.getText().equals(new PointerType(int32Type).getText())){
+            if(ctx.exp().isEmpty()){
+                return lValPointer;
+            }else{
+                List<ValueRef> indexes = new ArrayList<>();
+                ValueRef index = ctx.exp(0).accept(this);
+                indexes.add(index);
+                ValueRef pointer = IRBuildLoad(builder,lValPointer,lValName);
+                lValPointer = IRBuildGEP(builder, pointer, indexes, indexes.size(), lValName);
+            }
+        }else {
+            if(ctx.exp().size()==0){
+                List<ValueRef> indexes = new ArrayList<>();
+                indexes.add(intZero);
+                indexes.add(intZero);
+                lValPointer = IRBuildGEP(builder, lValPointer, indexes, indexes.size(), lValName);
+                return lValPointer;
+            }
             for (SysYParser.ExpContext expContext : ctx.exp()) {
                 List<ValueRef> indexes = new ArrayList<>();
                 if (lvalType instanceof ArrayType) {

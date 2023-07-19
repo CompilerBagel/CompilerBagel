@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public class MachineFunction {
+
     // TODO: data structure to be discussed
     private LinkedList<MachineBlock> machineBlocks;
     private String funcName;
@@ -30,4 +31,8 @@ public class MachineFunction {
     private int frameSize; // 栈帧大小
     
     public void moveFrame(int size) { frameSize += size; }
+
+    public LinkedList<MachineBlock> getMachineBlocks() {
+        return machineBlocks;
+    }
 }
