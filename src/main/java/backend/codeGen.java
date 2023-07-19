@@ -101,6 +101,7 @@ public class codeGen {
         }
         
         for (FunctionBlock func: functionBlocks) {
+            varAnalyse(funcMap.get(func));
             List<BaseBlock> funcBlocks = func.getBaseBlocks();
             for (BaseBlock block: funcBlocks) {
                 MachineBlock machineBlock = new MachineBlock(block.getLabel(), funcMap.get(func));
@@ -108,10 +109,13 @@ public class codeGen {
                 blocks.add(machineBlock);
                 parseBlock(block, machineBlock);
             }
-            // TODO: arg relation
             // TODO: block succ
             serializeBlocks(blocks);
         }
+    }
+
+    public void varAnalyse(MachineFunction func) {
+        // stack analyse
     }
     
     public void parseBlock(BaseBlock block, MachineBlock machineBlock) {
@@ -226,9 +230,6 @@ public class codeGen {
     public void parseCallInstr(CallInstruction instr, MachineBlock block) {
         BaseRegister dest = (BaseRegister) instr.getOperands().get(0);
         List<ValueRef> params = instr.getParams();
-        if (dest.getIsDef()) { // always true?
-            dest.setIsDef(true);
-        }
         List<MachineOperand> operands = new ArrayList<>();
         for (ValueRef param: params) {
             BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
@@ -239,10 +240,18 @@ public class codeGen {
                 src = new MachineOperand(Integer.parseInt(param.getText()));
             }
             MCLoad load = new MCLoad(src, vReg, new MachineOperand(0));
+            if (vReg.getIsDef()) {
+                vReg.addUse(load);
+            }
             block.getMachineCodes().add(load);
             operands.add(vReg);
         }
         MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
+        if (!dest.getIsDef()) {
+            dest.setDef(call);
+        } else {
+            dest.addUse(call);
+        }
         block.getMachineCodes().add(call);
     }
 
