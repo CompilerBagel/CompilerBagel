@@ -80,11 +80,11 @@ public class PhysicsReg extends Reg {
         return physicsRegs[index];
     }
 
-    public void setAvailable(int index, boolean available) {
+    public static void setAvailable(int index, boolean available) {
         isAvailable[index] = available;
     }
 
-    public PhysicsReg getAvailableReg() {
+    public static PhysicsReg getAvailableReg() {
         for (int i = 0; i < regNum; i++) {
             if (isAvailable[i]) {
                 isAvailable[i] = false;
@@ -94,22 +94,27 @@ public class PhysicsReg extends Reg {
         return null;
     }
 
-    public void resetAvailableRegs() {
+    public static void resetAvailableRegs() {
         for (int i = 0; i < regNum; i++) {
             isAvailable[i] = true;
         }
     }
 
-    public PhysicsReg getPhysicsReg(int index) {
+    public static PhysicsReg getPhysicsReg(int index) {
         isAvailable[index] = false;
         return physicsRegs[index];
     }
 
-    public void giveBackReg(int index) {
+    public static void giveBackReg(int index) {
         isAvailable[index] = true;
     }
 
-    public boolean isAvailableReg(int index) {
+    public static void giveBackRegA() {
+        for (int i = 10; i <= 17; i++) {
+            isAvailable[i] = true;
+        }
+    }
+    public static boolean isAvailableReg(int index) {
         return isAvailable[index];
     }
 
