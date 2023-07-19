@@ -53,20 +53,6 @@ public class MCBinaryInteger extends MachineCode {
             right = newOperand;
         }
     }
-    
-    @Override
-    public ArrayList<MachineOperand> allocatePhyRegs() {
-        ArrayList<MachineOperand> phyRegs = new ArrayList<>();
-/*        if (dest.isPhysicsReg()) {
-            phyRegs.add(dest);
-        }
-        if (left.isPhysicsReg()) {
-            phyRegs.add(left);
-        }
-        if (right.isPhysicsReg()) {
-            phyRegs.add(right);
-        }*/
-        return phyRegs;
-    }
+
 
 }
