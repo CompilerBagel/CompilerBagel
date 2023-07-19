@@ -118,5 +118,8 @@ public class PhysicsReg extends Reg {
         return isAvailable[index];
     }
 
+    public void giveBack() {
+        isAvailable[index] = true;
+    }
 
 }

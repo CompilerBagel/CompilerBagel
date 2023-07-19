@@ -35,11 +35,29 @@ public class RegisterAllocate {
 
     private void funcEasyAllocate(MachineFunction function) {
         LinkedList<MachineBlock> blocks = function.getMachineBlocks();
-
+        // giveBack a0~a7
         for (MachineBlock block : blocks) {
             List<MachineCode> codes = block.getMachineCodes();
             for (MachineCode code : codes) {
-
+                List<MachineOperand> defs = code.getDef();
+                List<MachineOperand> uses = code.getUse();
+                for (MachineOperand def : defs) {
+                    PhysicsReg allocatedReg = getReg(def);
+                    if (allocatedReg != null) {
+                        code.replaceDef(def, allocatedReg);
+                        // def.remove(code);
+//                        if (def.noUser()) {
+//
+//                        }
+                    }
+                }
+                for (MachineOperand use : uses) {
+                    PhysicsReg allocatedReg = getReg(use);
+                    if (allocatedReg != null) {
+                        code.replaceDef(use, allocatedReg);
+                        // use.remove(code);
+                    }
+                }
             }
         }
     }
