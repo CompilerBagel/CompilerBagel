@@ -364,7 +364,6 @@ public class codeGen {
             // todo: globalRegister
         } else {
             MachineOperand op = operandMap.get(operand.getText());
-            op.setIsDef(true);
             return op;
         }
         return null;
