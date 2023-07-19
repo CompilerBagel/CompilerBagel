@@ -10,6 +10,8 @@ public class MCStore extends MachineCode {
     public MCStore(MachineOperand src, MachineOperand dest) {
         this.src = src;
         this.dest = dest;
+        this.offset = new MachineOperand(0);
+        this.offset.setIdentity("0");
     }
     
     public MCStore(MachineOperand src, MachineOperand dest, MachineOperand offset) {
