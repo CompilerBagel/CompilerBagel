@@ -233,25 +233,14 @@ public class codeGen {
         List<MachineOperand> operands = new ArrayList<>();
         for (ValueRef param: params) {
             BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
-            MachineOperand src;
-            if (!(param instanceof ConstIntValueRef) && !(param instanceof ConstFloatValueRef)) {
-                src = new PhysicsReg("s0");
-            } else {
-                src = new MachineOperand(Integer.parseInt(param.getText()));
-            }
+            BaseRegister src = new BaseRegister("li", param.getType());
             MCLoad load = new MCLoad(src, vReg, new MachineOperand(0));
-            if (vReg.getIsDef()) {
-                vReg.addUse(load);
-            }
+            setDefUse(vReg, load);
             block.getMachineCodes().add(load);
             operands.add(vReg);
         }
         MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
-        if (!dest.getIsDef()) {
-            dest.setDef(call);
-        } else {
-            dest.addUse(call);
-        }
+        setDefUse(dest, call);
         block.getMachineCodes().add(call);
     }
 
