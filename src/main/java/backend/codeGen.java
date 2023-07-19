@@ -263,8 +263,8 @@ public class codeGen {
     public void parseLoadInstr(LoadInstruction instr, MachineBlock block) {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
         MachineOperand src = parseOperand(instr.getOperands().get(1));
-        //todo: calculate offset
-        MCLoad load = new MCLoad(dest, src);
+        // TODO: calculate offset (temp 0)
+        MCLoad load = new MCLoad(dest, src, new MachineOperand(0));
         block.getMachineCodes().add(load);
         setDefUse(dest, load);
         setDefUse(src, load);
