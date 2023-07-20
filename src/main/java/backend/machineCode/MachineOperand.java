@@ -32,6 +32,7 @@ public class MachineOperand {
     public MachineOperand(int immValue) {
         this.t = operandType.imm;
         this.immValue = immValue;
+        this.identity = String.valueOf(immValue);
     }
     
     // type recognition

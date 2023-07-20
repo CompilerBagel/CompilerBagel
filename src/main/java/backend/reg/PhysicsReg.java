@@ -24,7 +24,7 @@ public class PhysicsReg extends Reg {
         nameMap.put("t0", 5);
         nameMap.put("t1", 6);
         nameMap.put("t2", 7);
-        nameMap.put("fp", 8);
+        nameMap.put("s0", 8);
         nameMap.put("s1", 9);
         nameMap.put("a0", 10);
         nameMap.put("a1", 11);
@@ -80,8 +80,16 @@ public class PhysicsReg extends Reg {
         return physicsRegs[index];
     }
 
+    public static PhysicsReg getRaReg() {
+        return getPhysicsReg(1);
+    }
+
     public static PhysicsReg getSpReg() {
         return getPhysicsReg(2);
+    }
+
+    public static PhysicsReg getS0Reg() {
+        return getPhysicsReg(8);
     }
 
     public static void setAvailable(int index, boolean available) {
@@ -126,6 +134,7 @@ public class PhysicsReg extends Reg {
         isAvailable[index] = true;
     }
 
+    @Override
     public String toString() {
         return regName;
     }

@@ -6,18 +6,20 @@ public class MCStore extends MachineCode {
     private MachineOperand src;
     private MachineOperand offset = new MachineOperand(0);
     private MachineOperand dest;
+    private String storeOp;
 
-    public MCStore(MachineOperand src, MachineOperand dest) {
+    public MCStore(MachineOperand src, MachineOperand dest, String storeOp) {
         this.src = src;
         this.dest = dest;
+        this.storeOp = storeOp;
         this.offset = new MachineOperand(0);
-        this.offset.setIdentity("0");
     }
     
-    public MCStore(MachineOperand src, MachineOperand dest, MachineOperand offset) {
+    public MCStore(MachineOperand src, MachineOperand dest, MachineOperand offset, String storeOp) {
         this.src = src;
         this.dest = dest;
         this.offset = offset;
+        this.storeOp = storeOp;
     }
     public void setOffset(final MachineOperand offset) {
         this.offset = offset;
@@ -25,7 +27,6 @@ public class MCStore extends MachineCode {
     public void setSrc(MachineOperand src) {
         this.src = src;
     }
-    
     /**
      * Store Word.
      * instruction: sw rs2, offset(rs1)
@@ -34,7 +35,7 @@ public class MCStore extends MachineCode {
      */
     @Override
     public String toString() {
-        return "sw " + src.toString() + ", " + offset.toString() + "(" + dest.toString() + ")";
+        return storeOp + " " + dest.toString() + ", " + offset.toString() + "(" + src.toString() + ")";
     }
     
     @Override

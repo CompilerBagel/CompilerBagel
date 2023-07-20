@@ -1,12 +1,6 @@
 package backend;
 
-import IRBuilder.BaseBlock;
-import IRBuilder.BaseRegister;
-import IRBuilder.ConstIntValueRef;
-import IRBuilder.FunctionBlock;
-import IRBuilder.IRConstants;
-import IRBuilder.IRModule;
-import IRBuilder.ValueRef;
+import IRBuilder.*;
 import Type.Type;
 import backend.machineCode.*;
 import backend.reg.PhysicsReg;
@@ -15,13 +9,7 @@ import instruction.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
@@ -37,6 +25,9 @@ public class codeGen {
     private static final Type int1Type = IRInt1Type();
     private static final Type voidType = IRVoidType();
     private static final PhysicsReg spReg = PhysicsReg.getSpReg();
+    private static final PhysicsReg s0Reg = PhysicsReg.getS0Reg();
+    private static final PhysicsReg raReg = PhysicsReg.getRaReg();
+
     private static IRModule module;
     private List<MachineBlock> blocks = new ArrayList<>();
     private HashMap<FunctionBlock, MachineFunction> funcMap;
@@ -108,6 +99,7 @@ public class codeGen {
         }
         
         for (FunctionBlock func: functionBlocks) {
+            varAnalyse(funcMap.get(func), func);
             List<BaseBlock> funcBlocks = func.getBaseBlocks();
             for (BaseBlock block: funcBlocks) {
                 MachineBlock machineBlock = new MachineBlock(block.getLabel(), funcMap.get(func));
@@ -115,10 +107,40 @@ public class codeGen {
                 blocks.add(machineBlock);
                 parseBlock(block, machineBlock);
             }
-            // TODO: arg relation
             // TODO: block succ
             serializeBlocks(blocks);
         }
+    }
+
+    public void varAnalyse(MachineFunction mfunc, FunctionBlock func) {
+        // stack analyse
+        Map<String, Integer> offestMap = mfunc.getOffsetMap();
+        int stackCount = 0; // 4 byte = 1 count
+        stackCount += 4; // ra 8 + s0 8  = 16 byte = 4 count
+        if (!func.getType().equals(IRVoidType())) {
+            stackCount += 1; // for ret value
+        }
+        offestMap.put("ra", 8);
+        offestMap.put("s0", 16);
+        List<ValueRef> params = func.getParams();
+        for (ValueRef param: params) {
+            if (param.getType().equals(IRInt32Type()) || param.getType().equals(IRFloatType())) {
+                stackCount ++;
+                offestMap.put(param.getText(), stackCount * 4);
+            } else {
+                stackCount += 2;
+                offestMap.put(param.getText(), stackCount * 8);
+            }
+        }
+        int frameSize = stackCount * 4;
+        if (frameSize % 16 != 0) {
+            frameSize = ((frameSize / 16) + 1) * 16;
+            mfunc.setFrameSize(frameSize);
+        }
+        mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new MachineOperand(-frameSize), ADDI));;
+        mfunc.getPreList().add(new MCStore(spReg, raReg, new MachineOperand(frameSize - 8), SD));
+        mfunc.getPreList().add(new MCStore(spReg, s0Reg, new MachineOperand(frameSize - 16), SD));
+        mfunc.getPreList().add(new MCBinaryInteger(s0Reg, spReg, new MachineOperand(frameSize), ADDI));
     }
     
     public void parseBlock(BaseBlock block, MachineBlock machineBlock) {
@@ -267,64 +289,20 @@ public class codeGen {
     }
     
     public void parseCallInstr(CallInstruction instr, MachineBlock block) {
-        List<ValueRef> operands = instr.getOperands();
-        int aRegIndex = 10; // a0-a7 <-> x10-x17
-        int stackCount = 0;
-        List<MachineOperand> uses = new ArrayList<>();
-        for (ValueRef param: instr.getParams()) {
-            Type type = param.getType();
-            if (!(type.equals(IRFloatType()))) {
-                MachineOperand src = parseOperand(param);
-                if (aRegIndex <= 17) {
-                    PhysicsReg reg = new PhysicsReg(aRegIndex);
-                    MCMove move = new MCMove(src, reg);
-                    uses.add(reg);
-                    block.getMachineCodes().add(move);
-                    aRegIndex ++;
-                } else {
-                    MachineOperand offset = new MachineOperand(-(stackCount + 1) * 4);
-                    MCStore store = new MCStore(src, spReg, offset);
-                    if (src.isImm()) { // 如果是立即数，必须先存在虚拟寄存器，然后再压栈
-                        BaseRegister virtualReg = new BaseRegister("tmpImm_" + tmpImmCount, IRInt32Type());
-                        MCMove move = new MCMove(src, virtualReg);
-                        store.setSrc(virtualReg);
-                        block.getMachineCodes().add(move);
-                    }
-                    block.getMachineCodes().add(store);
-                    stackCount ++;
-                }
-            } else {
-                // TODO: call with float arg
-            }
+        BaseRegister dest = (BaseRegister) instr.getOperands().get(0);
+        List<ValueRef> params = instr.getParams();
+        List<MachineOperand> operands = new ArrayList<>();
+        for (ValueRef param: params) {
+            BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
+            BaseRegister src = new BaseRegister("li", param.getType());
+            MCLoad load = new MCLoad(src, vReg, new MachineOperand(0));
+            setDefUse(vReg, load);
+            block.getMachineCodes().add(load);
+            operands.add(vReg);
         }
-        
-        // 压栈后，修改sp值
-        if (aRegIndex > 17) {
-            MachineOperand offset = new MachineOperand(stackCount * 4);
-            MCBinaryInteger sub = new MCBinaryInteger(spReg, spReg, offset, IRConstants.SUB);
-            block.getMachineCodes().add(sub);
-        }
-        
-        MCCall call = new MCCall(funcMap.get((FunctionBlock) operands.get(1)));
+        MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
+        setDefUse(dest, call);
         block.getMachineCodes().add(call);
-        call.getUse().addAll(uses);
-        for (int i = 10; i < 17; i ++) {
-            call.getDef().add(new PhysicsReg(i));
-        }
-        
-        // 调用结束，恢复sp值
-        if (stackCount != 0) {
-            MachineOperand offset = new MachineOperand(stackCount * 4);
-            MCBinaryInteger add = new MCBinaryInteger(spReg, spReg, offset, IRConstants.ADD);
-            block.getMachineCodes().add(add);
-        }
-        
-        // 如果有返回值，需要用mv指令取出
-        if (!instr.isVoid()) {
-            MachineOperand dest = parseOperand(operands.get(0));
-            MCMove move = new MCMove(new PhysicsReg("a0"), dest);
-            block.getMachineCodes().add(move);
-        }
     }
 
     public void parseCondInstr(CondInstruction instr, MachineBlock block){
@@ -338,8 +316,8 @@ public class codeGen {
     public void parseLoadInstr(LoadInstruction instr, MachineBlock block) {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
         MachineOperand src = parseOperand(instr.getOperands().get(1));
-        //todo: calculate offset
-        MCLoad load = new MCLoad(dest, src);
+        // TODO: calculate offset (temp 0)
+        MCLoad load = new MCLoad(dest, src, new MachineOperand(0));
         block.getMachineCodes().add(load);
         setDefUse(dest, load);
         setDefUse(src, load);
@@ -352,10 +330,40 @@ public class codeGen {
     public void parseReturnInstr(RetInstruction instr, MachineBlock block) {
         List<ValueRef> rets = instr.getOperands();
         if (rets.size() != 0) {
-            MachineOperand src = parseOperand(rets.get(0));
-            MCMove move = new MCMove(src, new PhysicsReg("a0"));
-            block.getMachineCodes().add(move);
+            // return not void
+            MachineOperand src = parseOperand(rets.get(0)); // rets.get(0) retValueRef
+            if(src.isImm()){
+                MCLi li = new MCLi(new PhysicsReg("a0"), src); // todo: 如何调用确定的寄存器？
+                block.getMachineCodes().add(li);
+                setDefUse(src, li);
+                setDefUse(new PhysicsReg("a0"), li); // TODO:?
+            }else{
+                MCLoad load = new MCLoad(src, new PhysicsReg("a0"));
+                block.getMachineCodes().add(load);
+                setDefUse(src, load);
+                setDefUse(new PhysicsReg("a0"), load);
+            }
         }
+        // ld
+        MCLoad raLoad = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("ra"),
+                new MachineOperand(block.getBlockFunc().getFrameSize() - 8));
+        block.getMachineCodes().add(raLoad);
+        setDefUse(new PhysicsReg("sp"), raLoad);
+        setDefUse(new PhysicsReg("ra"), raLoad);
+
+        MCLoad s0Load = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("s0"),
+                new MachineOperand(block.getBlockFunc().getFrameSize() - 16));
+        block.getMachineCodes().add(s0Load);
+        setDefUse(new PhysicsReg("sp"), s0Load);
+        setDefUse(new PhysicsReg("s0"), s0Load);
+
+        // addi
+        MCBinaryInteger addi = new MCBinaryInteger(new PhysicsReg("sp"), new PhysicsReg("sp"),
+                new MachineOperand(block.getBlockFunc().getFrameSize()), ADDI);
+        block.getMachineCodes().add(addi);
+        setDefUse(new PhysicsReg("sp"), addi);
+        setDefUse(new PhysicsReg("sp"), addi);
+
         MCReturn ret = new MCReturn();
         block.getMachineCodes().add(ret);
     }
@@ -365,7 +373,7 @@ public class codeGen {
         MachineOperand dest = parseOperand(instr.getOperands().get(2));
         //todo: calculate offset
         //MachineOperand offest = new MachineOperand(0);
-        MCStore store = new MCStore(src, dest);
+        MCStore store = new MCStore(src, dest, SW);
         block.getMachineCodes().add(store);
         setDefUse(src, store);
         setDefUse(dest, store);
@@ -413,10 +421,17 @@ public class codeGen {
     public void PrintCodeToFile(String dest) {
         StringBuilder builder = new StringBuilder();
         for(FunctionBlock function: module.getFunctionBlocks()){
+            builder.append(function.getFunctionName()).append(":").append("\n");
+            for (MachineCode code: funcMap.get(function).getPreList()) {
+                builder.append("    ");
+                builder.append(code.toString());
+                builder.append("\n");
+            }
             for(BaseBlock block: function.getBaseBlocks()){
                 MachineBlock machineBlock = blockMap.get(block);
                 builder.append(machineBlock.getBlockName()).append(":\n");
                 for(MachineCode code: machineBlock.getMachineCodes()){
+                    builder.append("    ");
                     builder.append(code.toString());
                     builder.append("\n");
                 }
@@ -430,6 +445,4 @@ public class codeGen {
             System.err.println("failed to print machine code.");
         }
     }
-
-
 }
