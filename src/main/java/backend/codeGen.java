@@ -115,7 +115,7 @@ public class codeGen {
         Map<String, Integer> offestMap = mfunc.getOffsetMap();
         int stackCount = 0; // 4 byte = 1 count
         stackCount += 4; // ra 8 + s0 8  = 16 byte = 4 count
-        if (!func.getType().equals(IRVoidType())) {
+        if (!func.getRetType().equals(IRVoidType())) {
             stackCount += 1; // for ret value
         }
         offestMap.put("ra", 8);
@@ -299,7 +299,7 @@ public class codeGen {
 
     public void parseReturnInstr(RetInstruction instr, MachineBlock block) {
         List<ValueRef> rets = instr.getOperands();
-        if (rets.size() != 0) {
+        if (rets.get(0) != null) {
             MachineOperand src = parseOperand(rets.get(0));
             MCMove move = new MCMove(src, new PhysicsReg("a0"));
             block.getMachineCodes().add(move);
