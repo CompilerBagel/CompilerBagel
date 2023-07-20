@@ -9,6 +9,13 @@ public class MCLoad extends MachineCode {
 
     public MCLoad(MachineOperand src, MachineOperand dest, MachineOperand offset) {
         this.src = src;
+        this.dest = dest;
+        this.offset = offset;
+    }
+
+    public MCLoad(MachineOperand src, MachineOperand dest){
+        this.src = src;
+        this.dest = dest;
         this.offset = new MachineOperand(0);
         this.offset.setIdentity("0");
     }
