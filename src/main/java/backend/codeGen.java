@@ -17,6 +17,7 @@ import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
 import static backend.machineCode.MachineConstants.*;
+import static instruction.BrInstruction.SINGLE;
 
 public class codeGen {
     private static final Type int32Type = IRInt32Type();
@@ -144,12 +145,32 @@ public class codeGen {
     public void parseBlock(BaseBlock block, MachineBlock machineBlock) {
         List<Instruction> instructions = block.getInstructions();
         for (Instruction instr: instructions) {
-            if (instr instanceof CalculateInstruction) {
+            if(instr instanceof  AllocaInstruction){
+                parseAllocaInstr((AllocaInstruction) instr, machineBlock);
+            }else if(instr instanceof BrInstruction){
+                parseBrInstr((BrInstruction) instr, machineBlock);
+            }else if (instr instanceof CalculateInstruction) {
                 parseCalculateInstr((CalculateInstruction) instr, machineBlock);
-            } else if (instr instanceof RetInstruction) {
-                parseReturnInstr((RetInstruction) instr, machineBlock);
             } else if (instr instanceof CallInstruction) {
                 parseCallInstr((CallInstruction) instr, machineBlock);
+            } else if (instr instanceof CondInstruction){
+                parseCondInstr((CondInstruction)instr, machineBlock);
+            } else if (instr instanceof GetElemPtrInstruction){
+                parseGetElemPtrInstr((GetElemPtrInstruction) instr, machineBlock);
+            } else if (instr instanceof LoadInstruction){
+                parseLoadInstr((LoadInstruction) instr, machineBlock);
+            } else if (instr instanceof PhiInstruction){
+                parsePhiInstr((PhiInstruction) instr, machineBlock);
+            } else if (instr instanceof RetInstruction) {
+                parseReturnInstr((RetInstruction) instr, machineBlock);
+            } else if (instr instanceof StoreInstruction){
+                parseStoreInstr((StoreInstruction) instr, machineBlock);
+            } else if (instr instanceof TypeTransInstruction){
+                parseTypeTransInstr((TypeTransInstruction) instr, machineBlock);
+            } else if (instr instanceof ZextInstruction){
+                parseZextInstr((ZextInstruction) instr, machineBlock);
+            } else {
+                assert(false);
             }
         }
     }
@@ -159,7 +180,15 @@ public class codeGen {
     }
 
     public void parseBrInstr(BrInstruction instr, MachineBlock block){
+        if(instr.getType() == SINGLE){
+            BaseBlock brBlock = (BaseBlock) instr.getOperands().get(0);
+            MachineBlock machineBlock = blockMap.get(brBlock);
+            MCJump jump = new MCJump(machineBlock.getBlockName());
+            block.getMachineCodes().add(jump);
+        }else{
 
+
+        }
     }
     
     public void parseCalculateInstr(CalculateInstruction instr, MachineBlock block) {
@@ -319,6 +348,10 @@ public class codeGen {
         setDefUse(dest, store);
     }
 
+    public void parseTypeTransInstr(TypeTransInstruction instr, MachineBlock block){
+
+    }
+
     public void parseZextInstr(ZextInstruction instr, MachineBlock block){
 
     }
@@ -365,6 +398,7 @@ public class codeGen {
             }
             for(BaseBlock block: function.getBaseBlocks()){
                 MachineBlock machineBlock = blockMap.get(block);
+                builder.append(machineBlock.getBlockName()).append(":\n");
                 for(MachineCode code: machineBlock.getMachineCodes()){
                     builder.append("    ");
                     builder.append(code.toString());
