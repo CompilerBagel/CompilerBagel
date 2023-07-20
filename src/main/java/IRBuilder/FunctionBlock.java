@@ -31,6 +31,9 @@ public class FunctionBlock implements ValueRef{
     public ValueRef getParam(int i) {
         return paramsValueRef.get(i);
     }
+    public List<ValueRef> getParams() {
+        return paramsValueRef;
+    }
 
     public void addBaseBlock(BaseBlock baseBlock) {
         baseBlocks.add(baseBlock);
