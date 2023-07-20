@@ -80,6 +80,10 @@ public class PhysicsReg extends Reg {
         return physicsRegs[index];
     }
 
+    public static PhysicsReg getSpReg() {
+        return getPhysicsReg(2);
+    }
+
     public static void setAvailable(int index, boolean available) {
         isAvailable[index] = available;
     }

@@ -36,7 +36,7 @@ public class codeGen {
     private static final Type floatType = IRFloatType();
     private static final Type int1Type = IRInt1Type();
     private static final Type voidType = IRVoidType();
-    private static final PhysicsReg spReg = new PhysicsReg("sp");
+    private static final PhysicsReg spReg = PhysicsReg.getSpReg();
     private static IRModule module;
     private List<MachineBlock> blocks = new ArrayList<>();
     private HashMap<FunctionBlock, MachineFunction> funcMap;

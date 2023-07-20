@@ -1,3 +1,4 @@
+import backend.RegisterAllocate;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -31,6 +32,8 @@ public class Main {
 
         codeGen code = new codeGen();
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
+        RegisterAllocate allocator = new RegisterAllocate();
+
         code.PrintCodeToFile(mcDest);
     }
 }
