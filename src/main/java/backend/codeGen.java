@@ -9,13 +9,7 @@ import instruction.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static IRBuilder.IRConstants.*;
 import static Type.FloatType.IRFloatType;
@@ -30,6 +24,8 @@ public class codeGen {
     private static final Type int1Type = IRInt1Type();
     private static final Type voidType = IRVoidType();
     private static final PhysicsReg spReg = new PhysicsReg("sp");
+    private static final PhysicsReg s0Reg = new PhysicsReg("s0");
+    private static final PhysicsReg raReg = new PhysicsReg("ra");
     private static IRModule module;
     private List<MachineBlock> blocks = new ArrayList<>();
     private HashMap<FunctionBlock, MachineFunction> funcMap;
@@ -101,7 +97,7 @@ public class codeGen {
         }
         
         for (FunctionBlock func: functionBlocks) {
-            varAnalyse(funcMap.get(func));
+            varAnalyse(funcMap.get(func), func);
             List<BaseBlock> funcBlocks = func.getBaseBlocks();
             for (BaseBlock block: funcBlocks) {
                 MachineBlock machineBlock = new MachineBlock(block.getLabel(), funcMap.get(func));
@@ -114,8 +110,35 @@ public class codeGen {
         }
     }
 
-    public void varAnalyse(MachineFunction func) {
+    public void varAnalyse(MachineFunction mfunc, FunctionBlock func) {
         // stack analyse
+        Map<String, Integer> offestMap = mfunc.getOffsetMap();
+        int stackCount = 0; // 4 byte = 1 count
+        stackCount += 4; // ra 8 + s0 8  = 16 byte = 4 count
+        if (!func.getType().equals(IRVoidType())) {
+            stackCount += 1; // for ret value
+        }
+        offestMap.put("ra", 8);
+        offestMap.put("s0", 16);
+        List<ValueRef> params = func.getParams();
+        for (ValueRef param: params) {
+            if (param.getType().equals(IRInt32Type()) || param.getType().equals(IRFloatType())) {
+                stackCount ++;
+                offestMap.put(param.getText(), stackCount * 4);
+            } else {
+                stackCount += 2;
+                offestMap.put(param.getText(), stackCount * 8);
+            }
+        }
+        int frameSize = stackCount * 4;
+        if (frameSize % 16 != 0) {
+            frameSize = ((frameSize / 16) + 1) * 16;
+            mfunc.setFrameSize(frameSize);
+        }
+        mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new MachineOperand(-frameSize), ADDI));;
+        mfunc.getPreList().add(new MCStore(spReg, raReg, new MachineOperand(frameSize - 8), SD));
+        mfunc.getPreList().add(new MCStore(spReg, s0Reg, new MachineOperand(frameSize - 16), SD));
+        mfunc.getPreList().add(new MCBinaryInteger(s0Reg, spReg, new MachineOperand(frameSize), ADDI));
     }
     
     public void parseBlock(BaseBlock block, MachineBlock machineBlock) {
@@ -290,7 +313,7 @@ public class codeGen {
         MachineOperand dest = parseOperand(instr.getOperands().get(2));
         //todo: calculate offset
         //MachineOperand offest = new MachineOperand(0);
-        MCStore store = new MCStore(src, dest);
+        MCStore store = new MCStore(src, dest, SW);
         block.getMachineCodes().add(store);
         setDefUse(src, store);
         setDefUse(dest, store);
@@ -334,9 +357,16 @@ public class codeGen {
     public void PrintCodeToFile(String dest) {
         StringBuilder builder = new StringBuilder();
         for(FunctionBlock function: module.getFunctionBlocks()){
+            builder.append(function.getFunctionName()).append(":").append("\n");
+            for (MachineCode code: funcMap.get(function).getPreList()) {
+                builder.append("    ");
+                builder.append(code.toString());
+                builder.append("\n");
+            }
             for(BaseBlock block: function.getBaseBlocks()){
                 MachineBlock machineBlock = blockMap.get(block);
                 for(MachineCode code: machineBlock.getMachineCodes()){
+                    builder.append("    ");
                     builder.append(code.toString());
                     builder.append("\n");
                 }
@@ -350,6 +380,4 @@ public class codeGen {
             System.err.println("failed to print machine code.");
         }
     }
-
-
 }
