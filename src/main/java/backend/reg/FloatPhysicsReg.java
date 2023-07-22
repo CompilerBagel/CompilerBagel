@@ -1,7 +1,7 @@
 package backend.reg;
 
-public class FloatPhysicsReg extends Reg{
-    public FloatPhysicsReg(final operandType t) {
-        super(t);
+public class FloatPhysicsReg extends Reg {
+    public FloatPhysicsReg(operandType t, String identity) {
+        super(t, identity);
     }
 }

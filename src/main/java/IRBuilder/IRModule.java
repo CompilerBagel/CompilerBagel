@@ -95,6 +95,9 @@ public class IRModule {
         this.stringBuilder.append(code);
     }
 
+    public Map<String, Symbol> getGlobalSymbol() {
+        return globalSymbol;
+    }
     public void addGlobalSymbol(String name, Symbol sym) {
         globalSymbol.put(name, sym);
     }
