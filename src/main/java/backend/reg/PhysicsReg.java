@@ -6,8 +6,8 @@ import java.util.Map;
 public class PhysicsReg extends Reg {
     private String regName;
     private int index;
-    public PhysicsReg(final operandType t) {
-        super(t);
+    public PhysicsReg(operandType t, String identity) {
+        super(t, identity);
     }
     public static int regNum = 32;
     private final static HashMap<String, Integer> nameMap = new HashMap<>();
@@ -62,13 +62,13 @@ public class PhysicsReg extends Reg {
     }
     
     public PhysicsReg(int index) {
-        super(operandType.physicsReg);
+        super(operandType.physicsReg, indexMap.get(index));
         this.index = index;
         this.regName = indexMap.get(index);
     }
     
     public PhysicsReg(String regName) {
-        super(operandType.physicsReg);
+        super(operandType.physicsReg, regName);
         this.index = nameMap.get(regName);
         this.regName = regName;
     }

@@ -11,7 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-import static IRBuilder.IRConstants.*;
+import Type.PointerType;
 import static Type.FloatType.IRFloatType;
 import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
@@ -33,7 +33,8 @@ public class codeGen {
     private static HashMap<BaseBlock, MachineBlock> blockMap;
     private HashMap<String, MachineOperand> operandMap;
     private final int tmpImmCount = 0;
-    
+    private StringBuilder globalSb;
+    private Map<String, Symbol> globalMap;
     
     public static void serializeBlocks(List<MachineBlock> blocks) {
         List<MachineBlock> sequence = new ArrayList<>();
@@ -91,6 +92,8 @@ public class codeGen {
         funcMap = new HashMap<>();
         blockMap = new HashMap<>();
         operandMap = new HashMap<>();
+        globalMap = module.getGlobalSymbol();
+        declareGlobal(globalMap);
         List<FunctionBlock> functionBlocks = module.getFunctionBlocks();
         for (FunctionBlock functionBlock : functionBlocks) {
             MachineFunction machineFunction = new MachineFunction(functionBlock.getFunctionName());
@@ -108,6 +111,24 @@ public class codeGen {
             }
             // TODO: block succ
             serializeBlocks(blocks);
+        }
+    }
+
+    public void declareGlobal(Map<String, Symbol> map) {
+        globalSb = new StringBuilder();
+        for (Map.Entry<String, Symbol> entry: map.entrySet()) {
+            globalSb.append(entry.getKey()).append(":").append("\n");
+            List<Float> values = entry.getValue().getInitValue();
+            boolean isInt = false;
+            if (entry.getValue().getType().equals(IRInt32Type())) {
+                isInt = true;
+            }
+            for (Float value: values) {
+                if (isInt)
+                    globalSb.append("    " + ".word ").append(value.intValue()).append("\n");
+                else
+                    globalSb.append("    " + ".word ").append(value).append("\n");
+            }
         }
     }
 
@@ -196,7 +217,7 @@ public class codeGen {
         MachineOperand left = parseOperand(instr.getOperands().get(1));
         MachineOperand right = parseOperand(instr.getOperands().get(2));
 
-        if(left.isImm() && right.isImm()){
+        if(left.isImm() && right.isImm()) {
             int result = 0;
             switch (instr.getType()){
                 case IRConstants.ADD:
@@ -222,7 +243,7 @@ public class codeGen {
             setDefUse(dest, move);
             block.getMachineCodes().add(move);
 
-        }else if(left.isImm() || right.isImm()){
+        } else if(left.isImm() || right.isImm()){
             MachineOperand src = left.isImm() ? right : left;
             MachineOperand imm = left.isImm() ? left : right;
             MCBinaryInteger code = null;
@@ -397,11 +418,22 @@ public class codeGen {
                 return intOp;
             } else if (operand instanceof BaseRegister) {
                 operandMap.put(operand.getText(), (MachineOperand) operand);
-                MachineOperand machineOperand = (MachineOperand) operand;
-                machineOperand.setIdentity(operand.getText());
-                return machineOperand;
+                return (MachineOperand) operand;
+            } else if (operand instanceof GlobalRegister) {
+                Type baseType = ((PointerType)operand.getType()).getBaseType();
+                if (baseType.equals(IRInt32Type())) {
+                    Symbol symbol = globalMap.get(((GlobalRegister) operand).getIdentity());
+                    if (symbol.getType().equals(IRInt32Type())) {
+                        MachineOperand value = new MachineOperand(symbol.getInitValue().get(0).intValue());
+                        operandMap.put(((GlobalRegister) operand).getIdentity(), value);
+                        return value;
+                    } else if (symbol.getType().equals(IRFloatType())){
+                        // TODO: Float
+                    } else {
+                        // TODO: array
+                    }
+                }
             }
-            // todo: globalRegister
         } else {
             MachineOperand op = operandMap.get(operand.getText());
             return op;
@@ -436,11 +468,12 @@ public class codeGen {
                 }
             }
         }
+        builder.append(globalSb);
         try{
             BufferedWriter out = new BufferedWriter(new FileWriter(dest));
             out.write(builder.toString());
             out.close();
-        }catch (IOException e){
+        } catch (IOException e){
             System.err.println("failed to print machine code.");
         }
     }
