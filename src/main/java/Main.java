@@ -32,8 +32,8 @@ public class Main {
 
         codeGen code = new codeGen();
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
-        // RegisterAllocate allocator = new RegisterAllocate();
-
+        RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
+        allocator.easyAllocate();
         code.PrintCodeToFile(mcDest);
     }
 }

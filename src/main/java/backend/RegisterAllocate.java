@@ -122,9 +122,20 @@ public class RegisterAllocate {
                 List<MachineOperand> defs = code.getDef();
                 List<MachineOperand> uses = code.getUse();
                 for (MachineOperand def : defs) {
-                    if (def.getPhysicsReg() != null || def instanceof PhysicsReg) continue;
+                    if (def.getPhysicsReg() != null) {
+                        if (def.getPhysicsReg().noUser()) {
+                            def.getPhysicsReg().giveBack();
+                        }
+                        continue;
+                    }
+                    if (def instanceof PhysicsReg) {
+                        if (def.noUser()){
+                            ((PhysicsReg)def).giveBack();
+                        }
+                        continue;
+                    }
                     PhysicsReg allocatedReg = getReg(def);
-                    if (allocatedReg != null) {
+                    if (allocatedReg != null) {   // have register
                         def.setPhysicsReg(allocatedReg);
                         if (def.noUser()) {
                             allocatedReg.giveBack();
@@ -134,7 +145,18 @@ public class RegisterAllocate {
                     }
                 }
                 for (MachineOperand use : uses) {
-                    if (use.getPhysicsReg() != null || use instanceof PhysicsReg) continue;
+                    if (use.getPhysicsReg() != null) {
+                        if (use.getPhysicsReg().noUser()) {
+                            use.getPhysicsReg().giveBack();
+                        }
+                        continue;
+                    }
+                    if (use instanceof PhysicsReg) {
+                        if (use.noUser()){
+                            ((PhysicsReg)use).giveBack();
+                        }
+                        continue;
+                    }
                     PhysicsReg allocatedReg = getReg(use);
                     if (allocatedReg != null) {
                         use.setPhysicsReg(allocatedReg);

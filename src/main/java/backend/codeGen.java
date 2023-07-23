@@ -498,4 +498,13 @@ public class codeGen {
             System.err.println("failed to print machine code.");
         }
     }
+
+    public List<MachineFunction> getMCFunctions() {
+        List<MachineFunction> mcFuncList = new ArrayList<>();
+        for(FunctionBlock function: module.getFunctionBlocks()){
+            MachineFunction mcFunc = funcMap.get(function);
+            mcFuncList.add(mcFunc);
+        }
+        return mcFuncList;
+    }
 }
