@@ -73,10 +73,11 @@ public class PhysicsReg extends Reg {
         this.regName = regName;
     }
 
-    public static PhysicsReg getPhysicReg(int index) {
+    public static PhysicsReg getPhysicsReg(int index) {
         if (physicsRegs[index] == null) {
             physicsRegs[index] = new PhysicsReg(index);
         }
+        isAvailable[index] = false;
         return physicsRegs[index];
     }
 
@@ -100,7 +101,7 @@ public class PhysicsReg extends Reg {
         for (int i = 0; i < regNum; i++) {
             if (isAvailable[i]) {
                 isAvailable[i] = false;
-                return getPhysicReg(i);
+                return getPhysicsReg(i);
             }
         }
         return null;
@@ -110,11 +111,6 @@ public class PhysicsReg extends Reg {
         for (int i = 0; i < regNum; i++) {
             isAvailable[i] = true;
         }
-    }
-
-    public static PhysicsReg getPhysicsReg(int index) {
-        isAvailable[index] = false;
-        return physicsRegs[index];
     }
 
     public static void giveBackReg(int index) {
