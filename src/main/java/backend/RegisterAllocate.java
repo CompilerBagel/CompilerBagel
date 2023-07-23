@@ -104,6 +104,9 @@ public class RegisterAllocate {
         }
     }
 
+    /**
+     *  enter method, call easyAllocate when you need to allocate register
+     */
     public void easyAllocate() {
         for (MachineFunction function : functions) {
             funcEasyAllocate(function);
@@ -119,6 +122,8 @@ public class RegisterAllocate {
                 List<MachineOperand> defs = code.getDef();
                 List<MachineOperand> uses = code.getUse();
                 for (MachineOperand def : defs) {
+                    if (def.getPhysicsReg() != null || def instanceof PhysicsReg) continue;
+
                     PhysicsReg allocatedReg = getReg(def);
                     if (allocatedReg != null) {
                         def.setPhysicsReg(allocatedReg);
@@ -130,6 +135,7 @@ public class RegisterAllocate {
                     }
                 }
                 for (MachineOperand use : uses) {
+                    if (use.getPhysicsReg() != null || use instanceof PhysicsReg) continue;
                     PhysicsReg allocatedReg = getReg(use);
                     if (allocatedReg != null) {
                         use.setPhysicsReg(allocatedReg);
@@ -153,7 +159,7 @@ public class RegisterAllocate {
         // allocate a0~a7
         for (int i = 10; i <= 17; i++) {
             if (isAvailableReg(i)) {
-                reg = getPhysicReg(i);
+                reg = getPhysicsReg(i);
                 allocatedReg.put(operand, reg);
                 return reg;
             }

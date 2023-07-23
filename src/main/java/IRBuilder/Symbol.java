@@ -43,4 +43,10 @@ public class Symbol {
     public void setInitValue(List<Float> value){
         initValue = value;
     }
+    public List<Float> getInitValue() {
+        return initValue;
+    }
+    public Type getType() {
+        return type;
+    }
 }
