@@ -1,21 +1,20 @@
 package backend.machineCode.Instruction;
 
+import backend.machineCode.Immeidiate;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineOperand;
 
-import java.util.ArrayList;
-
 public class MCStore extends MachineCode {
     private MachineOperand src;
-    private MachineOperand offset = new MachineOperand(0);
+    private MachineOperand offset;
     private MachineOperand dest;
-    private String storeOp;
+    private final String storeOp;
 
     public MCStore(MachineOperand src, MachineOperand dest, String storeOp) {
         this.src = src;
         this.dest = dest;
         this.storeOp = storeOp;
-        this.offset = new MachineOperand(0);
+        this.offset = new Immeidiate(0);
     }
     
     public MCStore(MachineOperand src, MachineOperand dest, MachineOperand offset, String storeOp) {
