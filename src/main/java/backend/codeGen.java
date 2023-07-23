@@ -3,6 +3,7 @@ package backend;
 import IRBuilder.*;
 import Type.Type;
 import backend.machineCode.*;
+import backend.machineCode.Instruction.*;
 import backend.reg.PhysicsReg;
 import instruction.*;
 
@@ -157,10 +158,10 @@ public class codeGen {
             frameSize = ((frameSize / 16) + 1) * 16;
             mfunc.setFrameSize(frameSize);
         }
-        mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new MachineOperand(-frameSize), ADDI));;
-        mfunc.getPreList().add(new MCStore(spReg, raReg, new MachineOperand(frameSize - 8), SD));
-        mfunc.getPreList().add(new MCStore(spReg, s0Reg, new MachineOperand(frameSize - 16), SD));
-        mfunc.getPreList().add(new MCBinaryInteger(s0Reg, spReg, new MachineOperand(frameSize), ADDI));
+        mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new Immeidiate(-frameSize), ADDI));;
+        mfunc.getPreList().add(new MCStore(spReg, raReg, new Immeidiate(frameSize - 8), SD));
+        mfunc.getPreList().add(new MCStore(spReg, s0Reg, new Immeidiate(frameSize - 16), SD));
+        mfunc.getPreList().add(new MCBinaryInteger(s0Reg, spReg, new Immeidiate(frameSize), ADDI));
     }
     
     public void parseBlock(BaseBlock block, MachineBlock machineBlock) {
@@ -214,8 +215,8 @@ public class codeGen {
     
     public void parseCalculateInstr(CalculateInstruction instr, MachineBlock block) {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
-        MachineOperand left = parseOperand(instr.getOperands().get(1));
-        MachineOperand right = parseOperand(instr.getOperands().get(2));
+        Immeidiate left = (Immeidiate) parseOperand(instr.getOperands().get(1));
+        Immeidiate right = (Immeidiate) parseOperand(instr.getOperands().get(2));
 
         if(left.isImm() && right.isImm()) {
             int result = 0;
@@ -236,7 +237,7 @@ public class codeGen {
                     assert(false);
                     break;
             }
-            MachineOperand src = new MachineOperand(result);
+            MachineOperand src = new Immeidiate(result);
             MCMove move = new MCMove(src, dest);
 
             setDefUse(src, move);
@@ -315,7 +316,7 @@ public class codeGen {
         for (ValueRef param: params) {
             BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
             BaseRegister src = new BaseRegister("li", param.getType());
-            MCLoad load = new MCLoad(src, vReg, new MachineOperand(0));
+            MCLoad load = new MCLoad(src, vReg, new Immeidiate(0));
             setDefUse(vReg, load);
             block.getMachineCodes().add(load);
             operands.add(vReg);
@@ -337,7 +338,7 @@ public class codeGen {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
         MachineOperand src = parseOperand(instr.getOperands().get(1));
         // TODO: calculate offset (temp 0)
-        MCLoad load = new MCLoad(dest, src, new MachineOperand(0));
+        MCLoad load = new MCLoad(dest, src, new Immeidiate(0));
         block.getMachineCodes().add(load);
         setDefUse(dest, load);
         setDefUse(src, load);
@@ -366,20 +367,20 @@ public class codeGen {
         }
         // ld
         MCLoad raLoad = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("ra"),
-                new MachineOperand(block.getBlockFunc().getFrameSize() - 8));
+                new Immeidiate(block.getBlockFunc().getFrameSize() - 8));
         block.getMachineCodes().add(raLoad);
         setDefUse(new PhysicsReg("sp"), raLoad);
         setDefUse(new PhysicsReg("ra"), raLoad);
 
         MCLoad s0Load = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("s0"),
-                new MachineOperand(block.getBlockFunc().getFrameSize() - 16));
+                new Immeidiate(block.getBlockFunc().getFrameSize() - 16));
         block.getMachineCodes().add(s0Load);
         setDefUse(new PhysicsReg("sp"), s0Load);
         setDefUse(new PhysicsReg("s0"), s0Load);
 
         // addi
         MCBinaryInteger addi = new MCBinaryInteger(new PhysicsReg("sp"), new PhysicsReg("sp"),
-                new MachineOperand(block.getBlockFunc().getFrameSize()), ADDI);
+                new Immeidiate(block.getBlockFunc().getFrameSize()), ADDI);
         block.getMachineCodes().add(addi);
         setDefUse(new PhysicsReg("sp"), addi);
         setDefUse(new PhysicsReg("sp"), addi);
@@ -412,8 +413,7 @@ public class codeGen {
         if (!operandMap.containsKey(operand.getText())) {
             if (operand instanceof ConstIntValueRef) {
                 int integer = Integer.parseInt(operand.getText());
-                MachineOperand intOp = new MachineOperand(integer);
-                intOp.setIdentity(operand.getText());
+                MachineOperand intOp = new Immeidiate(integer);
                 operandMap.put(operand.getText(), intOp);
                 return intOp;
             } else if (operand instanceof BaseRegister) {
@@ -424,7 +424,7 @@ public class codeGen {
                 if (baseType.equals(IRInt32Type())) {
                     Symbol symbol = globalMap.get(((GlobalRegister) operand).getIdentity());
                     if (symbol.getType().equals(IRInt32Type())) {
-                        MachineOperand value = new MachineOperand(symbol.getInitValue().get(0).intValue());
+                        MachineOperand value = new Immeidiate(symbol.getInitValue().get(0).intValue());
                         operandMap.put(((GlobalRegister) operand).getIdentity(), value);
                         return value;
                     } else if (symbol.getType().equals(IRFloatType())){
