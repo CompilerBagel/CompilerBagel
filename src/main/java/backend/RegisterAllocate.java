@@ -104,6 +104,9 @@ public class RegisterAllocate {
         }
     }
 
+    /**
+     *  enter method, call easyAllocate when you need to allocate register
+     */
     public void easyAllocate() {
         for (MachineFunction function : functions) {
             funcEasyAllocate(function);
