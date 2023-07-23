@@ -157,15 +157,7 @@ public class codeGen {
             }
         }
         int frameSize = stackCount * 4;
-        // frame size must be 16 byte align
-        if (frameSize % 16 != 0) {
-            frameSize = ((frameSize / 16) + 1) * 16;
-            mfunc.setFrameSize(frameSize);
-        }
-        mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new Immeidiate(-frameSize), ADDI));;
-        mfunc.getPreList().add(new MCStore(spReg, raReg, new Immeidiate(frameSize - 8), SD));
-        mfunc.getPreList().add(new MCStore(spReg, s0Reg, new Immeidiate(frameSize - 16), SD));
-        mfunc.getPreList().add(new MCBinaryInteger(s0Reg, spReg, new Immeidiate(frameSize), ADDI));
+        mfunc.setFrameSize(frameSize);
     }
     
     public void parseBlock(BaseBlock block, MachineBlock machineBlock) {
@@ -205,16 +197,19 @@ public class codeGen {
         MachineFunction mfunc = block.getBlockFunc();
         int frameSize = mfunc.getFrameSize();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
-        ValueRef resResgister = instr.getOperands().get(0);
-        String resName = resResgister.getText();
-        Type resType = ((PointerType) resResgister.getType()).getBaseType();
+        ValueRef resRegister = instr.getOperands().get(0);
+        String resName = resRegister.getText();
+        Type resType = ((PointerType) resRegister.getType()).getBaseType();
         if(resType.equals(IRInt32Type()) || resType.equals(IRFloatType())) {
             offsetMap.put(resName, frameSize);
             mfunc.setFrameSize(frameSize + 4);
-        }else{
+            frameSize += 4;
+        } else {
             offsetMap.put(resName, frameSize);
             mfunc.setFrameSize(frameSize + 8);
+            frameSize += 8;
         }
+        mfunc.setFrameSize(frameSize);
     }
 
     public void parseBrInstr(BrInstruction instr, MachineBlock block){
@@ -468,6 +463,17 @@ public class codeGen {
         StringBuilder builder = new StringBuilder();
         for(FunctionBlock function: module.getFunctionBlocks()){
             builder.append(function.getFunctionName()).append(":").append("\n");
+            MachineFunction mfunc = funcMap.get(function);
+            int frameSize = mfunc.getFrameSize();
+            // frame size must be 16 byte align
+            if (frameSize % 16 != 0) {
+                frameSize = ((frameSize / 16) + 1) * 16;
+                mfunc.setFrameSize(frameSize);
+            }
+            mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new Immeidiate(-frameSize), ADDI));;
+            mfunc.getPreList().add(new MCStore(spReg, raReg, new Immeidiate(frameSize - 8), SD));
+            mfunc.getPreList().add(new MCStore(spReg, s0Reg, new Immeidiate(frameSize - 16), SD));
+            mfunc.getPreList().add(new MCBinaryInteger(s0Reg, spReg, new Immeidiate(frameSize), ADDI));
             for (MachineCode code: funcMap.get(function).getPreList()) {
                 builder.append("    ");
                 builder.append(code.toString());

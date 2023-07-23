@@ -1,8 +1,8 @@
 main:
-    addi sp, sp, -32
-    sd ra, 24(sp)
-    sd s0, 16(sp)
-    addi s0, sp, 32
+    addi sp, sp, -48
+    sd ra, 40(sp)
+    sd s0, 32(sp)
+    addi s0, sp, 48
 mainEntry1:
     sw %a11, 0(2)
     lw %a11, 0(%a14)
@@ -15,14 +15,14 @@ mainEntry1:
     addiw %add_23, %c22, 3
     sw %d21, 0(%add_23)
     li a0, 0
-    lw ra, 24(sp)
-    lw s0, 16(sp)
-    addi sp, sp, 32
+    lw ra, 28(sp)
+    lw s0, 20(sp)
+    addi sp, sp, 36
     ret
     li a0, 0
-    lw ra, 24(sp)
-    lw s0, 16(sp)
-    addi sp, sp, 32
+    lw ra, 28(sp)
+    lw s0, 20(sp)
+    addi sp, sp, 36
     ret
 getch:
 before_main:

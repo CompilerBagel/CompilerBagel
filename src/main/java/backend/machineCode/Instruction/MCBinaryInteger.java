@@ -27,8 +27,7 @@ public class MCBinaryInteger extends MachineCode {
      */
     @Override
     public String toString() {
-        String ret = binaryOp + " " + dest.toString() + ", " + left.toString() + ", " + right.toString();
-        return ret;
+        return binaryOp + " " + dest.toString() + ", " + left.toString() + ", " + right.toString();
     }
     
     @Override
@@ -55,6 +54,4 @@ public class MCBinaryInteger extends MachineCode {
             right = newOperand;
         }
     }
-
-
 }
