@@ -34,6 +34,9 @@ public class MachineOperand {
         this.physicsReg = physicsReg;
         this.t = operandType.virtualReg;
     }
+    public PhysicsReg getPhysicsReg() {
+        return physicsReg;
+    }
     public void setDef(MachineCode def) {
         this.def = def;
         isDef = true;

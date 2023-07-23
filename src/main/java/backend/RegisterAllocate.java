@@ -123,7 +123,6 @@ public class RegisterAllocate {
                 List<MachineOperand> uses = code.getUse();
                 for (MachineOperand def : defs) {
                     if (def.getPhysicsReg() != null || def instanceof PhysicsReg) continue;
-
                     PhysicsReg allocatedReg = getReg(def);
                     if (allocatedReg != null) {
                         def.setPhysicsReg(allocatedReg);
