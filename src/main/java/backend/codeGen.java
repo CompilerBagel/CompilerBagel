@@ -19,6 +19,8 @@ import static Type.VoidType.IRVoidType;
 import static backend.machineCode.MachineConstants.*;
 import static instruction.BrInstruction.SINGLE;
 
+import Type.PointerType;
+
 public class codeGen {
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
@@ -133,6 +135,7 @@ public class codeGen {
             }
         }
         int frameSize = stackCount * 4;
+        // frame size must be 16 byte align
         if (frameSize % 16 != 0) {
             frameSize = ((frameSize / 16) + 1) * 16;
             mfunc.setFrameSize(frameSize);
@@ -177,7 +180,19 @@ public class codeGen {
     }
 
     public void parseAllocaInstr(AllocaInstruction instr, MachineBlock block){
-
+        MachineFunction mfunc = block.getBlockFunc();
+        int frameSize = mfunc.getFrameSize();
+        Map<String, Integer> offsetMap = mfunc.getOffsetMap();
+        ValueRef resResgister = instr.getOperands().get(0);
+        String resName = resResgister.getText();
+        Type resType = ((PointerType) resResgister.getType()).getBaseType();
+        if(resType.equals(IRInt32Type()) || resType.equals(IRFloatType())) {
+            offsetMap.put(resName, frameSize);
+            mfunc.setFrameSize(frameSize + 4);
+        }else{
+            offsetMap.put(resName, frameSize);
+            mfunc.setFrameSize(frameSize + 8);
+        }
     }
 
     public void parseBrInstr(BrInstruction instr, MachineBlock block){
