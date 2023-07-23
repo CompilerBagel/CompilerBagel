@@ -215,23 +215,23 @@ public class codeGen {
     
     public void parseCalculateInstr(CalculateInstruction instr, MachineBlock block) {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
-        Immeidiate left = (Immeidiate) parseOperand(instr.getOperands().get(1));
-        Immeidiate right = (Immeidiate) parseOperand(instr.getOperands().get(2));
+        MachineOperand left = parseOperand(instr.getOperands().get(1));
+        MachineOperand right = parseOperand(instr.getOperands().get(2));
 
         if(left.isImm() && right.isImm()) {
             int result = 0;
             switch (instr.getType()){
                 case IRConstants.ADD:
-                    result = left.getImmValue() + right.getImmValue();
+                    result = ((Immeidiate) left).getImmValue() + ((Immeidiate) right).getImmValue();
                     break;
                 case IRConstants.SUB:
-                    result = left.getImmValue() - right.getImmValue();
+                    result = ((Immeidiate) left).getImmValue() - ((Immeidiate) right).getImmValue();
                     break;
                 case IRConstants.MUL:
-                    result = left.getImmValue() * right.getImmValue();
+                    result = ((Immeidiate) left).getImmValue() * ((Immeidiate) right).getImmValue();
                     break;
                 case IRConstants.SDIV:
-                    result = left.getImmValue() / right.getImmValue();
+                    result = ((Immeidiate) left).getImmValue() / ((Immeidiate) right).getImmValue();
                     break;
                 default:
                     assert(false);
@@ -435,8 +435,7 @@ public class codeGen {
                 }
             }
         } else {
-            MachineOperand op = operandMap.get(operand.getText());
-            return op;
+            return operandMap.get(operand.getText());
         }
         return null;
     }
