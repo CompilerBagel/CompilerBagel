@@ -1,14 +1,13 @@
 package backend.machineCode.Instruction;
 
+import backend.machineCode.Immeidiate;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineOperand;
-
-import java.util.ArrayList;
 
 public class MCLoad extends MachineCode {
     private MachineOperand src;
     private MachineOperand dest;
-    private MachineOperand offset = new MachineOperand(0);
+    private MachineOperand offset;
 
     public MCLoad(MachineOperand src, MachineOperand dest, MachineOperand offset) {
         this.src = src;
@@ -19,7 +18,7 @@ public class MCLoad extends MachineCode {
     public MCLoad(MachineOperand src, MachineOperand dest){
         this.src = src;
         this.dest = dest;
-        this.offset = new MachineOperand(0);
+        this.offset = new Immeidiate(0);
     }
     
     public void setOffset(final MachineOperand offset) {
