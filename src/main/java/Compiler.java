@@ -10,6 +10,9 @@ import backend.codeGen;
 
 public class Compiler {
     public static void main(String[] args) throws IOException {
+//      功能测试： compiler testcase.sysy -S -o testcase.s
+//      性能测试： compiler testcase.sysy -S -o testcase.s -O1
+
         String source = args[0];
         String mcDest = args[3];
 
