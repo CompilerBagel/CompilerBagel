@@ -37,7 +37,7 @@ public class MCStore extends MachineCode {
      */
     @Override
     public String toString() {
-        return storeOp + " " + dest.toString() + ", " + offset.toString() + "(" + src.toString() + ")";
+        return storeOp + " " + src.toString() + ", " + offset.toString() + "(" + dest.toString() + ")";
     }
     
     @Override

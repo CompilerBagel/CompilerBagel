@@ -615,7 +615,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.GT() != null) {
             cmpResult = IRBuildICmp(builder, IRIntSGT, lVal, rVal, "icmp_GT");
         }
-//        return cmpResult;
+
         return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
@@ -630,7 +630,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.NEQ() != null) {
             cmpResult = IRBuildICmp(builder, IRIntNE, lVal, rVal, "icmp_NE");
         }
-//        return cmpResult;
         return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
@@ -638,14 +637,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitAndCond(SysYParser.AndCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
-//        if(lVal.getType() != int1Type){
-//            lVal = IRBuildICmp(builder, IRIntNE, lVal, intZero, "icmp_NE");
-//        }
-//        if(rVal.getType() != int1Type){
-//            rVal = IRBuildICmp(builder, IRIntNE, rVal, intZero, "imcp_NE");
-//        }
         ValueRef cmpResult = IRBuildAnd(builder, lVal, rVal, "and_");
-//        return cmpResult;
         return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 
@@ -653,14 +645,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitOrCond(SysYParser.OrCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
-//        if(lVal.getType() != int1Type){
-//            lVal = IRBuildICmp(builder, IRIntNE, lVal, intZero, "icmp_NE");
-//        }
-//        if(rVal.getType() != int1Type){
-//            rVal = IRBuildICmp(builder, IRIntNE, rVal, intZero, "imcp_NE");
-//        }
         ValueRef cmpResult = IRBuildOr(builder,  lVal, rVal, "or_");
-//        return cmpResult;
         return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
     }
 

@@ -18,6 +18,7 @@ import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
 import static backend.machineCode.MachineConstants.*;
+import static backend.machineCode.MachineOperand.operandType.imm;
 import static instruction.BrInstruction.SINGLE;
 
 import Type.PointerType;
@@ -110,6 +111,8 @@ public class codeGen {
             for (BaseBlock block: funcBlocks) {
                 MachineBlock machineBlock = new MachineBlock(block.getLabel(), funcMap.get(func));
                 blockMap.put(block, machineBlock);
+                MachineBlock machineBlockTmp = blockMap.get(block);
+                assert(machineBlockTmp != null);
                 blocks.add(machineBlock);
                 parseBlock(block, machineBlock);
             }
@@ -118,6 +121,10 @@ public class codeGen {
         }
     }
 
+    /**
+     * declare global variable
+     * @param map
+     */
     public void declareGlobal(Map<String, Symbol> map) {
         globalSb = new StringBuilder();
         for (Map.Entry<String, Symbol> entry: map.entrySet()) {
@@ -202,11 +209,11 @@ public class codeGen {
         Type resType = ((PointerType) resRegister.getType()).getBaseType();
         if(resType.equals(IRInt32Type()) || resType.equals(IRFloatType())) {
             offsetMap.put(resName, frameSize);
-            mfunc.setFrameSize(frameSize + 4);
+            //mfunc.setFrameSize(frameSize + 4);
             frameSize += 4;
         } else {
             offsetMap.put(resName, frameSize);
-            mfunc.setFrameSize(frameSize + 8);
+            //mfunc.setFrameSize(frameSize + 8);
             frameSize += 8;
         }
         mfunc.setFrameSize(frameSize);
@@ -215,12 +222,25 @@ public class codeGen {
     public void parseBrInstr(BrInstruction instr, MachineBlock block){
         if(instr.getType() == SINGLE){
             BaseBlock brBlock = (BaseBlock) instr.getOperands().get(0);
-            MachineBlock machineBlock = blockMap.get(brBlock);
-            MCJump jump = new MCJump(machineBlock.getBlockName());
+            MCJump jump = new MCJump(brBlock.getLabel());
             block.getMachineCodes().add(jump);
         }else{
-
-
+            ValueRef register = instr.getOperands().get(0);
+            MachineOperand reg1 = parseOperand(register);
+            BaseBlock brBlock1 = (BaseBlock) instr.getOperands().get(1);
+            BaseBlock brBlock2 = (BaseBlock) instr.getOperands().get(2);
+            BaseRegister liReg = new BaseRegister("li", int32Type);
+            MachineOperand imm = new Immeidiate(1);
+            MachineOperand reg2 = parseOperand(liReg);
+            MCLi li = new MCLi(reg2, imm);
+            block.getMachineCodes().add(li);
+            setDefUse(imm, li);
+            MCJump jump1 = new MCJump(reg1, reg2, brBlock1.getLabel());
+            block.getMachineCodes().add(jump1);
+            setDefUse(reg1, jump1);
+            setDefUse(reg2, jump1);
+            MCJump jump2 = new MCJump(brBlock2.getLabel());
+            block.getMachineCodes().add(jump2);
         }
     }
     
@@ -405,6 +425,13 @@ public class codeGen {
         MachineOperand dest = parseOperand(instr.getOperands().get(2));
         //todo: calculate offset
         //MachineOperand offest = new MachineOperand(0);
+        if(src.isImm()){
+            BaseRegister storeReg = new BaseRegister("li", int32Type);
+            MachineOperand storeLi = parseOperand(storeReg);
+            MCLi mulLi = new MCLi(storeLi, src);
+            block.getMachineCodes().add(mulLi);
+            src = storeLi;
+        }
         MCStore store = new MCStore(src, dest, SW);
         block.getMachineCodes().add(store);
         setDefUse(src, store);
