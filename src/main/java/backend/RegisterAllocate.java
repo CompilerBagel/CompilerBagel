@@ -177,7 +177,7 @@ public class RegisterAllocate {
         if (reg != null) {
             return reg;
         }
-        // allocate a0~a7
+        // allocate a0 ~ a7
         for (int i = 10; i <= 17; i++) {
             if (isAvailableReg(i)) {
                 reg = getPhysicsReg(i);

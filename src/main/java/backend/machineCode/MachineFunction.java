@@ -44,6 +44,10 @@ public class MachineFunction {
         return offsetMap;
     }
 
+    public void addMachineBlock(MachineBlock block) {
+        machineBlocks.add(block);
+    }
+
     public LinkedList<MachineBlock> getMachineBlocks() {
         return machineBlocks;
     }

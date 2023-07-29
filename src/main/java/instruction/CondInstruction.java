@@ -29,4 +29,8 @@ public class CondInstruction extends Instruction{
                 + lhs.getTypeText() + " " + lhs.getText() + ", " + rhs.getText();
 
     }
+
+    public int getIcmpType() {
+        return icmpType;
+    }
 }

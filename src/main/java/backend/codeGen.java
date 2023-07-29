@@ -115,6 +115,7 @@ public class codeGen {
                 assert(machineBlockTmp != null);
                 blocks.add(machineBlock);
                 parseBlock(block, machineBlock);
+                funcMap.get(func).addMachineBlock(machineBlock);
             }
             // TODO: block succ
             serializeBlocks(blocks);
@@ -288,22 +289,24 @@ public class codeGen {
                     break;
                 case IRConstants.MUL:
                     // add register to store the imm(mul operand can only be register)
-                    BaseRegister mulReg = new BaseRegister("li", int32Type);
+                    /*BaseRegister mulReg = new BaseRegister("li", int32Type);
                     MachineOperand mulRegOp = parseOperand(mulReg);
                     MCLi mulLi = new MCLi(mulRegOp, imm);
                     block.getMachineCodes().add(mulLi);
                     mulRegOp.setDef(mulLi);
-                    imm.addUse(mulLi);
+                    imm.addUse(mulLi);*/
+                    MachineOperand mulRegOp = addLiOperation(imm, block);
                     code = new MCBinaryInteger(dest, src, mulRegOp, MULW);
                     break;
                 case IRConstants.SDIV:
-                    BaseRegister divReg = new BaseRegister("li", int32Type);
+                   /* BaseRegister divReg = new BaseRegister("li", int32Type);
                     MachineOperand divRegOp = parseOperand(divReg);
                     MCLi divLi = new MCLi(divRegOp, imm);
                     block.getMachineCodes().add(divLi);
                     divRegOp.setDef(divLi);
-                    imm.addUse(divLi);
-                    code = new MCBinaryInteger(dest, src, imm, DIVW);
+                    imm.addUse(divLi);*/
+                    MachineOperand divRegOp = addLiOperation(imm, block);
+                    code = new MCBinaryInteger(dest, src, divRegOp, DIVW);
                     break;
                 default:
                     break;
@@ -358,7 +361,18 @@ public class codeGen {
     }
 
     public void parseCondInstr(CondInstruction instr, MachineBlock block){
+        int icmpType = instr.getIcmpType();
+        MachineOperand dest = parseOperand(instr.getOperands().get(0));
+        MachineOperand left = parseOperand(instr.getOperands().get(1));
+        MachineOperand right = parseOperand(instr.getOperands().get(2));
+        if(left.isImm()) left = addLiOperation(left, block);
+        if(right.isImm()) right = addLiOperation(right, block);
 
+        MCBranch branch = new MCBranch(icmpType, dest, left, right);
+        block.getMachineCodes().add(branch);
+        setDefUse(dest, branch);
+        setDefUse(left, branch);
+        setDefUse(right, branch);
     }
 
     public void parseGetElemPtrInstr(GetElemPtrInstruction instr, MachineBlock block) {
@@ -443,7 +457,12 @@ public class codeGen {
     }
 
     public void parseZextInstr(ZextInstruction instr, MachineBlock block){
-
+        MachineOperand rd = parseOperand(instr.getOperands().get(0));
+        MachineOperand rs = parseOperand(instr.getOperands().get(1));
+        MCMove move = new MCMove(rd, rs);
+        block.getMachineCodes().add(move);
+        setDefUse(rd, move);
+        setDefUse(rs, move);
     }
 
 
@@ -476,14 +495,6 @@ public class codeGen {
             return operandMap.get(operand.getText());
         }
         return null;
-    }
-
-    public void setDefUse(MachineOperand operand, MachineCode code){
-        if(operand.getIsDef()){
-            operand.addUse(code);
-        }else{
-            operand.setDef(code);
-        }
     }
 
     public void PrintCodeToFile(String dest) {
@@ -534,4 +545,31 @@ public class codeGen {
         }
         return mcFuncList;
     }
+
+    /**
+     * tool method
+     */
+
+    public void setDefUse(MachineOperand operand, MachineCode code){
+        if(operand.getIsDef()){
+            operand.addUse(code);
+        }else{
+            operand.setDef(code);
+        }
+    }
+
+    /**
+     * when we meet an imm but need a reg, add this
+     * @return
+     */
+    public MachineOperand addLiOperation(MachineOperand imm, MachineBlock block){
+        BaseRegister reg = new BaseRegister("li", int32Type);
+        MachineOperand regOp = parseOperand(reg);
+        MCLi li = new MCLi(regOp, imm);
+        block.getMachineCodes().add(li);
+        regOp.setDef(li);
+        imm.addUse(li);
+        return regOp;
+    }
+
 }

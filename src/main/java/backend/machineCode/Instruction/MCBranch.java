@@ -7,18 +7,46 @@ import backend.machineCode.MachineOperand;
 
 import java.util.ArrayList;
 
+import static backend.machineCode.MachineConstants.MCCodes;
+
+/**
+ * beq, bne, blt, bge, bltu, bgeu
+ * type rs1, rs2, label
+ */
 public class MCBranch extends MachineCode {
-    private MachineBlock target;
-    private String cond;
+    private int type;
+    static int branchNumber = 0;
+    private MachineOperand dest;
+    private MachineOperand rs1;
+    private MachineOperand rs2;
+    private String label;
+
     
-    public MCBranch(MachineBlock target, String cond) {
-        this.target = target;
-        this.cond = cond;
+    public MCBranch(int type, MachineOperand dest, MachineOperand rs1, MachineOperand rs2) {
+        this.type = type;
+        this.dest = dest;
+        this.rs1 = rs1;
+        this.rs2 = rs2;
+        branchNumber ++;
+        this.label = "Branch" + String.valueOf(branchNumber);
     }
     
     @Override
     public String toString() {
-        return "b" + cond + "Block_" + target.getBlockName() + "_" + target.getBlockFunc().getFuncName();
+        StringBuilder sb = new StringBuilder();
+        sb.append(MCCodes[type] + " " + rs1.toString() + ", " + rs2.toString() + ", " + label + "\n");
+        sb.append("    " + "j\t" + label + "_else\n");
+
+        sb.append(label + ":\n");
+        sb.append("    " + "li " + dest.toString() + ", 1\n");
+        sb.append("    " + "j\t" + label + "_end\n");
+
+        sb.append(label + "_else:\n");
+        sb.append("    " + "li " + dest.toString() + ", 0\n");
+
+        sb.append(label + "_end:");
+
+        return sb.toString();
     }
     
     @Override
