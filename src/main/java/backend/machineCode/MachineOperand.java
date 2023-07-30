@@ -1,7 +1,6 @@
 package backend.machineCode;
 
 import backend.reg.PhysicsReg;
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
