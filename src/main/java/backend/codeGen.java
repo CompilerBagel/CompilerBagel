@@ -392,8 +392,13 @@ public class codeGen {
         String srcName = src.toString();
         MachineFunction mfunc = block.getBlockFunc();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
-        int offset = offsetMap.get(srcName);
-        MCLoad load = new MCLoad(s0Reg, dest, new Immeidiate(offset));
+        MCLoad load;
+        if (null == offsetMap.get(srcName)) {
+            load = new MCLoad(src, dest); // TODO: la when src.isAddress = true
+        } else {
+            int offset = offsetMap.get(srcName);
+            load = new MCLoad(s0Reg, dest, new Immeidiate(offset));
+        }
         block.getMachineCodes().add(load);
         setDefUse(dest, load);
         setDefUse(src, load);
@@ -493,13 +498,9 @@ public class codeGen {
                 if (baseType.equals(IRInt32Type())) {
                     Symbol symbol = globalMap.get(((GlobalRegister) operand).getIdentity());
                     if (symbol.getType().equals(IRInt32Type())) {
-                        MachineOperand value = new Immeidiate(symbol.getInitValue().get(0).intValue());
+                        MachineOperand value = new Label(symbol.getName(), symbol);
                         operandMap.put(((GlobalRegister) operand).getIdentity(), value);
                         return value;
-                    } else if (symbol.getType().equals(IRFloatType())){
-                        // TODO: Float
-                    } else {
-                        // TODO: array
                     }
                 }
             }
