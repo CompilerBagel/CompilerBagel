@@ -13,6 +13,9 @@ public class MCLoad extends MachineCode {
         this.src = src;
         this.dest = dest;
         this.offset = offset;
+        this.addDef(dest);
+        this.addUse(src);
+        this.addUse(offset);
     }
 
     public MCLoad(MachineOperand src, MachineOperand dest){

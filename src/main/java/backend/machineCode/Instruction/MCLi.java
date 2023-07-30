@@ -9,6 +9,8 @@ public class MCLi extends MachineCode {
     public MCLi(MachineOperand dest, MachineOperand imm){
         this.dest = dest;
         this.imm = imm;
+        this.addDef(dest);
+        this.addUse(imm);
     }
 
     @Override

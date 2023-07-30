@@ -16,6 +16,12 @@ public abstract class MachineCode {
         def.clear();
         use.clear();
     }
+    public void addDef(MachineOperand operand) {
+        def.add(operand);
+    }
+    public void addUse(MachineOperand operand) {
+        use.add(operand);
+    }
     // optimization for operand
     public abstract void replaceDef(MachineOperand oldOperand, MachineOperand newOperand);
     public abstract void replaceUse(MachineOperand oldOperand, MachineOperand newOperand);

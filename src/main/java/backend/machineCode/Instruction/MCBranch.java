@@ -27,6 +27,9 @@ public class MCBranch extends MachineCode {
         this.dest = dest;
         this.rs1 = rs1;
         this.rs2 = rs2;
+        this.addDef(dest);
+        this.addUse(rs1);
+        this.addUse(rs2);
         branchNumber ++;
         this.label = "Branch" + String.valueOf(branchNumber);
     }

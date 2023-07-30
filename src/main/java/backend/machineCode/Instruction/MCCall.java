@@ -15,6 +15,9 @@ public class MCCall extends MachineCode {
     public MCCall(MachineFunction function, List<MachineOperand> params) {
         this.function = function;
         this.params = params;
+        for (MachineOperand param : params) {
+            this.addUse(param);
+        }
     }
     
     @Override

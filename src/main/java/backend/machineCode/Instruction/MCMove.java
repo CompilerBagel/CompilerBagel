@@ -12,6 +12,8 @@ public class MCMove extends MachineCode {
     public MCMove(MachineOperand src, MachineOperand dest) {
         this.src = src;
         this.dest = dest;
+        this.addDef(dest);
+        this.addUse(src);
     }
     
     /**

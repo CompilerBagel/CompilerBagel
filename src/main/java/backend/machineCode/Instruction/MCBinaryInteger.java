@@ -18,6 +18,9 @@ public class MCBinaryInteger extends MachineCode {
         this.dest = dest;
         this.left = left;
         this.right = right;
+        this.addDef(dest);
+        this.addUse(left);
+        this.addUse(right);
         this.binaryOp = binaryOp;
     }
     

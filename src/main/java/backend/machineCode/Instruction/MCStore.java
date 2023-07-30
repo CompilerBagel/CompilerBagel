@@ -22,6 +22,9 @@ public class MCStore extends MachineCode {
         this.dest = dest;
         this.offset = offset;
         this.storeOp = storeOp;
+        this.addDef(dest);
+        this.addUse(src);
+        this.addUse(offset);
     }
     public void setOffset(final MachineOperand offset) {
         this.offset = offset;

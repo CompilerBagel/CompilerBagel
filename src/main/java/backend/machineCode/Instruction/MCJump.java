@@ -21,6 +21,8 @@ public class MCJump extends MachineCode {
     public MCJump(MachineOperand lCmp, MachineOperand rCmp, String lable){
         this.lCmp = lCmp;
         this.rCmp = rCmp;
+        this.addUse(lCmp);
+        this.addUse(rCmp);
         this.label = lable;
         this.type = BNE;
     }
