@@ -37,15 +37,15 @@ public class MCBranch extends MachineCode {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(MCCodes[type] + " " + rs1.toString() + ", " + rs2.toString() + ", " + label + "\n");
+        sb.append(MCCodes[type] + " " + rs1.getRegister() + ", " + rs2.getRegister() + ", " + label + "\n");
         sb.append("    " + "j\t" + label + "_else\n");
 
         sb.append(label + ":\n");
-        sb.append("    " + "li " + dest.toString() + ", 1\n");
+        sb.append("    " + "li " + dest.getRegister() + ", 1\n");
         sb.append("    " + "j\t" + label + "_end\n");
 
         sb.append(label + "_else:\n");
-        sb.append("    " + "li " + dest.toString() + ", 0\n");
+        sb.append("    " + "li " + dest.getRegister() + ", 0\n");
 
         sb.append(label + "_end:");
 

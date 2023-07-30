@@ -29,6 +29,6 @@ public class MCLi extends MachineCode {
 
     @Override
     public String toString(){
-        return "li " + dest.toString() + ", " + imm.toString();
+        return "li " + dest.getRegister() + ", " + imm.getRegister();
     }
 }

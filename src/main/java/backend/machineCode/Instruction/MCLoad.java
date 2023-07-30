@@ -36,7 +36,7 @@ public class MCLoad extends MachineCode {
      */
     @Override
     public String toString() {
-        return "lw " + dest.toString() + ", " + offset.toString() + "(" + src.toString() + ")";
+        return "lw " + dest.getRegister() + ", " + offset.getRegister() + "(" + src.getRegister() + ")";
     }
     
     @Override

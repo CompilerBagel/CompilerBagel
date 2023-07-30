@@ -37,7 +37,6 @@ public class codeGen {
     private HashMap<FunctionBlock, MachineFunction> funcMap;
     private static HashMap<BaseBlock, MachineBlock> blockMap;
     private HashMap<String, MachineOperand> operandMap;
-    private final int tmpImmCount = 0;
     private StringBuilder globalSb;
     private Map<String, Symbol> globalMap;
     
@@ -383,7 +382,11 @@ public class codeGen {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
         MachineOperand src = parseOperand(instr.getOperands().get(1));
         // TODO: calculate offset (temp 0)
-        MCLoad load = new MCLoad(dest, src, new Immeidiate(0));
+        String srcName = src.toString();
+        MachineFunction mfunc = block.getBlockFunc();
+        Map<String, Integer> offsetMap = mfunc.getOffsetMap();
+        int offset = offsetMap.get(srcName);
+        MCLoad load = new MCLoad(s0Reg, dest, new Immeidiate(offset));
         block.getMachineCodes().add(load);
         setDefUse(dest, load);
         setDefUse(src, load);
@@ -446,7 +449,9 @@ public class codeGen {
             block.getMachineCodes().add(mulLi);
             src = storeLi;
         }
-        MCStore store = new MCStore(src, dest, SW);
+        String destName = dest.toString();
+        int offset = block.getBlockFunc().getOffsetMap().get(destName);
+        MCStore store = new MCStore(src, s0Reg, new Immeidiate(offset), SW);
         block.getMachineCodes().add(store);
         setDefUse(src, store);
         setDefUse(dest, store);

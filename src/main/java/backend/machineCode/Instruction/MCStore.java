@@ -15,6 +15,8 @@ public class MCStore extends MachineCode {
         this.dest = dest;
         this.storeOp = storeOp;
         this.offset = new Immeidiate(0);
+        this.addDef(dest);
+        this.addUse(src);
     }
     
     public MCStore(MachineOperand src, MachineOperand dest, MachineOperand offset, String storeOp) {
@@ -40,7 +42,7 @@ public class MCStore extends MachineCode {
      */
     @Override
     public String toString() {
-        return storeOp + " " + src.toString() + ", " + offset.toString() + "(" + dest.toString() + ")";
+        return storeOp + " " + src.getRegister() + ", " + offset.getRegister() + "(" + dest.getRegister() + ")";
     }
     
     @Override

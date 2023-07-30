@@ -30,7 +30,7 @@ public class MCBinaryInteger extends MachineCode {
      */
     @Override
     public String toString() {
-        return binaryOp + " " + dest.toString() + ", " + left.toString() + ", " + right.toString();
+        return binaryOp + " " + dest.getRegister() + ", " + left.getRegister() + ", " + right.getRegister();
     }
     
     @Override

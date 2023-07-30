@@ -42,7 +42,7 @@ public class MCJump extends MachineCode {
         if(type.equals(J)) {
             return "j\t" + label;
         }else{
-            return "bne\t" + lCmp.toString() + ", " + rCmp.toString() + ", " + label;
+            return "bne\t" + lCmp.getRegister() + ", " + rCmp.getRegister() + ", " + label;
         }
     }
 }

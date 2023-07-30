@@ -68,7 +68,15 @@ public class MachineOperand {
     public String getIdentity(){
         return identity;
     }
+
     public String toString(){
+        if(physicsReg == null)
+            return identity;
+        else
+            return physicsReg.toString();
+    }
+
+    public String getRegister(){
         if(physicsReg == null)
             return identity;
         else
