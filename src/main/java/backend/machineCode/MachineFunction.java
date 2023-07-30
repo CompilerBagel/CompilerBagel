@@ -32,8 +32,15 @@ public class MachineFunction {
     public void initSavedRegs() { savedRegs.clear();}
     
     // stack
-    private int frameSize; // 栈帧大小
-    
+    private int frameSize; // 栈大小
+    private int stackCount = 0; // real count
+
+    public int getStackCount() {
+        return stackCount;
+    }
+    public void setStackCount(int count) {
+        stackCount = count;
+    }
     public void setFrameSize(int size) {
         this.frameSize = size;
     }

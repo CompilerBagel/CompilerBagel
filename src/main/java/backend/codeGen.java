@@ -146,7 +146,7 @@ public class codeGen {
     public void varAnalyse(MachineFunction mfunc, FunctionBlock func) {
         // stack analyse
         Map<String, Integer> offestMap = mfunc.getOffsetMap();
-        int stackCount = 0; // 4 byte = 1 count
+        int stackCount = mfunc.getStackCount(); // 4 byte = 1 count
         stackCount += 4; // ra 8 + s0 8  = 16 byte = 4 count
         if (!func.getType().equals(IRVoidType())) {
             stackCount += 1; // for ret value
@@ -163,8 +163,8 @@ public class codeGen {
                 offestMap.put(param.getText(), stackCount * 8);
             }
         }
-        int frameSize = stackCount * 4;
-        mfunc.setFrameSize(frameSize);
+        mfunc.setStackCount(stackCount);
+        mfunc.setFrameSize(stackAlign(stackCount));
     }
     
     public void parseBlock(BaseBlock block, MachineBlock machineBlock) {
@@ -202,21 +202,28 @@ public class codeGen {
 
     public void parseAllocaInstr(AllocaInstruction instr, MachineBlock block){
         MachineFunction mfunc = block.getBlockFunc();
-        int frameSize = mfunc.getFrameSize();
+        int stackCount = mfunc.getStackCount();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
         ValueRef resRegister = instr.getOperands().get(0);
         String resName = resRegister.getText();
         Type resType = ((PointerType) resRegister.getType()).getBaseType();
         if(resType.equals(IRInt32Type()) || resType.equals(IRFloatType())) {
-            offsetMap.put(resName, frameSize);
-            //mfunc.setFrameSize(frameSize + 4);
-            frameSize += 4;
+            stackCount ++;
+            offsetMap.put(resName, stackCount * 4);
         } else {
-            offsetMap.put(resName, frameSize);
-            //mfunc.setFrameSize(frameSize + 8);
-            frameSize += 8;
+            stackCount += 2;
+            offsetMap.put(resName, stackCount * 8);
         }
-        mfunc.setFrameSize(frameSize);
+        mfunc.setStackCount(stackCount);
+        mfunc.setFrameSize(stackAlign(stackCount));
+    }
+
+    private int stackAlign(int stackCount) {
+        int realSize = stackCount * 4;
+        if (realSize % 16 != 0) {
+            return ((realSize / 16) + 1) * 16;
+        }
+        return realSize;
     }
 
     public void parseBrInstr(BrInstruction instr, MachineBlock block){
@@ -508,11 +515,6 @@ public class codeGen {
             builder.append(function.getFunctionName()).append(":").append("\n");
             MachineFunction mfunc = funcMap.get(function);
             int frameSize = mfunc.getFrameSize();
-            // frame size must be 16 byte align
-            if (frameSize % 16 != 0) {
-                frameSize = ((frameSize / 16) + 1) * 16;
-                mfunc.setFrameSize(frameSize);
-            }
             mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new Immeidiate(-frameSize), ADDI));;
             mfunc.getPreList().add(new MCStore(spReg, raReg, new Immeidiate(frameSize - 8), SD));
             mfunc.getPreList().add(new MCStore(spReg, s0Reg, new Immeidiate(frameSize - 16), SD));
