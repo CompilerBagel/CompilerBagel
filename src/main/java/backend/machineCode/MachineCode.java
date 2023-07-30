@@ -1,10 +1,8 @@
 package backend.machineCode;
 
-import lombok.Data;
 
 import java.util.ArrayList;
 
-@Data
 public abstract class MachineCode {
     private boolean isDead; // 死代码判断
     
@@ -21,6 +19,12 @@ public abstract class MachineCode {
     }
     public void addUse(MachineOperand operand) {
         use.add(operand);
+    }
+    public ArrayList<MachineOperand> getDef() {
+        return def;
+    }
+    public ArrayList<MachineOperand> getUse() {
+        return use;
     }
     // optimization for operand
     public abstract void replaceDef(MachineOperand oldOperand, MachineOperand newOperand);
