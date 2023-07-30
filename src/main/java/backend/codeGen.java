@@ -208,11 +208,11 @@ public class codeGen {
         String resName = resRegister.getText();
         Type resType = ((PointerType) resRegister.getType()).getBaseType();
         if(resType.equals(IRInt32Type()) || resType.equals(IRFloatType())) {
-            stackCount ++;
             offsetMap.put(resName, stackCount * 4);
+            stackCount ++;
         } else {
-            stackCount += 2;
             offsetMap.put(resName, stackCount * 8);
+            stackCount += 2;
         }
         mfunc.setStackCount(stackCount);
         mfunc.setFrameSize(stackAlign(stackCount));
@@ -463,7 +463,7 @@ public class codeGen {
         }
         String destName = dest.toString();
         int offset = block.getBlockFunc().getOffsetMap().get(destName);
-        MCStore store = new MCStore(src, s0Reg, new Immeidiate(offset), SW);
+        MCStore store = new MCStore(src, s0Reg, new Immeidiate(-offset), SW);
         block.getMachineCodes().add(store);
         setDefUse(src, store);
         setDefUse(dest, store);
@@ -517,8 +517,8 @@ public class codeGen {
             MachineFunction mfunc = funcMap.get(function);
             int frameSize = mfunc.getFrameSize();
             mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new Immeidiate(-frameSize), ADDI));;
-            mfunc.getPreList().add(new MCStore(spReg, raReg, new Immeidiate(frameSize - 8), SD));
-            mfunc.getPreList().add(new MCStore(spReg, s0Reg, new Immeidiate(frameSize - 16), SD));
+            mfunc.getPreList().add(new MCStore(raReg, spReg, new Immeidiate(frameSize - 8), SD));
+            mfunc.getPreList().add(new MCStore(s0Reg, spReg, new Immeidiate(frameSize - 16), SD));
             mfunc.getPreList().add(new MCBinaryInteger(s0Reg, spReg, new Immeidiate(frameSize), ADDI));
             for (MachineCode code: funcMap.get(function).getPreList()) {
                 builder.append("    ");
