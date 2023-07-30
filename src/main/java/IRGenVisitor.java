@@ -8,9 +8,7 @@ import Type.PointerType;
 import Type.Type;
 import antlr.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
@@ -25,6 +23,7 @@ import static Type.VoidType.IRVoidType;
 public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRModule module = IRModuleCreateWithName("module");
     IRBuilder builder = IRCreateBuilder();
+    private final Map<String,Integer> ConstVarMap = new LinkedHashMap<>();
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
     private static final Type int1Type = IRInt1Type();
@@ -214,6 +213,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRAddGlobal(module, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
+                    ConstVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
                     IRSetInitializer(module, constVariable, assign, constName);
                 } else {
                     // TODO: 验证vardecl的正确性之后再搬过来
@@ -224,7 +224,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRBuildAlloca(builder, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
-                    IRBuildStore(builder, assign, constVariable);
+                    ValueRef storeRes = IRBuildStore(builder, assign, constVariable);
+                    ConstVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
                 } else {
                     // TODO: 验证vardecl的正确性之后再搬过来
                     //if(constDefContext.ASSIGN() != null) visitInitVal(constDefContext.constInitVal());
@@ -442,7 +443,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitMulExp(SysYParser.MulExpContext ctx) {
         ValueRef left = visit(ctx.exp(0));
         ValueRef right = visit(ctx.exp(1));
-
+        if(ConstVarMap.get(left.getText())!=null){
+            left = new ConstIntValueRef(ConstVarMap.get(left.getText()));
+        }
+        if(ConstVarMap.get(right.getText())!=null){
+            right = new ConstIntValueRef(ConstVarMap.get(right.getText()));
+        }
         if (ctx.MUL() != null) {
             return IRBuildCalc(builder, left, right, "mul_", MUL);
         } else if (ctx.DIV() != null) {
@@ -458,7 +464,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitPlusExp(SysYParser.PlusExpContext ctx) {
         ValueRef left = visit(ctx.exp(0));
         ValueRef right = visit(ctx.exp(1));
-
+        if(ConstVarMap.get(left.getText())!=null){
+            left = new ConstIntValueRef(ConstVarMap.get(left.getText()));
+        }
+        if(ConstVarMap.get(right.getText())!=null){
+            right = new ConstIntValueRef(ConstVarMap.get(right.getText()));
+        }
         if (ctx.PLUS() != null) {
             return IRBuildCalc(builder, left, right, "add_", ADD);
         } else if (ctx.MINUS() != null) {
@@ -506,6 +517,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         String variableName = ctx.lVal().IDENT().getText();
         ValueRef variable = currentScope.getValueRef(variableName);
         Type varType = currentScope.getType(variableName);
+        if(ConstVarMap.get(variable.getText())!=null){
+            return new ConstIntValueRef(ConstVarMap.get(variable.getText()));
+        }
         ValueRef lValPointer = visitLVal(ctx.lVal());
         if(arrayAddr){
             arrayAddr = false;
