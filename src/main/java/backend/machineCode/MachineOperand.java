@@ -8,6 +8,7 @@ import java.util.List;
 
 public class MachineOperand {
     public enum operandType {
+        label,
         imm, // 立即数
         virtualReg, // 虚拟寄存器
         physicsReg // 物理寄存器

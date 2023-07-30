@@ -49,4 +49,7 @@ public class Symbol {
     public Type getType() {
         return type;
     }
+    public String getName() {
+        return name;
+    }
 }
