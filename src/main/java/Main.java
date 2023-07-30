@@ -13,6 +13,7 @@ public class Main {
         if (args.length < 2) {
             System.out.println("input path is required");
         }
+        
         String source = args[0];
         String dest = args[1];
         String mcDest = args[2];

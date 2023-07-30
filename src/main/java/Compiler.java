@@ -10,11 +10,11 @@ import backend.codeGen;
 
 public class Compiler {
     public static void main(String[] args) throws IOException {
-//      功能测试： compiler testcase.sysy -S -o testcase.s
+//      功能测试：compiler -S -o testcase.s testcase.sy
 //      性能测试： compiler testcase.sysy -S -o testcase.s -O1
 
-        String source = args[0];
-        String mcDest = args[3];
+        String source = args[3];
+        String mcDest = args[2];
 
         CharStream input = CharStreams.fromFileName(source);
         // Lexer

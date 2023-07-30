@@ -1,28 +1,54 @@
 main:
-    addi sp, sp, -48
-    sd ra, 40(sp)
-    sd s0, 32(sp)
-    addi s0, sp, 48
+    addi sp, sp, -32
+    sd sp, 24(ra)
+    sd sp, 16(s0)
+    addi s0, sp, 32
 mainEntry1:
-    sw %a11, 0(2)
-    lw %a11, 0(%a14)
-    addiw %add_15, %a14, 1
-    sw %b13, 0(%add_15)
-    lw %b13, 0(%b18)
-    addiw %add_19, %b18, 2
-    sw %c17, 0(%add_19)
-    lw %c17, 0(%c22)
-    addiw %add_23, %c22, 3
-    sw %d21, 0(%add_23)
+    li a0, 1
+    sw a0, 24(s0)
+    li a0, 2
+    sw a0, 28(s0)
+    lw a0, 24(s0)
+    lw a1, 28(s0)
+    blt a0, a1, Branch1
+    j	Branch1_else
+Branch1:
+    li a2, 1
+    j	Branch1_end
+Branch1_else:
+    li a2, 0
+Branch1_end:
+    mv a2, a0
+    li a1, 0
+    bne a0, a1, Branch2
+    j	Branch2_else
+Branch2:
+    li a2, 1
+    j	Branch2_end
+Branch2_else:
+    li a2, 0
+Branch2_end:
+    li a0, 1
+    bne	a2, a0, trueBlock2
+    j	falseBlock3
+trueBlock2:
+    li a0, 3
+    sw a0, 24(s0)
+    j	afterBlock4
+falseBlock3:
+    li a0, 3
+    sw a0, 28(s0)
+    j	afterBlock4
+afterBlock4:
     li a0, 0
-    lw ra, 28(sp)
-    lw s0, 20(sp)
-    addi sp, sp, 36
+    lw ra, 24(sp)
+    lw s0, 16(sp)
+    addi sp, sp, 32
     ret
     li a0, 0
-    lw ra, 28(sp)
-    lw s0, 20(sp)
-    addi sp, sp, 36
+    lw ra, 24(sp)
+    lw s0, 16(sp)
+    addi sp, sp, 32
     ret
 getch:
 before_main:
