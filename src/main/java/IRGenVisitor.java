@@ -216,8 +216,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     ConstVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
                     IRSetInitializer(module, constVariable, assign, constName);
                 } else {
-                    // TODO: 验证vardecl的正确性之后再搬过来
-                    //if(constDefContext.ASSIGN() != null) visitInitVal(constDefContext.constInitVal());
+                    if(constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
                     IRSetInitializer(module, constVariable, init);
                 }
             } else {
@@ -227,9 +226,48 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     ValueRef storeRes = IRBuildStore(builder, assign, constVariable);
                     ConstVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
                 } else {
-                    // TODO: 验证vardecl的正确性之后再搬过来
-                    //if(constDefContext.ASSIGN() != null) visitInitVal(constDefContext.constInitVal());
-                    IRSetInitializer(module, constVariable, init);
+                    //TODO: 正确性验证
+                    if (constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
+//                    boolean flag = true;
+//                    for(int i = 0;i<init.size();i++){
+//                        if(!(init.get(i) instanceof ConstIntValueRef)){
+//                            flag = false;
+//                            break;
+//                        }
+//                    }
+//                    if(flag){
+//                        ValueRef initVariable = IRAddLocal(module , type , "__const.main."+variable.getText().substring(1));
+//                        IRSetInitializer(module, initVariable, init);
+//                    }else{
+
+                    List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
+                    for(int i = 0;i<init.size();i++){
+
+                        int totalCount = init.size();
+                        int temp = 1;
+                        int counter = i;
+
+                        arrayPtr.add(new ConstIntValueRef(0));
+                        for(int j = 0;j<elementDimension.size();j++){
+                            totalCount/=elementDimension.get(j);
+                            arrayPtr.add(new ConstIntValueRef(counter/totalCount));
+                            counter -= (counter/totalCount)*totalCount;
+                        }
+                        int counter1 = 1;
+                        List<ValueRef> paramList = new ArrayList<ValueRef>();
+                        paramList.add(intZero);
+                        paramList.add(arrayPtr.get(counter1++));
+                        ValueRef elementPtr = IRBuildGEP(builder,constVariable,paramList,2,"array");
+                        for(int j = 0;j<elementDimension.size()-1;j++){
+                            paramList.clear();
+                            paramList.add(intZero);
+                            paramList.add(arrayPtr.get(counter1++));
+                            elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array");
+                        }
+
+                        IRBuildStore(builder, init.get(i),elementPtr);
+                        arrayPtr.clear();
+                    }
                 }
             }
             currentScope.define(constName, constVariable, type);
@@ -332,6 +370,52 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 }
             }
             currentScope.define(variableName, variable, type);
+        }
+        return null;
+    }
+
+    @Override
+    public ValueRef visitConstInitVal(SysYParser.ConstInitValContext ctx) {
+        if (ctx.constExp() != null) return ctx.constExp().exp().accept(this);
+        // 处理initVal嵌套的情况
+        int layerDim = curDim;
+        boolean dump = false;
+        int count = 0; // 本层已有的数目
+        int fullCount = 0; // 需要进到上一层的数目
+        for (SysYParser.ConstInitValContext initValContext : ctx.constInitVal()) {
+            if (initValContext.constExp() != null) {
+                // 没有{}的处理
+                if (!dump) {
+                    dump = true;
+                    curDim = elementDimension.size() - 1;
+                    count = 0;
+                    fullCount = elementDimension.get(curDim);
+                }
+                init.add(initValContext.constExp().exp().accept(this));
+            } else {
+                int tmpDim = curDim;
+                curDim = tmpDim + 1;
+                visitConstInitVal(initValContext);
+                curDim = tmpDim;
+            }
+            count++;
+            if (count == fullCount) {
+                dump = false;
+                curDim--;
+                if (curDim <= layerDim) curDim = layerDim;
+                fullCount = elementDimension.get(curDim);
+                int layerParamCount = 1;
+                for (int i = curDim + 1; i < elementDimension.size(); i++) layerParamCount *= elementDimension.get(i);
+                count = init.size() / layerParamCount;
+            }
+        }
+        int totalParamCount = 1;
+        for (int i = layerDim; i < elementDimension.size(); i++) {
+            totalParamCount *= elementDimension.get(i);
+        }
+        boolean empty = (ctx.constInitVal().size() == 0);
+        if (init.size() % totalParamCount != 0 || empty) {
+            for (int i = init.size() % totalParamCount; i < totalParamCount; i++) init.add(intZero);
         }
         return null;
     }
