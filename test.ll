@@ -19,23 +19,20 @@ declare void @_sysy_stoptime(i32 %0)
 
 define i32 @main() {
 mainEntry1:
-  %a11 = alloca i32, align 4
-  store i32 1, i32* %a11, align 4
-  %b13 = alloca i32, align 4
-  store i32 2, i32* %b13, align 4
-  %a15 = load i32, i32* %a11, align 4
-  %b16 = load i32, i32* %b13, align 4
-  %icmp_LT17 = icmp slt i32 %a15, %b16
-  %zext_18 = zext i1 %icmp_LT17 to i32
-  %icmp_19 = icmp ne i32 %zext_18, 0
-  br i1 %icmp_19, label %trueBlock2, label %falseBlock3
-trueBlock2:
-  store i32 3, i32* %a11, align 4
-  br label %afterBlock4
-falseBlock3:
-  store i32 3, i32* %b13, align 4
-  br label %afterBlock4
-afterBlock4:
+  %a0 = alloca i32, align 4
+  store i32 2, i32* %a0, align 4
+  %b2 = alloca i32, align 4
+  %a3 = load i32, i32* %a0, align 4
+  %add_4 = add i32 %a3, 1
+  store i32 %add_4, i32* %b2, align 4
+  %c6 = alloca i32, align 4
+  %b7 = load i32, i32* %b2, align 4
+  %add_8 = add i32 %b7, 2
+  store i32 %add_8, i32* %c6, align 4
+  %d10 = alloca i32, align 4
+  %c11 = load i32, i32* %c6, align 4
+  %add_12 = add i32 %c11, 3
+  store i32 %add_12, i32* %d10, align 4
   ret i32 0
   ret i32 0
 }
