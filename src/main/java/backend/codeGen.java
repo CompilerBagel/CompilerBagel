@@ -422,7 +422,7 @@ public class codeGen {
                 setDefUse(src, li);
                 setDefUse(new PhysicsReg("a0"), li); // TODO:?
             }else{
-                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new Immeidiate(0), ADDW);
+                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new Immeidiate(0), ADDIW);
                 block.getMachineCodes().add(addw);
                 setDefUse(src, addw);
                 setDefUse(new PhysicsReg("a0"), addw);
