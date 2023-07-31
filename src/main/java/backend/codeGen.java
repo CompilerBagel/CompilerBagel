@@ -149,6 +149,7 @@ public class codeGen {
         int stackCount = mfunc.getStackCount(); // 4 byte = 1 count
         stackCount += 4; // ra 8 + s0 8  = 16 byte = 4 count
         if (!func.getType().equals(IRVoidType())) {
+            offestMap.put("ret", stackCount * 4);
             stackCount += 1; // for ret value
         }
         offestMap.put("ra", 8);
@@ -392,16 +393,18 @@ public class codeGen {
         String srcName = src.toString();
         MachineFunction mfunc = block.getBlockFunc();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
-        MCLoad load;
         if (null == offsetMap.get(srcName)) {
-            load = new MCLoad(src, dest); // TODO: la when src.isAddress = true
+            MCLoad load = new MCLoad(src, dest); // TODO: la when src.isAddress = true
+            block.getMachineCodes().add(load);
+            setDefUse(dest, load);
+            setDefUse(src, load);
         } else {
             int offset = offsetMap.get(srcName);
-            load = new MCLoad(s0Reg, dest, new Immeidiate(-offset));
+            MCLoad load = new MCLoad(s0Reg, dest, new Immeidiate(-offset));
+            block.getMachineCodes().add(load);
+            setDefUse(dest, load);
+            setDefUse(src, load);
         }
-        block.getMachineCodes().add(load);
-        setDefUse(dest, load);
-        setDefUse(src, load);
     }
 
     public void parsePhiInstr(PhiInstruction instr, MachineBlock block){
@@ -419,10 +422,10 @@ public class codeGen {
                 setDefUse(src, li);
                 setDefUse(new PhysicsReg("a0"), li); // TODO:?
             }else{
-                MCLoad load = new MCLoad(src, new PhysicsReg("a0"));
-                block.getMachineCodes().add(load);
-                setDefUse(src, load);
-                setDefUse(new PhysicsReg("a0"), load);
+                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new PhysicsReg("zero"), ADDW);
+                block.getMachineCodes().add(addw);
+                setDefUse(src, addw);
+                setDefUse(new PhysicsReg("a0"), addw);
             }
         }
         // ld
@@ -535,7 +538,7 @@ public class codeGen {
                 }
             }
         }
-        builder.append(globalSb);
+        // builder.append(globalSb);
         try{
             BufferedWriter out = new BufferedWriter(new FileWriter(dest));
             out.write(builder.toString());
