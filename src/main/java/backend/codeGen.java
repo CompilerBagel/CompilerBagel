@@ -128,7 +128,7 @@ public class codeGen {
     public void declareGlobal(Map<String, Symbol> map) {
         globalSb = new StringBuilder();
         for (Map.Entry<String, Symbol> entry: map.entrySet()) {
-            globalSb.append(entry.getKey()).append(":").append("\n");
+            globalSb.append("    ").append(entry.getKey()).append(":").append("\n");
             List<Float> values = entry.getValue().getInitValue();
             boolean isInt = false;
             if (entry.getValue().getType().equals(IRInt32Type())) {
@@ -136,9 +136,9 @@ public class codeGen {
             }
             for (Float value: values) {
                 if (isInt)
-                    globalSb.append("    " + ".word ").append(value.intValue()).append("\n");
+                    globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
                 else
-                    globalSb.append("    " + ".word ").append(value).append("\n");
+                    globalSb.append("        " + ".word ").append(value).append("\n");
             }
         }
     }
@@ -516,6 +516,10 @@ public class codeGen {
 
     public void PrintCodeToFile(String dest) {
         StringBuilder builder = new StringBuilder();
+        builder.append(".global main\n");
+        builder.append(".data\n");
+        builder.append(globalSb);
+        builder.append(".text\n");
         for(FunctionBlock function: module.getFunctionBlocks()){
             builder.append(function.getFunctionName()).append(":").append("\n");
             MachineFunction mfunc = funcMap.get(function);
@@ -539,7 +543,6 @@ public class codeGen {
                 }
             }
         }
-        // builder.append(globalSb);
         try{
             BufferedWriter out = new BufferedWriter(new FileWriter(dest));
             out.write(builder.toString());

@@ -19,11 +19,13 @@ declare void @_sysy_stoptime(i32 %0)
 
 define i32 @main() {
 mainEntry1:
-  %a11 = alloca i32, align 4
-  store i32 0, i32* %a11, align 4
-  store i32 10, i32* %a11, align 4
-  %a14 = load i32, i32* %a11, align 4
-  %add_15 = add i32 %a14, 3
-  ret i32 %add_15
+  %a0 = alloca i32, align 4
+  store i32 10, i32* %a0, align 4
+  %b2 = alloca i32, align 4
+  %a3 = load i32, i32* %a0, align 4
+  %sub_4 = sub i32 %a3, 3
+  store i32 %sub_4, i32* %b2, align 4
+  %a6 = load i32, i32* %a0, align 4
+  ret i32 %a6
   ret i32 0
 }

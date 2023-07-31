@@ -50,7 +50,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     }
 
     private void addLibs(GlobalScope globalScope){
-        FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
+/*        FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
         globalScope.define("getint", addLib("getint", getIntType), getIntType);
 
         FunctionType getchType = new FunctionType(new ArrayList<>(), int32Type);
@@ -112,7 +112,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         List<Type> endTimeTypeParams = new ArrayList<>();
         endTimeTypeParams.add(int32Type);
         FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
-        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
+        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);*/
 
     }
 
