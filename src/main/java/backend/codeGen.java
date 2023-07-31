@@ -397,7 +397,7 @@ public class codeGen {
             load = new MCLoad(src, dest); // TODO: la when src.isAddress = true
         } else {
             int offset = offsetMap.get(srcName);
-            load = new MCLoad(s0Reg, dest, new Immeidiate(offset));
+            load = new MCLoad(s0Reg, dest, new Immeidiate(-offset));
         }
         block.getMachineCodes().add(load);
         setDefUse(dest, load);
