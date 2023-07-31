@@ -28,6 +28,7 @@ public class codeGen {
     private static final Type floatType = IRFloatType();
     private static final Type int1Type = IRInt1Type();
     private static final Type voidType = IRVoidType();
+    private final Type pointerToIntType = new PointerType(int32Type);
     private static final PhysicsReg spReg = PhysicsReg.getSpReg();
     private static final PhysicsReg s0Reg = PhysicsReg.getS0Reg();
     private static final PhysicsReg raReg = PhysicsReg.getRaReg();
@@ -292,7 +293,7 @@ public class codeGen {
                     code = new MCBinaryInteger(dest, src, imm, ADDIW);
                     break;
                 case IRConstants.SUB:
-                    code = new MCBinaryInteger(dest, src, imm, SUBIW);
+                    code = new MCBinaryInteger(dest, src, new Immeidiate(-((Immeidiate)imm).getImmValue()), ADDIW);
                     break;
                 case IRConstants.MUL:
                     // add register to store the imm(mul operand can only be register)
@@ -394,10 +395,14 @@ public class codeGen {
         MachineFunction mfunc = block.getBlockFunc();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
         if (null == offsetMap.get(srcName)) {
-            MCLoad load = new MCLoad(src, dest, LW); // TODO: la when src.isAddress = true and LD?
-            block.getMachineCodes().add(load);
-            setDefUse(dest, load);
-            setDefUse(src, load);
+            MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
+            MCLoad ld = new MCLoad(new PhysicsReg("t0"), dest, LW); // TODO: la when src.isAddress = true and LD?
+            block.getMachineCodes().add(la);
+            block.getMachineCodes().add(ld);
+            setDefUse(dest, la);
+            setDefUse(src, la);
+            setDefUse(dest, ld);
+            setDefUse(src, ld);
         } else {
             int offset = offsetMap.get(srcName);
             MCLoad load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), LW);
@@ -421,7 +426,7 @@ public class codeGen {
                 block.getMachineCodes().add(li);
                 setDefUse(src, li);
                 setDefUse(new PhysicsReg("a0"), li); // TODO:?
-            }else{
+            } else {
                 MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new Immeidiate(0), ADDIW);
                 block.getMachineCodes().add(addw);
                 setDefUse(src, addw);

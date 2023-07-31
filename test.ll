@@ -17,15 +17,14 @@ declare void @after_main()
 declare void @_sysy_starttime(i32 %0)
 declare void @_sysy_stoptime(i32 %0)
 
+@a0 = global i32 10
 define i32 @main() {
 mainEntry1:
-  %a0 = alloca i32, align 4
-  store i32 10, i32* %a0, align 4
-  %b2 = alloca i32, align 4
-  %a3 = load i32, i32* %a0, align 4
-  %sub_4 = sub i32 %a3, 3
-  store i32 %sub_4, i32* %b2, align 4
-  %a6 = load i32, i32* %a0, align 4
-  ret i32 %a6
+  %b0 = alloca i32, align 4
+  %a1 = load i32, i32* @a0, align 4
+  %sub_2 = sub i32 %a1, 3
+  store i32 %sub_2, i32* %b0, align 4
+  %a4 = load i32, i32* @a0, align 4
+  ret i32 %a4
   ret i32 0
 }
