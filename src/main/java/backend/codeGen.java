@@ -356,12 +356,21 @@ public class codeGen {
         List<ValueRef> params = instr.getParams();
         List<MachineOperand> operands = new ArrayList<>();
         for (ValueRef param: params) {
-            BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
-            BaseRegister src = new BaseRegister("li", param.getType());
-            MCLoad load = new MCLoad(src, vReg, new Immeidiate(0), LW);
-            setDefUse(vReg, load);
-            block.getMachineCodes().add(load);
-            operands.add(vReg);
+            MachineOperand op = parseOperand(param);
+            if (op.isImm()){
+                BaseRegister tmp = new BaseRegister("li", param.getType());
+                MCLi li = new MCLi(tmp, op);
+                setDefUse(tmp, li);
+                block.getMachineCodes().add(li);
+                operands.add(tmp);
+            } else {
+                BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
+                BaseRegister src = new BaseRegister("li", param.getType());
+                MCLoad load = new MCLoad(src, vReg, new Immeidiate(0), LW);
+                setDefUse(vReg, load);
+                block.getMachineCodes().add(load);
+                operands.add(vReg);
+            }
         }
         MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
         setDefUse(dest, call);
@@ -427,7 +436,7 @@ public class codeGen {
                 setDefUse(src, li);
                 setDefUse(new PhysicsReg("a0"), li); // TODO:?
             } else {
-                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new Immeidiate(0), ADDIW);
+                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new Immeidiate(0), ADDW);
                 block.getMachineCodes().add(addw);
                 setDefUse(src, addw);
                 setDefUse(new PhysicsReg("a0"), addw);
