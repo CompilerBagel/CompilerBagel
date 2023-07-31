@@ -462,7 +462,8 @@ public class codeGen {
             src = storeLi;
         }
         String destName = dest.toString();
-        int offset = block.getBlockFunc().getOffsetMap().get(destName);
+        Map<String, Integer> offsetMap = block.getBlockFunc().getOffsetMap();
+        int offset = offsetMap.get(destName);
         MCStore store = new MCStore(src, s0Reg, new Immeidiate(-offset), SW);
         block.getMachineCodes().add(store);
         setDefUse(src, store);

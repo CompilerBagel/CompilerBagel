@@ -6,7 +6,7 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
-import antlr.*;
+//import antlr.*;
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitProgram(SysYParser.ProgramContext ctx) {
         globalScope = new GlobalScope("globalScope", null);
         currentScope = globalScope;
-        addLibs(globalScope);
+        //addLibs(globalScope);
         return super.visitProgram(ctx);
     }
 
