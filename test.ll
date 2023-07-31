@@ -17,18 +17,41 @@ declare void @after_main()
 declare void @_sysy_starttime(i32 %0)
 declare void @_sysy_stoptime(i32 %0)
 
-define i32 @f(i32 %f00) {
-fEntry1:
-  %f1 = alloca i32, align 4
-  store i32 %f00, i32* %f1, align 4
-  %f3 = load i32, i32* %f1, align 4
-  %mul_4 = mul i32 %f3, 2
-  ret i32 %mul_4
+define i32 @ififElse() {
+ififElseEntry1:
+  %a0 = alloca i32, align 4
+  store i32 0, i32* %a0, align 4
+  store i32 5, i32* %a0, align 4
+  %b3 = alloca i32, align 4
+  store i32 0, i32* %b3, align 4
+  store i32 10, i32* %b3, align 4
+  %a6 = load i32, i32* %a0, align 4
+  %icmp_EQ7 = icmp eq i32 %a6, 5
+  br i1 %icmp_EQ7, label %trueBlock2, label %falseBlock3
+trueBlock2:
+  %b8 = load i32, i32* %b3, align 4
+  %icmp_EQ9 = icmp eq i32 %b8, 10
+  br i1 %icmp_EQ9, label %trueBlock5, label %falseBlock6
+falseBlock3:
+  br label %afterBlock4
+afterBlock4:
+  %a14 = load i32, i32* %a0, align 4
+  ret i32 %a14
   ret i32 0
+trueBlock5:
+  store i32 25, i32* %a0, align 4
+  br label %afterBlock7
+falseBlock6:
+  %a11 = load i32, i32* %a0, align 4
+  %add_12 = add i32 %a11, 15
+  store i32 %add_12, i32* %a0, align 4
+  br label %afterBlock7
+afterBlock7:
+  br label %afterBlock4
 }
 define i32 @main() {
-mainEntry2:
-  %f5 = call i32 @f(i32 10)
-  ret i32 %f5
+mainEntry8:
+  %ififElse15 = call i32 @ififElse()
+  ret i32 %ififElse15
   ret i32 0
 }

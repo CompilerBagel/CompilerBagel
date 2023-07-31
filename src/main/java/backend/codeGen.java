@@ -418,16 +418,27 @@ public class codeGen {
             }
             case IRConstants.IRIntSGE, IRConstants.IRIntUGE -> {
                 MachineOperand res = new BaseRegister("tmp", int32Type);
-                MCBinaryInteger sub = new MCBinaryInteger(res, left, right, SUBW);
-                MCSetz setz = new MCSetz(dest, res, IRConstants.IRIntEQ);
-                MCSet set = new MCSet(dest, left, right);
-                block.getMachineCodes().add(sub);
-                block.getMachineCodes().add(setz);
+                MCSet set = new MCSet(res, left, right);
+                MCBinaryInteger xor = new MCBinaryInteger(dest, res, new Immeidiate(1), XORI);
                 block.getMachineCodes().add(set);
-                setDefUse(dest, set);
-                setDefUse(left, sub);
-                setDefUse(right, sub);
-                setDefUse(res, sub);
+                block.getMachineCodes().add(xor);
+                setDefUse(dest, xor);
+                setDefUse(res, xor);
+                setDefUse(left, set);
+                setDefUse(right, set);
+                setDefUse(res, set);
+            }
+            case IRConstants.IRIntSLE, IRConstants.IRIntULE -> {
+                MachineOperand res = new BaseRegister("tmp", int32Type);
+                MCSet set = new MCSet(res, right, left);
+                MCBinaryInteger xor = new MCBinaryInteger(dest, res, new Immeidiate(1), XORI);
+                block.getMachineCodes().add(set);
+                block.getMachineCodes().add(xor);
+                setDefUse(dest, xor);
+                setDefUse(res, xor);
+                setDefUse(left, set);
+                setDefUse(right, set);
+                setDefUse(res, set);
             }
         }
     }
