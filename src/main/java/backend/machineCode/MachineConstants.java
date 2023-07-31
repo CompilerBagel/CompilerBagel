@@ -16,7 +16,8 @@ public final class MachineConstants {
     public static final String DIVW = "divw";
     public static final String SW = "sw";
     public static final String SD = "sd";
-
+    public static final String LW = "lw";
+    public static final String LD = "ld";
     public static final String J = "j";
     public static final String BNE = "bne";
 

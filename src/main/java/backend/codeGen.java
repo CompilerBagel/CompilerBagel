@@ -357,7 +357,7 @@ public class codeGen {
         for (ValueRef param: params) {
             BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
             BaseRegister src = new BaseRegister("li", param.getType());
-            MCLoad load = new MCLoad(src, vReg, new Immeidiate(0));
+            MCLoad load = new MCLoad(src, vReg, new Immeidiate(0), LW);
             setDefUse(vReg, load);
             block.getMachineCodes().add(load);
             operands.add(vReg);
@@ -394,13 +394,13 @@ public class codeGen {
         MachineFunction mfunc = block.getBlockFunc();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
         if (null == offsetMap.get(srcName)) {
-            MCLoad load = new MCLoad(src, dest); // TODO: la when src.isAddress = true
+            MCLoad load = new MCLoad(src, dest, LW); // TODO: la when src.isAddress = true and LD?
             block.getMachineCodes().add(load);
             setDefUse(dest, load);
             setDefUse(src, load);
         } else {
             int offset = offsetMap.get(srcName);
-            MCLoad load = new MCLoad(s0Reg, dest, new Immeidiate(-offset));
+            MCLoad load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), LW);
             block.getMachineCodes().add(load);
             setDefUse(dest, load);
             setDefUse(src, load);
@@ -430,13 +430,13 @@ public class codeGen {
         }
         // ld
         MCLoad raLoad = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("ra"),
-                new Immeidiate(block.getBlockFunc().getFrameSize() - 8));
+                new Immeidiate(block.getBlockFunc().getFrameSize() - 8), LD);
         block.getMachineCodes().add(raLoad);
         setDefUse(new PhysicsReg("sp"), raLoad);
         setDefUse(new PhysicsReg("ra"), raLoad);
 
         MCLoad s0Load = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("s0"),
-                new Immeidiate(block.getBlockFunc().getFrameSize() - 16));
+                new Immeidiate(block.getBlockFunc().getFrameSize() - 16), LD);
         block.getMachineCodes().add(s0Load);
         setDefUse(new PhysicsReg("sp"), s0Load);
         setDefUse(new PhysicsReg("s0"), s0Load);
