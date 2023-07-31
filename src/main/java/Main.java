@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.IOException;
-import antlr.*;
+// import antlr.*;
 import static IRBuilder.IRModule.PrintModuleToFile;
 import backend.codeGen;
 
@@ -28,7 +28,6 @@ public class Main {
         // Generate intermediate code(IR)
         IRGenVisitor irGenVisitorVisitor = new IRGenVisitor();
         irGenVisitorVisitor.visit(tree);
-
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
 
         codeGen code = new codeGen();

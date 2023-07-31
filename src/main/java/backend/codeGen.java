@@ -422,7 +422,7 @@ public class codeGen {
                 setDefUse(src, li);
                 setDefUse(new PhysicsReg("a0"), li); // TODO:?
             }else{
-                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new PhysicsReg("zero"), ADDW);
+                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new Immeidiate(0), ADDW);
                 block.getMachineCodes().add(addw);
                 setDefUse(src, addw);
                 setDefUse(new PhysicsReg("a0"), addw);
@@ -465,7 +465,8 @@ public class codeGen {
             src = storeLi;
         }
         String destName = dest.toString();
-        int offset = block.getBlockFunc().getOffsetMap().get(destName);
+        Map<String, Integer> offsetMap = block.getBlockFunc().getOffsetMap();
+        int offset = offsetMap.get(destName);
         MCStore store = new MCStore(src, s0Reg, new Immeidiate(-offset), SW);
         block.getMachineCodes().add(store);
         setDefUse(src, store);
