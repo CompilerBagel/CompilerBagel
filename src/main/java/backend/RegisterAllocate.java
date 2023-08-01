@@ -124,9 +124,10 @@ public class RegisterAllocate {
                 List<MachineOperand> uses = code.getUse();
 
                 for (MachineOperand use : uses) {
+                    use.removeUse(code);
                     if(use.isImm()) continue;
                     if (use.getPhysicsReg() != null) {
-                        if (use.getPhysicsReg().noUser()) {
+                        if (use.noUser()) {
                             use.getPhysicsReg().giveBack();
                         }
                         continue;
@@ -140,7 +141,8 @@ public class RegisterAllocate {
                     PhysicsReg allocatedReg = getReg(use);
                     if (allocatedReg != null) {
                         use.setPhysicsReg(allocatedReg);
-                        use.removeUse(code);
+                        allocatedReg.occupy();
+
                         if (use.noUser()) {
                             allocatedReg.giveBack();
                         }
@@ -152,7 +154,7 @@ public class RegisterAllocate {
                 for (MachineOperand def : defs) {
                     if(def.isImm()) continue;
                     if (def.getPhysicsReg() != null) {
-                        if (def.getPhysicsReg().noUser()) {
+                        if (def.noUser()) {
                             def.getPhysicsReg().giveBack();
                         }
                         continue;
@@ -166,6 +168,7 @@ public class RegisterAllocate {
                     PhysicsReg allocatedReg = getReg(def);
                     if (allocatedReg != null) {   // have register
                         def.setPhysicsReg(allocatedReg);
+                        allocatedReg.occupy();
                         if (def.noUser()) {
                             allocatedReg.giveBack();
                         }

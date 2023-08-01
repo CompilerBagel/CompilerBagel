@@ -6,9 +6,11 @@ import java.util.Map;
 public class PhysicsReg extends Reg {
     private String regName;
     private int index;
+
     public PhysicsReg(operandType t, String identity) {
         super(t, identity);
     }
+
     public static int regNum = 32;
     private final static HashMap<String, Integer> nameMap = new HashMap<>();
     private final static HashMap<Integer, String> indexMap = new HashMap<>();
@@ -48,7 +50,7 @@ public class PhysicsReg extends Reg {
         nameMap.put("t4", 29);
         nameMap.put("t5", 30);
         nameMap.put("t6", 31);
-        
+
         for (Map.Entry<String, Integer> entry : nameMap.entrySet()) {
             String name = entry.getKey();
             int index = entry.getValue();
@@ -60,13 +62,13 @@ public class PhysicsReg extends Reg {
         }
 
     }
-    
+
     public PhysicsReg(int index) {
         super(operandType.physicsReg, indexMap.get(index));
         this.index = index;
         this.regName = indexMap.get(index);
     }
-    
+
     public PhysicsReg(String regName) {
         super(operandType.physicsReg, regName);
         this.index = nameMap.get(regName);
@@ -77,7 +79,6 @@ public class PhysicsReg extends Reg {
         if (physicsRegs[index] == null) {
             physicsRegs[index] = new PhysicsReg(index);
         }
-        isAvailable[index] = false;
         return physicsRegs[index];
     }
 
@@ -92,6 +93,7 @@ public class PhysicsReg extends Reg {
     public static PhysicsReg getS0Reg() {
         return getPhysicsReg(8);
     }
+
     public static PhysicsReg getA0Reg() {
         return getPhysicsReg(10);
     }
@@ -125,12 +127,17 @@ public class PhysicsReg extends Reg {
             isAvailable[i] = true;
         }
     }
+
     public static boolean isAvailableReg(int index) {
         return isAvailable[index];
     }
 
     public void giveBack() {
         isAvailable[index] = true;
+    }
+
+    public void occupy() {
+        isAvailable[index] = false;
     }
 
     @Override
