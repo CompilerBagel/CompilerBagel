@@ -573,7 +573,11 @@ public class codeGen {
             builder.append(function.getFunctionName()).append(":").append("\n");
             MachineFunction mfun = funcMap.get(function);
             mfun.allocate();
-            mfun.restore();
+            List<MachineBlock> retBlocks = new ArrayList<>();
+            for (BaseBlock retBlock: function.getRetBlocks()) {
+                retBlocks.add(blockMap.get(retBlock));
+            }
+            mfun.restore(retBlocks);
             for(BaseBlock block: function.getBaseBlocks()){
                 MachineBlock machineBlock = blockMap.get(block);
                 builder.append(machineBlock.getBlockName()).append(":\n");

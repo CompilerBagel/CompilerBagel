@@ -1,5 +1,6 @@
 package backend.machineCode;
 
+import IRBuilder.BaseBlock;
 import backend.machineCode.Instruction.MCBinaryInteger;
 import backend.machineCode.Instruction.MCLoad;
 import backend.machineCode.Instruction.MCStore;
@@ -61,17 +62,15 @@ public class MachineFunction {
         allocateList.add(new MCBinaryInteger(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));
         this.getEntryBlock().addInstrsAtHead(allocateList);
     }
-    public void restore() {
+    public void restore(List<MachineBlock> retBlocks) {
         restoreList.add(new MCLoad(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 8), LD));
         restoreList.add(new MCLoad(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 16), LD));
         restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));;
-        this.getRetBlock().addInstrsBeforeLast(restoreList);
+        for (MachineBlock retBlock : retBlocks) {
+            retBlock.addInstrsBeforeLast(restoreList);
+        }
     }
     public MachineBlock getEntryBlock() {
         return machineBlocks.getFirst();
-    }
-    public MachineBlock getRetBlock() {
-        // TODO: after frontend done
-        return null;
     }
 }
