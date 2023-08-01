@@ -470,7 +470,12 @@ public class codeGen {
     public void parseLoadInstr(LoadInstruction instr, MachineBlock block) {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
         MachineOperand src = parseOperand(instr.getOperands().get(1));
-        // TODO: calculate offset (temp 0)
+        if (src.isImm()) {
+            src = addLiOperation(src, block);
+        }
+        if (dest.isImm()) {
+            dest = addLiOperation(dest, block);
+        }
         String srcName = src.toString();
         MachineFunction mfunc = block.getBlockFunc();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
@@ -518,22 +523,28 @@ public class codeGen {
     public void parseStoreInstr(StoreInstruction instr, MachineBlock block) {
         MachineOperand src = parseOperand(instr.getOperands().get(1));
         MachineOperand dest = parseOperand(instr.getOperands().get(2));
-        //todo: calculate offset
-        //MachineOperand offest = new MachineOperand(0);
-        if(src.isImm()){
-            BaseRegister storeReg = new BaseRegister("li", int32Type);
-            MachineOperand storeLi = parseOperand(storeReg);
-            MCLi mulLi = new MCLi(storeLi, src);
-            setDefUse(storeLi, mulLi);
-            block.getMachineCodes().add(mulLi);
-            src = storeLi;
+        Map<String, Integer> offsetMap = block.getBlockFunc().getOffsetMap();
+        if (src.isImm()) {
+            src = addLiOperation(src, block);
+        }
+        if (dest.isImm()) {
+            dest = addLiOperation(dest, block);
         }
         String destName = dest.toString();
-        Map<String, Integer> offsetMap = block.getBlockFunc().getOffsetMap();
-        int offset = offsetMap.get(destName);
-        MCStore store = new MCStore(src, s0Reg, new Immeidiate(-offset), SW);
-        block.getMachineCodes().add(store);
-        setDefUse(src, store);
+        if (null == offsetMap.get(destName)) {
+            MCLoad la = new MCLoad(dest, new PhysicsReg("t0"), LA);
+            MCStore store = new MCStore(src, new PhysicsReg("t0"), new Immeidiate(0), SW);
+            block.getMachineCodes().add(la);
+            block.getMachineCodes().add(store);
+            setDefUse(src, store);
+            setDefUse(dest, la);
+        } else {
+            int offset = offsetMap.get(destName);
+            MCStore store = new MCStore(src, s0Reg, new Immeidiate(-offset), SW);
+            block.getMachineCodes().add(store);
+            setDefUse(src, store);
+            setDefUse(dest, store);
+        }
     }
 
     public void parseTypeTransInstr(TypeTransInstruction instr, MachineBlock block){
