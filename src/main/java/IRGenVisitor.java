@@ -30,6 +30,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private static final Type voidType = IRVoidType();
     private GlobalScope globalScope = null;
     private Scope currentScope = null;
+    private BaseBlock currentBlock = null;
     private int localScopeCounter = 0;
     private FunctionBlock currentFunction = null;
     private Stack<BaseBlock> conditionStack = new Stack<>();
@@ -183,6 +184,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         localScopeCounter++;
         currentScope = new LocalScope(scopeName, currentScope);
         ValueRef ret = super.visitBlock(ctx);
+        currentBlock = (BaseBlock) ret;
         currentScope = currentScope.getEnclosingScope();
         return ret;
     }
@@ -486,6 +488,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         if (ctx.exp() != null) {
             result = visit(ctx.exp());
         }
+        currentFunction.addRetBlock(currentBlock);
         IRBuildRet(builder, result);
         return result;
     }
