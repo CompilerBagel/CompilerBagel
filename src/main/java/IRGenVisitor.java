@@ -50,7 +50,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     }
 
     private void addLibs(GlobalScope globalScope){
-        FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
+/*        FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
         globalScope.define("getint", addLib("getint", getIntType), getIntType);
 
         FunctionType getchType = new FunctionType(new ArrayList<>(), int32Type);
@@ -112,7 +112,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         List<Type> endTimeTypeParams = new ArrayList<>();
         endTimeTypeParams.add(int32Type);
         FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
-        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
+        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);*/
 
     }
 
@@ -677,12 +677,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx) {
         ValueRef conditionVal = this.visit(ctx.cond());
-        ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+        // ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
 
-        IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
+        // IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
+        IRBuildCondBr(builder, conditionVal, trueBlock, falseBlock);
 
         IRPositionBuilderAtEnd(builder, trueBlock);
         this.visit(ctx.stmt(0));
@@ -714,7 +715,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             cmpResult = IRBuildICmp(builder, IRIntSGT, lVal, rVal, "icmp_GT");
         }
 
-        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        // return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        return cmpResult;
     }
 
     @Override
@@ -728,7 +730,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.NEQ() != null) {
             cmpResult = IRBuildICmp(builder, IRIntNE, lVal, rVal, "icmp_NE");
         }
-        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        // return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        return cmpResult;
     }
 
     @Override
@@ -736,7 +739,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
         ValueRef cmpResult = IRBuildAnd(builder, lVal, rVal, "and_");
-        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        // return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        return cmpResult;
     }
 
     @Override
@@ -744,7 +748,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
         ValueRef cmpResult = IRBuildOr(builder,  lVal, rVal, "or_");
-        return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        // return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
+        return cmpResult;
     }
 
     @Override
@@ -757,8 +762,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder, condBlock);
         ValueRef conditionVal = this.visit(ctx.cond());
-        ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
-        IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
+        // ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
+        // IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
+        IRBuildCondBr(builder, conditionVal, bodyBlock, afterBlock);
 
         IRPositionBuilderAtEnd(builder, bodyBlock);
         conditionStack.push(condBlock);

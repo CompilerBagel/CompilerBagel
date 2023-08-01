@@ -4,6 +4,8 @@ import backend.machineCode.Immeidiate;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineOperand;
 
+import static backend.machineCode.MachineConstants.LA;
+
 public class MCLoad extends MachineCode {
     private MachineOperand src;
     private MachineOperand dest;
@@ -39,6 +41,9 @@ public class MCLoad extends MachineCode {
      */
     @Override
     public String toString() {
+        if (loadOp.equals(LA)) {
+            return loadOp + " " + dest.getRegister() + ", " + src.getRegister();
+        }
         return loadOp + " " + dest.getRegister() + ", " + offset.getRegister() + "(" + src.getRegister() + ")";
     }
     

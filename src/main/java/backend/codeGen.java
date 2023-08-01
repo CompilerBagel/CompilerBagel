@@ -18,16 +18,14 @@ import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
 import static Type.VoidType.IRVoidType;
 import static backend.machineCode.MachineConstants.*;
-import static backend.machineCode.MachineOperand.operandType.imm;
 import static instruction.BrInstruction.SINGLE;
-
-import Type.PointerType;
 
 public class codeGen {
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
     private static final Type int1Type = IRInt1Type();
     private static final Type voidType = IRVoidType();
+    private final Type pointerToIntType = new PointerType(int32Type);
     private static final PhysicsReg spReg = PhysicsReg.getSpReg();
     private static final PhysicsReg s0Reg = PhysicsReg.getS0Reg();
     private static final PhysicsReg raReg = PhysicsReg.getRaReg();
@@ -128,7 +126,7 @@ public class codeGen {
     public void declareGlobal(Map<String, Symbol> map) {
         globalSb = new StringBuilder();
         for (Map.Entry<String, Symbol> entry: map.entrySet()) {
-            globalSb.append(entry.getKey()).append(":").append("\n");
+            globalSb.append("    ").append(entry.getKey()).append(":").append("\n");
             List<Float> values = entry.getValue().getInitValue();
             boolean isInt = false;
             if (entry.getValue().getType().equals(IRInt32Type())) {
@@ -136,9 +134,9 @@ public class codeGen {
             }
             for (Float value: values) {
                 if (isInt)
-                    globalSb.append("    " + ".word ").append(value.intValue()).append("\n");
+                    globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
                 else
-                    globalSb.append("    " + ".word ").append(value).append("\n");
+                    globalSb.append("        " + ".word ").append(value).append("\n");
             }
         }
     }
@@ -232,23 +230,15 @@ public class codeGen {
             BaseBlock brBlock = (BaseBlock) instr.getOperands().get(0);
             MCJump jump = new MCJump(brBlock.getLabel());
             block.getMachineCodes().add(jump);
-        }else{
-            ValueRef register = instr.getOperands().get(0);
-            MachineOperand reg1 = parseOperand(register);
-            BaseBlock brBlock1 = (BaseBlock) instr.getOperands().get(1);
-            BaseBlock brBlock2 = (BaseBlock) instr.getOperands().get(2);
-            BaseRegister liReg = new BaseRegister("li", int32Type);
-            MachineOperand imm = new Immeidiate(1);
-            MachineOperand reg2 = parseOperand(liReg);
-            MCLi li = new MCLi(reg2, imm);
-            block.getMachineCodes().add(li);
-            setDefUse(imm, li);
-            MCJump jump1 = new MCJump(reg1, reg2, brBlock1.getLabel());
-            block.getMachineCodes().add(jump1);
-            setDefUse(reg1, jump1);
-            setDefUse(reg2, jump1);
-            MCJump jump2 = new MCJump(brBlock2.getLabel());
-            block.getMachineCodes().add(jump2);
+        } else {
+            ValueRef cond = instr.getOperands().get(0);
+            BaseBlock trueBlock = (BaseBlock) instr.getOperands().get(1);
+            BaseBlock falseBlock = (BaseBlock) instr.getOperands().get(2);
+
+            MachineCode br = new MCBranch(1, parseOperand(cond), new PhysicsReg(0), trueBlock.getLabel());
+            MachineCode jump = new MCJump(falseBlock.getLabel());
+            block.getMachineCodes().add(br);
+            block.getMachineCodes().add(jump);
         }
     }
     
@@ -292,7 +282,7 @@ public class codeGen {
                     code = new MCBinaryInteger(dest, src, imm, ADDIW);
                     break;
                 case IRConstants.SUB:
-                    code = new MCBinaryInteger(dest, src, imm, SUBIW);
+                    code = new MCBinaryInteger(dest, src, new Immeidiate(-((Immeidiate)imm).getImmValue()), ADDIW);
                     break;
                 case IRConstants.MUL:
                     // add register to store the imm(mul operand can only be register)
@@ -355,12 +345,21 @@ public class codeGen {
         List<ValueRef> params = instr.getParams();
         List<MachineOperand> operands = new ArrayList<>();
         for (ValueRef param: params) {
-            BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
-            BaseRegister src = new BaseRegister("li", param.getType());
-            MCLoad load = new MCLoad(src, vReg, new Immeidiate(0), LW);
-            setDefUse(vReg, load);
-            block.getMachineCodes().add(load);
-            operands.add(vReg);
+            MachineOperand op = parseOperand(param);
+            if (op.isImm()){
+                BaseRegister tmp = new BaseRegister("li", param.getType());
+                MCLi li = new MCLi(tmp, op);
+                setDefUse(tmp, li);
+                block.getMachineCodes().add(li);
+                operands.add(tmp);
+            } else {
+                BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
+                BaseRegister src = new BaseRegister("li", param.getType());
+                MCLoad load = new MCLoad(src, vReg, new Immeidiate(0), LW);
+                setDefUse(vReg, load);
+                block.getMachineCodes().add(load);
+                operands.add(vReg);
+            }
         }
         MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
         setDefUse(dest, call);
@@ -372,14 +371,76 @@ public class codeGen {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
         MachineOperand left = parseOperand(instr.getOperands().get(1));
         MachineOperand right = parseOperand(instr.getOperands().get(2));
-        if(left.isImm()) left = addLiOperation(left, block);
-        if(right.isImm()) right = addLiOperation(right, block);
 
-        MCBranch branch = new MCBranch(icmpType, dest, left, right);
-        block.getMachineCodes().add(branch);
-        setDefUse(dest, branch);
-        setDefUse(left, branch);
-        setDefUse(right, branch);
+        if (left.isImm()) {
+            addLiOperation(left, block);
+        }
+        if (right.isImm()) {
+            addLiOperation(right, block);
+        }
+
+        switch (instr.getIcmpType()) {
+            case IRConstants.IRIntSLT, IRConstants.IRIntULT ->{
+                MCSet set = new MCSet(dest, left, right);
+                block.getMachineCodes().add(set);
+                setDefUse(dest, set);
+                setDefUse(left, set);
+                setDefUse(right, set);
+            }
+            case IRConstants.IRIntSGT, IRConstants.IRIntUGT ->{
+                MCSet set = new MCSet(dest, right, left);
+                block.getMachineCodes().add(set);
+                setDefUse(dest, set);
+                setDefUse(left, set);
+                setDefUse(right, set);
+            }
+            case IRConstants.IRIntEQ -> {
+                MachineOperand res = new BaseRegister("tmp", int32Type);
+                MCBinaryInteger sub = new MCBinaryInteger(res, left, right, SUBW);
+                MCSetz setz = new MCSetz(dest, res, IRConstants.IRIntEQ);
+                block.getMachineCodes().add(sub);
+                block.getMachineCodes().add(setz);
+                setDefUse(dest, setz);
+                setDefUse(left, sub);
+                setDefUse(right, sub);
+                setDefUse(res, sub);
+            }
+            case IRConstants.IRIntNE -> {
+                MachineOperand res = new BaseRegister("tmp", int32Type);
+                MCBinaryInteger sub = new MCBinaryInteger(res, left, right, SUBW);
+                MCSetz setz = new MCSetz(dest, res, IRConstants.IRIntNE);
+                block.getMachineCodes().add(sub);
+                block.getMachineCodes().add(setz);
+                setDefUse(dest, setz);
+                setDefUse(left, sub);
+                setDefUse(right, sub);
+                setDefUse(res, sub);
+            }
+            case IRConstants.IRIntSGE, IRConstants.IRIntUGE -> {
+                MachineOperand res = new BaseRegister("tmp", int32Type);
+                MCSet set = new MCSet(res, left, right);
+                MCBinaryInteger xor = new MCBinaryInteger(dest, res, new Immeidiate(1), XORI);
+                block.getMachineCodes().add(set);
+                block.getMachineCodes().add(xor);
+                setDefUse(dest, xor);
+                setDefUse(res, xor);
+                setDefUse(left, set);
+                setDefUse(right, set);
+                setDefUse(res, set);
+            }
+            case IRConstants.IRIntSLE, IRConstants.IRIntULE -> {
+                MachineOperand res = new BaseRegister("tmp", int32Type);
+                MCSet set = new MCSet(res, right, left);
+                MCBinaryInteger xor = new MCBinaryInteger(dest, res, new Immeidiate(1), XORI);
+                block.getMachineCodes().add(set);
+                block.getMachineCodes().add(xor);
+                setDefUse(dest, xor);
+                setDefUse(res, xor);
+                setDefUse(left, set);
+                setDefUse(right, set);
+                setDefUse(res, set);
+            }
+        }
     }
 
     public void parseGetElemPtrInstr(GetElemPtrInstruction instr, MachineBlock block) {
@@ -394,10 +455,12 @@ public class codeGen {
         MachineFunction mfunc = block.getBlockFunc();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
         if (null == offsetMap.get(srcName)) {
-            MCLoad load = new MCLoad(src, dest, LW); // TODO: la when src.isAddress = true and LD?
-            block.getMachineCodes().add(load);
-            setDefUse(dest, load);
-            setDefUse(src, load);
+            MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
+            MCLoad ld = new MCLoad(new PhysicsReg("t0"), dest, LW); // TODO: la when src.isAddress = true and LD?
+            block.getMachineCodes().add(la);
+            block.getMachineCodes().add(ld);
+            setDefUse(src, la);
+            setDefUse(dest, ld);
         } else {
             int offset = offsetMap.get(srcName);
             MCLoad load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), LW);
@@ -421,8 +484,8 @@ public class codeGen {
                 block.getMachineCodes().add(li);
                 setDefUse(src, li);
                 setDefUse(new PhysicsReg("a0"), li); // TODO:?
-            }else{
-                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new Immeidiate(0), ADDIW);
+            } else {
+                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new Immeidiate(0), ADDW);
                 block.getMachineCodes().add(addw);
                 setDefUse(src, addw);
                 setDefUse(new PhysicsReg("a0"), addw);
@@ -516,6 +579,10 @@ public class codeGen {
 
     public void PrintCodeToFile(String dest) {
         StringBuilder builder = new StringBuilder();
+        builder.append(".global main\n");
+        builder.append(".data\n");
+        builder.append(globalSb);
+        builder.append(".text\n");
         for(FunctionBlock function: module.getFunctionBlocks()){
             builder.append(function.getFunctionName()).append(":").append("\n");
             MachineFunction mfunc = funcMap.get(function);
@@ -539,7 +606,6 @@ public class codeGen {
                 }
             }
         }
-        // builder.append(globalSb);
         try{
             BufferedWriter out = new BufferedWriter(new FileWriter(dest));
             out.write(builder.toString());

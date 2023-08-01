@@ -1,4 +1,4 @@
-package antlr; // Generated from ./src/main/java/antlr/SysYParser.g4 by ANTLR 4.12.0
+package antlr;// Generated from ./src/main/java/antlr/SysYParser.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
