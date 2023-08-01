@@ -35,8 +35,8 @@ bodyBlock3:
 afterBlock4:
     lw a1, -36(s0)
     addw a0, a1, 0
-    ld sp, 40(ra)
-    ld sp, 32(s0)
+    ld ra, 40(sp)
+    ld s0, 32(sp)
     addi sp, sp, 48
     ret
     li a0, 0
@@ -98,8 +98,8 @@ mainEntry14:
     mv a1, a2
     call deepWhileBr
     addw a0, a1, 0
-    ld sp, 24(ra)
-    ld sp, 16(s0)
+    ld ra, 24(sp)
+    ld s0, 16(sp)
     addi sp, sp, 32
     ret
     li a0, 0

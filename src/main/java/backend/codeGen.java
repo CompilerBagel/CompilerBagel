@@ -369,6 +369,9 @@ public class codeGen {
             }
         }
         MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
+        for (MachineOperand op: operands) {
+            setDefUse(op, call);
+        }
         setDefUse(dest, call);
         block.getMachineCodes().add(call);
     }
