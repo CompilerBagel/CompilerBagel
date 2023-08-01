@@ -122,30 +122,7 @@ public class RegisterAllocate {
             for (MachineCode code : codes) {
                 List<MachineOperand> defs = code.getDef();
                 List<MachineOperand> uses = code.getUse();
-                for (MachineOperand def : defs) {
-                    if(def.isImm()) continue;
-                    if (def.getPhysicsReg() != null) {
-                        if (def.getPhysicsReg().noUser()) {
-                            def.getPhysicsReg().giveBack();
-                        }
-                        continue;
-                    }
-                    if (def instanceof PhysicsReg) {
-                        if (def.noUser()){
-                            ((PhysicsReg)def).giveBack();
-                        }
-                        continue;
-                    }
-                    PhysicsReg allocatedReg = getReg(def);
-                    if (allocatedReg != null) {   // have register
-                        def.setPhysicsReg(allocatedReg);
-                        if (def.noUser()) {
-                            allocatedReg.giveBack();
-                        }
-                    } else {
-                        // spill
-                    }
-                }
+
                 for (MachineOperand use : uses) {
                     if(use.isImm()) continue;
                     if (use.getPhysicsReg() != null) {
@@ -171,6 +148,32 @@ public class RegisterAllocate {
                         // spill
                     }
                 }
+
+                for (MachineOperand def : defs) {
+                    if(def.isImm()) continue;
+                    if (def.getPhysicsReg() != null) {
+                        if (def.getPhysicsReg().noUser()) {
+                            def.getPhysicsReg().giveBack();
+                        }
+                        continue;
+                    }
+                    if (def instanceof PhysicsReg) {
+                        if (def.noUser()){
+                            ((PhysicsReg)def).giveBack();
+                        }
+                        continue;
+                    }
+                    PhysicsReg allocatedReg = getReg(def);
+                    if (allocatedReg != null) {   // have register
+                        def.setPhysicsReg(allocatedReg);
+                        if (def.noUser()) {
+                            allocatedReg.giveBack();
+                        }
+                    } else {
+                        // spill
+                    }
+                }
+
             }
         }
     }
