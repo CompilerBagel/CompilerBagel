@@ -21,7 +21,7 @@ do
     fi
     echo $? >> answer.txt
 
-    java -Dfile.encoding=UTF-8 -classpath ./target/classes:./lib/antlr4-runtime-4.9.1.jar Main ${sysy_filename} out_without_sylib.ll test.s
+    java -Dfile.encoding=UTF-8 -classpath ./target/classes:./lib/antlr-4.12.0-complete.jar Main ${sysy_filename} out_without_sylib.ll test.s
     clang out_without_sylib.ll ./src/test/resources/sylib.c -w -o out
     if [ -f $input_file ]; then
         timeout 60s ./out < $input_file > output.txt

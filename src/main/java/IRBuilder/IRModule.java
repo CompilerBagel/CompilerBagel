@@ -28,7 +28,7 @@ public class IRModule {
     public static FunctionBlock IRAddFunction(IRModule module, String funcName, FunctionType functionType) {
         FunctionBlock function = new FunctionBlock(funcName, functionType);
         Symbol funcSym = new Symbol(funcName, functionType);
-        module.addGlobalSymbol(funcName, funcSym);
+        //module.addGlobalSymbol(funcName, funcSym);
         module.addFunction(function);
         return function;
     }
