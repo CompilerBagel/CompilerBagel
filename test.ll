@@ -17,41 +17,76 @@ declare void @after_main()
 declare void @_sysy_starttime(i32 %0)
 declare void @_sysy_stoptime(i32 %0)
 
-define i32 @ififElse() {
-ififElseEntry1:
-  %a0 = alloca i32, align 4
-  store i32 0, i32* %a0, align 4
-  store i32 5, i32* %a0, align 4
-  %b3 = alloca i32, align 4
-  store i32 0, i32* %b3, align 4
-  store i32 10, i32* %b3, align 4
-  %a6 = load i32, i32* %a0, align 4
-  %icmp_EQ7 = icmp eq i32 %a6, 5
-  br i1 %icmp_EQ7, label %trueBlock2, label %falseBlock3
-trueBlock2:
-  %b8 = load i32, i32* %b3, align 4
-  %icmp_EQ9 = icmp eq i32 %b8, 10
-  br i1 %icmp_EQ9, label %trueBlock5, label %falseBlock6
-falseBlock3:
-  br label %afterBlock4
+define i32 @deepWhileBr(i32 %deepWhileBr00, i32 %deepWhileBr11) {
+deepWhileBrEntry1:
+  %a2 = alloca i32, align 4
+  store i32 %deepWhileBr00, i32* %a2, align 4
+  %b4 = alloca i32, align 4
+  store i32 %deepWhileBr11, i32* %b4, align 4
+  %c6 = alloca i32, align 4
+  store i32 0, i32* %c6, align 4
+  %a8 = load i32, i32* %a2, align 4
+  %b9 = load i32, i32* %b4, align 4
+  %add_10 = add i32 %a8, %b9
+  store i32 %add_10, i32* %c6, align 4
+  br label %condBlock2
+condBlock2:
+  %c12 = load i32, i32* %c6, align 4
+  %icmp_LT13 = icmp slt i32 %c12, 75
+  br i1 %icmp_LT13, label %bodyBlock3, label %afterBlock4
+bodyBlock3:
+  %d14 = alloca i32, align 4
+  store i32 0, i32* %d14, align 4
+  store i32 42, i32* %d14, align 4
+  %c17 = load i32, i32* %c6, align 4
+  %icmp_LT18 = icmp slt i32 %c17, 100
+  br i1 %icmp_LT18, label %trueBlock5, label %falseBlock6
 afterBlock4:
-  %a14 = load i32, i32* %a0, align 4
-  ret i32 %a14
+  %c34 = load i32, i32* %c6, align 4
+  ret i32 %c34
   ret i32 0
 trueBlock5:
-  store i32 25, i32* %a0, align 4
-  br label %afterBlock7
+  %c19 = load i32, i32* %c6, align 4
+  %d20 = load i32, i32* %d14, align 4
+  %add_21 = add i32 %c19, %d20
+  store i32 %add_21, i32* %c6, align 4
+  %c23 = load i32, i32* %c6, align 4
+  %icmp_GT24 = icmp sgt i32 %c23, 99
+  br i1 %icmp_GT24, label %trueBlock8, label %falseBlock9
 falseBlock6:
-  %a11 = load i32, i32* %a0, align 4
-  %add_12 = add i32 %a11, 15
-  store i32 %add_12, i32* %a0, align 4
   br label %afterBlock7
 afterBlock7:
-  br label %afterBlock4
+  br label %condBlock2
+trueBlock8:
+  %e25 = alloca i32, align 4
+  store i32 0, i32* %e25, align 4
+  %d27 = load i32, i32* %d14, align 4
+  %mul_28 = mul i32 %d27, 2
+  store i32 %mul_28, i32* %e25, align 4
+  %icmp_EQ30 = icmp eq i32 1, 1
+  br i1 %icmp_EQ30, label %trueBlock11, label %falseBlock12
+falseBlock9:
+  br label %afterBlock10
+afterBlock10:
+  br label %afterBlock7
+trueBlock11:
+  %e31 = load i32, i32* %e25, align 4
+  %mul_32 = mul i32 %e31, 2
+  store i32 %mul_32, i32* %c6, align 4
+  br label %afterBlock13
+falseBlock12:
+  br label %afterBlock13
+afterBlock13:
+  br label %afterBlock10
 }
 define i32 @main() {
-mainEntry8:
-  %ififElse15 = call i32 @ififElse()
-  ret i32 %ififElse15
+mainEntry14:
+  %p35 = alloca i32, align 4
+  store i32 0, i32* %p35, align 4
+  store i32 2, i32* %p35, align 4
+  %p38 = load i32, i32* %p35, align 4
+  %p39 = load i32, i32* %p35, align 4
+  %deepWhileBr40 = call i32 @deepWhileBr(i32 %p38, i32 %p39)
+  ret i32 %deepWhileBr40
   ret i32 0
 }

@@ -373,10 +373,10 @@ public class codeGen {
         MachineOperand right = parseOperand(instr.getOperands().get(2));
 
         if (left.isImm()) {
-            addLiOperation(left, block);
+            left = addLiOperation(left, block);
         }
         if (right.isImm()) {
-            addLiOperation(right, block);
+            right = addLiOperation(right, block);
         }
 
         switch (instr.getIcmpType()) {
