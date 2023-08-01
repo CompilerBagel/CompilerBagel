@@ -147,10 +147,6 @@ public class codeGen {
         Map<String, Integer> offestMap = mfunc.getOffsetMap();
         int stackCount = mfunc.getStackCount(); // 4 byte = 1 count
         stackCount += 4; // ra 8 + s0 8  = 16 byte = 4 count
-        if (!func.getType().equals(IRVoidType())) {
-            offestMap.put("ret", stackCount * 4);
-            stackCount += 1; // for ret value
-        }
         offestMap.put("ra", 8);
         offestMap.put("s0", 16);
         List<ValueRef> params = func.getParams();
@@ -162,6 +158,10 @@ public class codeGen {
                 stackCount += 2;
                 offestMap.put(param.getText(), stackCount * 8);
             }
+        }
+        if (!func.getType().equals(IRVoidType())) {
+            stackCount += 1;
+            offestMap.put("ret", stackCount * 4);
         }
         mfunc.setStackCount(stackCount);
         mfunc.setFrameSize(stackAlign(stackCount));
