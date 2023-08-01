@@ -30,10 +30,10 @@ public class Main {
         irGenVisitorVisitor.visit(tree);
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
 
-        codeGen code = new codeGen();
-        code.MachineCodeGen(irGenVisitorVisitor.getModule());
-        RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
-        allocator.easyAllocate();
-        code.PrintCodeToFile(mcDest);
+//        codeGen code = new codeGen();
+//        code.MachineCodeGen(irGenVisitorVisitor.getModule());
+//        RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
+//        allocator.easyAllocate();
+//        code.PrintCodeToFile(mcDest);
     }
 }

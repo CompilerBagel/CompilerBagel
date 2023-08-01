@@ -51,7 +51,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     }
 
     private void addLibs(GlobalScope globalScope){
-/*        FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
+        FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
         globalScope.define("getint", addLib("getint", getIntType), getIntType);
 
         FunctionType getchType = new FunctionType(new ArrayList<>(), int32Type);
@@ -113,7 +113,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         List<Type> endTimeTypeParams = new ArrayList<>();
         endTimeTypeParams.add(int32Type);
         FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
-        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);*/
+        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
 
     }
 
@@ -473,7 +473,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         String funcName = ctx.IDENT().getText();
         FunctionBlock functionBlock = (FunctionBlock) globalScope.getValueRef(funcName);
         FunctionType functionType = (FunctionType) globalScope.getType(funcName);
-        int argc = functionType.getParamsType().size();
+            int argc = functionType.getParamsType().size();
         List<ValueRef> args = new ArrayList<>(argc);
         for (int i = 0; i < argc; i++) {
             args.add(i, ctx.funcRParams().param(i).accept(this));
@@ -575,8 +575,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 return IRBuildNeg(builder, operand, "neg_");
             case "!":
                 operand = IRBuildICmp(builder, 1, new ConstIntValueRef(0), operand, "icmp_");
-                // operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
-                // operand = IRBuildZExt(builder, operand, int32Type, "zext_");
+                 operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
+                 operand = IRBuildZExt(builder, operand, int32Type, "zext_");
                 return operand;
             default:
                 break;
@@ -678,13 +678,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx) {
         ValueRef conditionVal = this.visit(ctx.cond());
-        // ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+         ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
 
-        // IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
-        IRBuildCondBr(builder, conditionVal, trueBlock, falseBlock);
+         IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
 
         IRPositionBuilderAtEnd(builder, trueBlock);
         this.visit(ctx.stmt(0));
@@ -759,9 +758,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder, condBlock);
         ValueRef conditionVal = this.visit(ctx.cond());
-        // ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
-        // IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
-        IRBuildCondBr(builder, conditionVal, bodyBlock, afterBlock);
+         ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
+         IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
+//        IRBuildCondBr(builder, conditionVal, bodyBlock, afterBlock);
 
         IRPositionBuilderAtEnd(builder, bodyBlock);
         conditionStack.push(condBlock);
