@@ -19,6 +19,7 @@ public class MachineOperand {
     private MachineCode def = null;
     private List<MachineCode> useList = new ArrayList<>();
 
+
     public MachineOperand(operandType t, String identity) {
         this.t = t;
         this.identity = identity;
