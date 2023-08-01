@@ -198,6 +198,7 @@ public class codeGen {
                 assert(false);
             }
         }
+
     }
 
     public void parseAllocaInstr(AllocaInstruction instr, MachineBlock block){
@@ -235,8 +236,11 @@ public class codeGen {
             ValueRef cond = instr.getOperands().get(0);
             BaseBlock trueBlock = (BaseBlock) instr.getOperands().get(1);
             BaseBlock falseBlock = (BaseBlock) instr.getOperands().get(2);
-
-            MachineCode br = new MCBranch(1, parseOperand(cond), new PhysicsReg(0), trueBlock.getLabel());
+            MachineOperand condReg = parseOperand(cond);
+            if (condReg.isImm()) {
+                condReg = addLiOperation(condReg, block);
+            }
+            MachineCode br = new MCBranch(1, condReg, new PhysicsReg(0), trueBlock.getLabel());
             MachineCode jump = new MCJump(falseBlock.getLabel());
             block.getMachineCodes().add(br);
             block.getMachineCodes().add(jump);
@@ -526,6 +530,7 @@ public class codeGen {
             BaseRegister storeReg = new BaseRegister("li", int32Type);
             MachineOperand storeLi = parseOperand(storeReg);
             MCLi mulLi = new MCLi(storeLi, src);
+            setDefUse(storeLi, mulLi);
             block.getMachineCodes().add(mulLi);
             src = storeLi;
         }
@@ -535,7 +540,6 @@ public class codeGen {
         MCStore store = new MCStore(src, s0Reg, new Immeidiate(-offset), SW);
         block.getMachineCodes().add(store);
         setDefUse(src, store);
-        setDefUse(dest, store);
     }
 
     public void parseTypeTransInstr(TypeTransInstruction instr, MachineBlock block){

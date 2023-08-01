@@ -1,25 +1,39 @@
-int deepWhileBr(int a, int b) {
-  int c;
-  c = a + b;
-  while (c < 75) {
-    int d;
-    d = 42;
-    if (c < 100) {
-      c = c + d;
-      if (c > 99) {
-        int e;
-        e = d * 2;
-        if (1 == 1) {
-          c = e * 2;
-        }
-      }
-    }
-  }
-  return (c);
-}
-
 int main() {
-  int p;
-  p = 2;
-  return deepWhileBr(p, p);
+  int sum = 0;
+  int i = 0;
+  while(i < 20) {
+    int j = 0;
+    while (j < 10) {
+      int k = 0;
+      while (k < 5) {
+        int m = 0;
+        while (m < 3) {
+          if (m + 1 >= 3)
+            if (m)
+              if (m || !m)
+                if (m - -1 >= 3)
+                  {{{{;;break;continue;}}}}
+          int n = 0;
+          while (n < 2) {
+            n = n + 1;
+            continue;
+            break;
+            sum = sum + 1;
+          }
+          m = m + 1;
+          sum = sum + 1;
+        }
+        while(1) {
+          while(1) break;
+          break;
+        }
+        k = k + 1;
+      }
+      j = j + 1;
+      continue;
+      j = j + 1;
+    }
+    i = i + 1;
+  }
+  return sum;
 }

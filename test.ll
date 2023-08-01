@@ -17,76 +17,139 @@ declare void @after_main()
 declare void @_sysy_starttime(i32 %0)
 declare void @_sysy_stoptime(i32 %0)
 
-define i32 @deepWhileBr(i32 %deepWhileBr00, i32 %deepWhileBr11) {
-deepWhileBrEntry1:
-  %a2 = alloca i32, align 4
-  store i32 %deepWhileBr00, i32* %a2, align 4
-  %b4 = alloca i32, align 4
-  store i32 %deepWhileBr11, i32* %b4, align 4
-  %c6 = alloca i32, align 4
-  store i32 0, i32* %c6, align 4
-  %a8 = load i32, i32* %a2, align 4
-  %b9 = load i32, i32* %b4, align 4
-  %add_10 = add i32 %a8, %b9
-  store i32 %add_10, i32* %c6, align 4
+define i32 @main() {
+mainEntry1:
+  %sum0 = alloca i32, align 4
+  store i32 0, i32* %sum0, align 4
+  %i2 = alloca i32, align 4
+  store i32 0, i32* %i2, align 4
   br label %condBlock2
 condBlock2:
-  %c12 = load i32, i32* %c6, align 4
-  %icmp_LT13 = icmp slt i32 %c12, 75
-  br i1 %icmp_LT13, label %bodyBlock3, label %afterBlock4
+  %i4 = load i32, i32* %i2, align 4
+  %icmp_LT5 = icmp slt i32 %i4, 20
+  br i1 %icmp_LT5, label %bodyBlock3, label %afterBlock4
 bodyBlock3:
-  %d14 = alloca i32, align 4
-  store i32 0, i32* %d14, align 4
-  store i32 42, i32* %d14, align 4
-  %c17 = load i32, i32* %c6, align 4
-  %icmp_LT18 = icmp slt i32 %c17, 100
-  br i1 %icmp_LT18, label %trueBlock5, label %falseBlock6
+  %j6 = alloca i32, align 4
+  store i32 0, i32* %j6, align 4
+  br label %condBlock5
 afterBlock4:
-  %c34 = load i32, i32* %c6, align 4
-  ret i32 %c34
+  %sum57 = load i32, i32* %sum0, align 4
+  ret i32 %sum57
   ret i32 0
-trueBlock5:
-  %c19 = load i32, i32* %c6, align 4
-  %d20 = load i32, i32* %d14, align 4
-  %add_21 = add i32 %c19, %d20
-  store i32 %add_21, i32* %c6, align 4
-  %c23 = load i32, i32* %c6, align 4
-  %icmp_GT24 = icmp sgt i32 %c23, 99
-  br i1 %icmp_GT24, label %trueBlock8, label %falseBlock9
-falseBlock6:
-  br label %afterBlock7
+condBlock5:
+  %j8 = load i32, i32* %j6, align 4
+  %icmp_LT9 = icmp slt i32 %j8, 10
+  br i1 %icmp_LT9, label %bodyBlock6, label %afterBlock7
+bodyBlock6:
+  %k10 = alloca i32, align 4
+  store i32 0, i32* %k10, align 4
+  br label %condBlock8
 afterBlock7:
+  %i54 = load i32, i32* %i2, align 4
+  %add_55 = add i32 %i54, 1
+  store i32 %add_55, i32* %i2, align 4
   br label %condBlock2
-trueBlock8:
-  %e25 = alloca i32, align 4
-  store i32 0, i32* %e25, align 4
-  %d27 = load i32, i32* %d14, align 4
-  %mul_28 = mul i32 %d27, 2
-  store i32 %mul_28, i32* %e25, align 4
-  %icmp_EQ30 = icmp eq i32 1, 1
-  br i1 %icmp_EQ30, label %trueBlock11, label %falseBlock12
-falseBlock9:
-  br label %afterBlock10
+condBlock8:
+  %k12 = load i32, i32* %k10, align 4
+  %icmp_LT13 = icmp slt i32 %k12, 5
+  br i1 %icmp_LT13, label %bodyBlock9, label %afterBlock10
+bodyBlock9:
+  %m14 = alloca i32, align 4
+  store i32 0, i32* %m14, align 4
+  br label %condBlock11
 afterBlock10:
-  br label %afterBlock7
-trueBlock11:
-  %e31 = load i32, i32* %e25, align 4
-  %mul_32 = mul i32 %e31, 2
-  store i32 %mul_32, i32* %c6, align 4
-  br label %afterBlock13
-falseBlock12:
-  br label %afterBlock13
+  %j48 = load i32, i32* %j6, align 4
+  %add_49 = add i32 %j48, 1
+  store i32 %add_49, i32* %j6, align 4
+  br label %condBlock5
+  %j51 = load i32, i32* %j6, align 4
+  %add_52 = add i32 %j51, 1
+  store i32 %add_52, i32* %j6, align 4
+  br label %condBlock5
+condBlock11:
+  %m16 = load i32, i32* %m14, align 4
+  %icmp_LT17 = icmp slt i32 %m16, 3
+  br i1 %icmp_LT17, label %bodyBlock12, label %afterBlock13
+bodyBlock12:
+  %m18 = load i32, i32* %m14, align 4
+  %add_19 = add i32 %m18, 1
+  %icmp_GE20 = icmp sge i32 %add_19, 3
+  br i1 %icmp_GE20, label %trueBlock14, label %falseBlock15
 afterBlock13:
-  br label %afterBlock10
-}
-define i32 @main() {
-mainEntry14:
-  %p35 = alloca i32, align 4
-  store i32 0, i32* %p35, align 4
-  store i32 2, i32* %p35, align 4
-  %p38 = load i32, i32* %p35, align 4
-  %p39 = load i32, i32* %p35, align 4
-  %deepWhileBr40 = call i32 @deepWhileBr(i32 %p38, i32 %p39)
-  ret i32 %deepWhileBr40
-  ret i32 0
+  br label %condBlock29
+trueBlock14:
+  %m21 = load i32, i32* %m14, align 4
+  br i32 %m21, label %trueBlock17, label %falseBlock18
+falseBlock15:
+  br label %afterBlock16
+afterBlock16:
+  %n29 = alloca i32, align 4
+  store i32 0, i32* %n29, align 4
+  br label %condBlock26
+trueBlock17:
+  %m22 = load i32, i32* %m14, align 4
+  %m23 = load i32, i32* %m14, align 4
+  %icmp_24 = icmp ne i32 0, %m23
+  %or_25 = or i32 %m22, %icmp_24
+  br i32 %or_25, label %trueBlock20, label %falseBlock21
+falseBlock18:
+  br label %afterBlock19
+afterBlock19:
+  br label %afterBlock16
+trueBlock20:
+  %m26 = load i32, i32* %m14, align 4
+  %sub_27 = sub i32 %m26, -1
+  %icmp_GE28 = icmp sge i32 %sub_27, 3
+  br i1 %icmp_GE28, label %trueBlock23, label %falseBlock24
+falseBlock21:
+  br label %afterBlock22
+afterBlock22:
+  br label %afterBlock19
+trueBlock23:
+  br label %afterBlock13
+  br label %condBlock11
+  br label %afterBlock25
+falseBlock24:
+  br label %afterBlock25
+afterBlock25:
+  br label %afterBlock22
+condBlock26:
+  %n31 = load i32, i32* %n29, align 4
+  %icmp_LT32 = icmp slt i32 %n31, 2
+  br i1 %icmp_LT32, label %bodyBlock27, label %afterBlock28
+bodyBlock27:
+  %n33 = load i32, i32* %n29, align 4
+  %add_34 = add i32 %n33, 1
+  store i32 %add_34, i32* %n29, align 4
+  br label %condBlock26
+  br label %afterBlock28
+  %sum36 = load i32, i32* %sum0, align 4
+  %add_37 = add i32 %sum36, 1
+  store i32 %add_37, i32* %sum0, align 4
+  br label %condBlock26
+afterBlock28:
+  %m39 = load i32, i32* %m14, align 4
+  %add_40 = add i32 %m39, 1
+  store i32 %add_40, i32* %m14, align 4
+  %sum42 = load i32, i32* %sum0, align 4
+  %add_43 = add i32 %sum42, 1
+  store i32 %add_43, i32* %sum0, align 4
+  br label %condBlock11
+condBlock29:
+  br i32 1, label %bodyBlock30, label %afterBlock31
+bodyBlock30:
+  br label %condBlock32
+afterBlock31:
+  %k45 = load i32, i32* %k10, align 4
+  %add_46 = add i32 %k45, 1
+  store i32 %add_46, i32* %k10, align 4
+  br label %condBlock8
+condBlock32:
+  br i32 1, label %bodyBlock33, label %afterBlock34
+bodyBlock33:
+  br label %afterBlock34
+  br label %condBlock32
+afterBlock34:
+  br label %afterBlock31
+  br label %condBlock29
 }

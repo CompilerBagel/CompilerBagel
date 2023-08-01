@@ -6,7 +6,7 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
-import antlr.*;
+// import antlr.*;
 
 import java.util.*;
 
@@ -574,8 +574,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 return IRBuildNeg(builder, operand, "neg_");
             case "!":
                 operand = IRBuildICmp(builder, 1, new ConstIntValueRef(0), operand, "icmp_");
-                operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
-                operand = IRBuildZExt(builder, operand, int32Type, "zext_");
+                // operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
+                // operand = IRBuildZExt(builder, operand, int32Type, "zext_");
                 return operand;
             default:
                 break;
