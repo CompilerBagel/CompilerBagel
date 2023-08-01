@@ -1,7 +1,11 @@
+int f(int x, int y) {
+    return x + y;
+}
+
 int main() {
-    int a = 1;
-    int b = 2;
-    int c = a + b * b;
-    int d = a + b + c;
-    return d;
+    int a = 3;
+    int b = 4;
+    int c = 2;
+    c = c + f(a, b);
+    return c;
 }

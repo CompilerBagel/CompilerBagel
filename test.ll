@@ -17,27 +17,33 @@ declare void @after_main()
 declare void @_sysy_starttime(i32 %0)
 declare void @_sysy_stoptime(i32 %0)
 
+define i32 @f(i32 %f00, i32 %f11) {
+fEntry1:
+  %x2 = alloca i32, align 4
+  store i32 %f00, i32* %x2, align 4
+  %y4 = alloca i32, align 4
+  store i32 %f11, i32* %y4, align 4
+  %x6 = load i32, i32* %x2, align 4
+  %y7 = load i32, i32* %y4, align 4
+  %add_8 = add i32 %x6, %y7
+  ret i32 %add_8
+  ret i32 0
+}
 define i32 @main() {
-mainEntry1:
-  %a0 = alloca i32, align 4
-  store i32 1, i32* %a0, align 4
-  %b2 = alloca i32, align 4
-  store i32 2, i32* %b2, align 4
-  %c4 = alloca i32, align 4
-  %a5 = load i32, i32* %a0, align 4
-  %b6 = load i32, i32* %b2, align 4
-  %b7 = load i32, i32* %b2, align 4
-  %mul_8 = mul i32 %b6, %b7
-  %add_9 = add i32 %a5, %mul_8
-  store i32 %add_9, i32* %c4, align 4
-  %d11 = alloca i32, align 4
-  %a12 = load i32, i32* %a0, align 4
-  %b13 = load i32, i32* %b2, align 4
-  %add_14 = add i32 %a12, %b13
-  %c15 = load i32, i32* %c4, align 4
-  %add_16 = add i32 %add_14, %c15
-  store i32 %add_16, i32* %d11, align 4
-  %d18 = load i32, i32* %d11, align 4
-  ret i32 %d18
+mainEntry2:
+  %a9 = alloca i32, align 4
+  store i32 3, i32* %a9, align 4
+  %b11 = alloca i32, align 4
+  store i32 4, i32* %b11, align 4
+  %c13 = alloca i32, align 4
+  store i32 2, i32* %c13, align 4
+  %c15 = load i32, i32* %c13, align 4
+  %a16 = load i32, i32* %a9, align 4
+  %b17 = load i32, i32* %b11, align 4
+  %f18 = call i32 @f(i32 %a16, i32 %b17)
+  %add_19 = add i32 %c15, %f18
+  store i32 %add_19, i32* %c13, align 4
+  %c21 = load i32, i32* %c13, align 4
+  ret i32 %c21
   ret i32 0
 }
