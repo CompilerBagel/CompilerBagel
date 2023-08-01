@@ -29,6 +29,7 @@ public class codeGen {
     private static final PhysicsReg spReg = PhysicsReg.getSpReg();
     private static final PhysicsReg s0Reg = PhysicsReg.getS0Reg();
     private static final PhysicsReg raReg = PhysicsReg.getRaReg();
+    private static final PhysicsReg a0Reg = PhysicsReg.getA0Reg();
 
     private static IRModule module;
     private List<MachineBlock> blocks = new ArrayList<>();
@@ -353,12 +354,14 @@ public class codeGen {
                 block.getMachineCodes().add(li);
                 operands.add(tmp);
             } else {
-                BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
-                BaseRegister src = new BaseRegister("li", param.getType());
-                MCLoad load = new MCLoad(src, vReg, new Immeidiate(0), LW);
-                setDefUse(vReg, load);
-                block.getMachineCodes().add(load);
-                operands.add(vReg);
+                // BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
+                BaseRegister src = new BaseRegister(param.getText(), param.getType());
+                MCMove mv = new MCMove(op, src);
+                setDefUse(src, mv);
+                setDefUse(op, mv);
+                // setDefUse(vReg, mv);
+                block.getMachineCodes().add(mv);
+                // operands.add(vReg);
             }
         }
         MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
@@ -367,7 +370,6 @@ public class codeGen {
     }
 
     public void parseCondInstr(CondInstruction instr, MachineBlock block){
-        int icmpType = instr.getIcmpType();
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
         MachineOperand left = parseOperand(instr.getOperands().get(1));
         MachineOperand right = parseOperand(instr.getOperands().get(2));
@@ -480,15 +482,15 @@ public class codeGen {
             // return not void
             MachineOperand src = parseOperand(rets.get(0)); // rets.get(0) retValueRef
             if(src.isImm()){
-                MCLi li = new MCLi(new PhysicsReg("a0"), src); // todo: 如何调用确定的寄存器？
+                MCLi li = new MCLi(a0Reg, src); // todo: 如何调用确定的寄存器？
                 block.getMachineCodes().add(li);
                 setDefUse(src, li);
-                setDefUse(new PhysicsReg("a0"), li); // TODO:?
+                setDefUse(a0Reg, li); // TODO:?
             } else {
-                MCBinaryInteger addw = new MCBinaryInteger(new PhysicsReg("a0"), src, new Immeidiate(0), ADDW);
+                MCBinaryInteger addw = new MCBinaryInteger(a0Reg, src, new Immeidiate(0), ADDW);
                 block.getMachineCodes().add(addw);
                 setDefUse(src, addw);
-                setDefUse(new PhysicsReg("a0"), addw);
+                setDefUse(a0Reg, addw);
             }
         }
         // ld

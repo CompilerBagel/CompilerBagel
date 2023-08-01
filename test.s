@@ -17,24 +17,24 @@ deepWhileBrEntry1:
     sw a2, -36(s0)
     j	condBlock2
 condBlock2:
-    lw a0, -36(s0)
-    li a1, 75
-    slt a2, a0, a1
-    bne a2, zero, bodyBlock3
+    lw a1, -36(s0)
+    li a2, 75
+    slt a3, a1, a2
+    bne a3, zero, bodyBlock3
     j	afterBlock4
 bodyBlock3:
-    li a0, 0
-    sw a0, -40(s0)
-    li a0, 42
-    sw a0, -40(s0)
-    lw a0, -36(s0)
-    li a1, 100
-    slt a2, a0, a1
-    bne a2, zero, trueBlock5
+    li a1, 0
+    sw a1, -40(s0)
+    li a1, 42
+    sw a1, -40(s0)
+    lw a1, -36(s0)
+    li a2, 100
+    slt a3, a1, a2
+    bne a3, zero, trueBlock5
     j	falseBlock6
 afterBlock4:
-    lw a0, -36(s0)
-    addw a0, a0, 0
+    lw a1, -36(s0)
+    addw a0, a1, 0
     ld ra, 40(sp)
     ld s0, 32(sp)
     addi sp, sp, 48
@@ -45,41 +45,41 @@ afterBlock4:
     addi sp, sp, 48
     ret
 trueBlock5:
-    lw a0, -36(s0)
-    lw a1, -40(s0)
-    addw a2, a0, a1
-    sw a2, -36(s0)
-    lw a0, -36(s0)
-    li a1, 99
-    slt a2, a1, a0
-    bne a2, zero, trueBlock8
+    lw a1, -36(s0)
+    lw a2, -40(s0)
+    addw a3, a1, a2
+    sw a3, -36(s0)
+    lw a1, -36(s0)
+    li a2, 99
+    slt a3, a2, a1
+    bne a3, zero, trueBlock8
     j	falseBlock9
 falseBlock6:
     j	afterBlock7
 afterBlock7:
     j	condBlock2
 trueBlock8:
-    li a0, 0
-    sw a0, -44(s0)
-    lw a0, -40(s0)
-    li a1, 2
-    mulw a1, a0, a1
+    li a1, 0
     sw a1, -44(s0)
-    li a0, 1
+    lw a1, -40(s0)
+    li a2, 2
+    mulw a2, a1, a2
+    sw a2, -44(s0)
     li a1, 1
-    subw a2, a0, a1
-    seqz a0, a2
-    bne a0, zero, trueBlock11
+    li a2, 1
+    subw a3, a1, a2
+    seqz a1, a3
+    bne a1, zero, trueBlock11
     j	falseBlock12
 falseBlock9:
     j	afterBlock10
 afterBlock10:
     j	afterBlock7
 trueBlock11:
-    lw a0, -44(s0)
-    li a1, 2
-    mulw a1, a0, a1
-    sw a1, -36(s0)
+    lw a1, -44(s0)
+    li a2, 2
+    mulw a2, a1, a2
+    sw a2, -36(s0)
     j	afterBlock13
 falseBlock12:
     j	afterBlock13
@@ -96,11 +96,11 @@ mainEntry14:
     li a0, 2
     sw a0, -20(s0)
     lw a0, -20(s0)
-    lw a0, -20(s0)
-    lw a0, 0(a0)
-    lw a0, 0(a0)
+    lw a1, -20(s0)
+    mv a2, a0
+    mv a2, a1
     call deepWhileBr
-    addw a0, a0, 0
+    addw a0, a1, 0
     ld ra, 24(sp)
     ld s0, 16(sp)
     addi sp, sp, 32

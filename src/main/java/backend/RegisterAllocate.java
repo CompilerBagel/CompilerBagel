@@ -116,6 +116,7 @@ public class RegisterAllocate {
     private void funcEasyAllocate(MachineFunction function) {
         LinkedList<MachineBlock> blocks = function.getMachineBlocks();
         // giveBack a0~a7
+        giveBackRegA();
         for (MachineBlock block : blocks) {
             List<MachineCode> codes = block.getMachineCodes();
             for (MachineCode code : codes) {
