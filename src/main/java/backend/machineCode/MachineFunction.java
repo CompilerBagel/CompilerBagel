@@ -1,14 +1,14 @@
 package backend.machineCode;
 
 import backend.machineCode.Instruction.MCBinaryInteger;
+import backend.machineCode.Instruction.MCLoad;
 import backend.machineCode.Instruction.MCStore;
 import backend.reg.PhysicsReg;
 import instruction.Instruction;
 
 import java.util.*;
 
-import static backend.machineCode.MachineConstants.ADDI;
-import static backend.machineCode.MachineConstants.SD;
+import static backend.machineCode.MachineConstants.*;
 
 public class MachineFunction {
 
@@ -25,7 +25,6 @@ public class MachineFunction {
         allocateList = new ArrayList<>();
         restoreList = new ArrayList<>();
     }
-    
     public String getFuncName() {
         return funcName;
     }
@@ -55,23 +54,24 @@ public class MachineFunction {
     public LinkedList<MachineBlock> getMachineBlocks() {
         return machineBlocks;
     }
-    public List<MachineCode> getAllocateList() {
+    public void allocate() {
         allocateList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(-frameSize), ADDI));;
         allocateList.add(new MCStore(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 8), SD));
         allocateList.add(new MCStore(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 16), SD));
         allocateList.add(new MCBinaryInteger(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));
-        return allocateList;
+        this.getEntryBlock().addInstrsAtHead(allocateList);
     }
-    public List<MachineCode> getRestoreList() {
-        restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(-frameSize), ADDI));;
-        restoreList.add(new MCStore(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 8), SD));
-        restoreList.add(new MCStore(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 16), SD));
-        restoreList.add(new MCBinaryInteger(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));
-        return restoreList;
+    public void restore() {
+        restoreList.add(new MCLoad(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 8), LD));
+        restoreList.add(new MCLoad(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 16), LD));
+        restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));;
+        this.getRetBlock().addInstrsBeforeLast(restoreList);
     }
     public MachineBlock getEntryBlock() {
         return machineBlocks.getFirst();
     }
-
-
+    public MachineBlock getRetBlock() {
+        // TODO: after frontend done
+        return null;
+    }
 }

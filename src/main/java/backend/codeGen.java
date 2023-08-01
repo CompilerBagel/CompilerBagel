@@ -497,26 +497,6 @@ public class codeGen {
                 setDefUse(a0Reg, addw);
             }
         }
-        // ld
-        MCLoad raLoad = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("ra"),
-                new Immeidiate(block.getBlockFunc().getFrameSize() - 8), LD);
-        block.getMachineCodes().add(raLoad);
-        setDefUse(new PhysicsReg("sp"), raLoad);
-        setDefUse(new PhysicsReg("ra"), raLoad);
-
-        MCLoad s0Load = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("s0"),
-                new Immeidiate(block.getBlockFunc().getFrameSize() - 16), LD);
-        block.getMachineCodes().add(s0Load);
-        setDefUse(new PhysicsReg("sp"), s0Load);
-        setDefUse(new PhysicsReg("s0"), s0Load);
-
-        // addi
-        MCBinaryInteger addi = new MCBinaryInteger(new PhysicsReg("sp"), new PhysicsReg("sp"),
-                new Immeidiate(block.getBlockFunc().getFrameSize()), ADDI);
-        block.getMachineCodes().add(addi);
-        setDefUse(new PhysicsReg("sp"), addi);
-        setDefUse(new PhysicsReg("sp"), addi);
-
         MCReturn ret = new MCReturn();
         block.getMachineCodes().add(ret);
     }
@@ -591,11 +571,9 @@ public class codeGen {
         builder.append(".text\n");
         for(FunctionBlock function: module.getFunctionBlocks()){
             builder.append(function.getFunctionName()).append(":").append("\n");
-            for (MachineCode code: funcMap.get(function).getAllocateList()) {
-                builder.append("    ");
-                builder.append(code.toString());
-                builder.append("\n");
-            }
+            MachineFunction mfun = funcMap.get(function);
+            mfun.allocate();
+            mfun.restore();
             for(BaseBlock block: function.getBaseBlocks()){
                 MachineBlock machineBlock = blockMap.get(block);
                 builder.append(machineBlock.getBlockName()).append(":\n");
