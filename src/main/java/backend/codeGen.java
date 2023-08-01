@@ -267,6 +267,9 @@ public class codeGen {
                 case IRConstants.SDIV:
                     result = ((Immeidiate) left).getImmValue() / ((Immeidiate) right).getImmValue();
                     break;
+                case IRConstants.XOR:
+                    result = ((Immeidiate) left).getImmValue() ^ ((Immeidiate) right).getImmValue();
+                    break;
                 default:
                     assert(false);
                     break;
@@ -310,6 +313,9 @@ public class codeGen {
                     MachineOperand divRegOp = addLiOperation(imm, block);
                     code = new MCBinaryInteger(dest, src, divRegOp, DIVW);
                     break;
+                case IRConstants.XOR:
+                    code = new MCBinaryInteger(dest, src, imm, XORI);
+                    break;
                 default:
                     break;
             }
@@ -333,6 +339,9 @@ public class codeGen {
                     break;
                 case IRConstants.SDIV:
                     code = new MCBinaryInteger(dest, left, right, DIVW);
+                    break;
+                case IRConstants.XOR:
+                    code = new MCBinaryInteger(dest, left, right, XOR);
                     break;
                 default:
                     break;
