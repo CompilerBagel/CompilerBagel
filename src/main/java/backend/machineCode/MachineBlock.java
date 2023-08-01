@@ -41,6 +41,6 @@ public class MachineBlock {
         return this.machineCodes.addAll(0, machineCodes);
     }
     public boolean addInstrsBeforeLast(List<MachineCode> machineCodes) {
-        return this.machineCodes.addAll(this.machineCodes.size() - 4, machineCodes);
+        return this.machineCodes.addAll(this.machineCodes.size() - 3, machineCodes);
     }
 }
