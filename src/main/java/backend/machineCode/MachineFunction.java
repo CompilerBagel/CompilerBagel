@@ -1,40 +1,38 @@
 package backend.machineCode;
 
+import backend.machineCode.Instruction.MCBinaryInteger;
+import backend.machineCode.Instruction.MCStore;
+import backend.reg.PhysicsReg;
 import instruction.Instruction;
 
 import java.util.*;
 
+import static backend.machineCode.MachineConstants.ADDI;
+import static backend.machineCode.MachineConstants.SD;
+
 public class MachineFunction {
 
-    // TODO: data structure to be discussed
-    private LinkedList<MachineBlock> machineBlocks;
     private String funcName;
-    private final ArrayList<MachineOperand> savedRegs;
-    private ArrayList<MachineCode> argList;
-    private HashMap<MachineCode, MachineCode> argMoveMap; // register change when function call
+    private LinkedList<MachineBlock> machineBlocks;
     private Map<String, Integer> offsetMap;
-    private List<MachineCode> preList;
+    private List<MachineCode> allocateList;
+    private List<MachineCode> restoreList;
     
     public MachineFunction(String funcName) {
         this.funcName = funcName;
         machineBlocks = new LinkedList<>();
-        savedRegs = new ArrayList<>();
-        argList = new ArrayList<>();
-        argMoveMap = new HashMap<>();
         offsetMap = new HashMap<>();
-        preList = new ArrayList<>();
+        allocateList = new ArrayList<>();
+        restoreList = new ArrayList<>();
     }
     
     public String getFuncName() {
         return funcName;
     }
-    
-    public void initSavedRegs() { savedRegs.clear();}
-    
+
     // stack
     private int frameSize; // 栈大小
     private int stackCount = 0; // real count
-
     public int getStackCount() {
         return stackCount;
     }
@@ -50,16 +48,29 @@ public class MachineFunction {
     public Map<String, Integer> getOffsetMap() {
         return offsetMap;
     }
-
+    // block
     public void addMachineBlock(MachineBlock block) {
         machineBlocks.add(block);
     }
-
     public LinkedList<MachineBlock> getMachineBlocks() {
         return machineBlocks;
     }
-    public List<MachineCode> getPreList() {
-        return preList;
+    public List<MachineCode> getAllocateList() {
+        allocateList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(-frameSize), ADDI));;
+        allocateList.add(new MCStore(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 8), SD));
+        allocateList.add(new MCStore(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 16), SD));
+        allocateList.add(new MCBinaryInteger(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));
+        return allocateList;
+    }
+    public List<MachineCode> getRestoreList() {
+        restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(-frameSize), ADDI));;
+        restoreList.add(new MCStore(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 8), SD));
+        restoreList.add(new MCStore(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 16), SD));
+        restoreList.add(new MCBinaryInteger(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));
+        return restoreList;
+    }
+    public MachineBlock getEntryBlock() {
+        return machineBlocks.getFirst();
     }
 
 

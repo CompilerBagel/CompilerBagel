@@ -591,13 +591,7 @@ public class codeGen {
         builder.append(".text\n");
         for(FunctionBlock function: module.getFunctionBlocks()){
             builder.append(function.getFunctionName()).append(":").append("\n");
-            MachineFunction mfunc = funcMap.get(function);
-            int frameSize = mfunc.getFrameSize();
-            mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new Immeidiate(-frameSize), ADDI));;
-            mfunc.getPreList().add(new MCStore(raReg, spReg, new Immeidiate(frameSize - 8), SD));
-            mfunc.getPreList().add(new MCStore(s0Reg, spReg, new Immeidiate(frameSize - 16), SD));
-            mfunc.getPreList().add(new MCBinaryInteger(s0Reg, spReg, new Immeidiate(frameSize), ADDI));
-            for (MachineCode code: funcMap.get(function).getPreList()) {
+            for (MachineCode code: funcMap.get(function).getAllocateList()) {
                 builder.append("    ");
                 builder.append(code.toString());
                 builder.append("\n");
