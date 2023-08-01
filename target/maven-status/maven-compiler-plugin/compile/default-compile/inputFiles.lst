@@ -26,10 +26,9 @@
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/instruction/Instruction.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/backend/machineCode/Instruction/MCCall.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/backend/machineCode/Instruction/MCBranch.java
-/home/cardigan1008/Desktop/CompilerBagel/src/main/java/antlr/SysYParserVisitor.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/Scope/Scope.java
-/home/cardigan1008/Desktop/CompilerBagel/src/main/java/antlr/SysYParserBaseVisitor.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/Compiler.java
+/home/cardigan1008/Desktop/CompilerBagel/src/main/java/backend/machineCode/Instruction/MCSet.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/instruction/TypeTransInstruction.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/instruction/LoadInstruction.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/instruction/CondInstruction.java
@@ -41,12 +40,11 @@
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/instruction/AllocaInstruction.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/instruction/CalculateInstruction.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/backend/machineCode/Instruction/MCJump.java
-/home/cardigan1008/Desktop/CompilerBagel/src/main/java/antlr/SysYParserBaseListener.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/Main.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/IRBuilder/ConstIntValueRef.java
-/home/cardigan1008/Desktop/CompilerBagel/src/main/java/antlr/SysYParserListener.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/instruction/CallInstruction.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/Type/Int32Type.java
+/home/cardigan1008/Desktop/CompilerBagel/src/main/java/backend/machineCode/Instruction/MCSetz.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/Scope/GlobalScope.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/instruction/StoreInstruction.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/backend/machineCode/Instruction/MCBinaryInteger.java
@@ -59,8 +57,6 @@
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/backend/machineCode/MachineConstants.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/backend/machineCode/MachineBlock.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/IRBuilder/IRBuilder.java
-/home/cardigan1008/Desktop/CompilerBagel/src/main/java/antlr/SysYLexer.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/backend/RegisterAllocate.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/Type/FloatType.java
 /home/cardigan1008/Desktop/CompilerBagel/src/main/java/instruction/ZextInstruction.java
-/home/cardigan1008/Desktop/CompilerBagel/src/main/java/antlr/SysYParser.java
