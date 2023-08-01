@@ -20,10 +20,8 @@ public class SysYParser extends Parser {
 		RETURN=10, PLUS=11, MINUS=12, MUL=13, DIV=14, MOD=15, ASSIGN=16, EQ=17, 
 		NEQ=18, LT=19, GT=20, LE=21, GE=22, NOT=23, AND=24, OR=25, L_PAREN=26, 
 		R_PAREN=27, L_BRACE=28, R_BRACE=29, L_BRACKT=30, R_BRACKT=31, COMMA=32, 
-		SEMICOLON=33, IDENT=34, INTEGER_CONST=35, FLOAT_CONST=36, EXPONENT=37, 
-		BINARY_EXPONENT=38, HEX_FLOAT_CONST=39, HEX_PREFIX=40, HEX_MANTISSA=41, 
-		HEX_EXPONENT=42, HEX_FLOAT_EXPONENT_INDICATOR=43, WS=44, SL_COMMENT=45, 
-		ML_COMMENT=46;
+		SEMICOLON=33, IDENT=34, INTEGER_CONST=35, FLOAT_CONST=36, DecimalFloatingConstant=37, 
+		HexadecimalFloatingConstant=38, WS=39, SL_COMMENT=40, ML_COMMENT=41;
 	public static final int
 		RULE_program = 0, RULE_compUnit = 1, RULE_decl = 2, RULE_constDecl = 3, 
 		RULE_bType = 4, RULE_constDef = 5, RULE_constInitVal = 6, RULE_varDecl = 7, 
@@ -56,8 +54,7 @@ public class SysYParser extends Parser {
 			"CONTINUE", "RETURN", "PLUS", "MINUS", "MUL", "DIV", "MOD", "ASSIGN", 
 			"EQ", "NEQ", "LT", "GT", "LE", "GE", "NOT", "AND", "OR", "L_PAREN", "R_PAREN", 
 			"L_BRACE", "R_BRACE", "L_BRACKT", "R_BRACKT", "COMMA", "SEMICOLON", "IDENT", 
-			"INTEGER_CONST", "FLOAT_CONST", "EXPONENT", "BINARY_EXPONENT", "HEX_FLOAT_CONST", 
-			"HEX_PREFIX", "HEX_MANTISSA", "HEX_EXPONENT", "HEX_FLOAT_EXPONENT_INDICATOR", 
+			"INTEGER_CONST", "FLOAT_CONST", "DecimalFloatingConstant", "HexadecimalFloatingConstant", 
 			"WS", "SL_COMMENT", "ML_COMMENT"
 		};
 	}
@@ -2637,7 +2634,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001.\u0131\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001)\u0131\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
 		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+
