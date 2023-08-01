@@ -147,10 +147,6 @@ public class codeGen {
         Map<String, Integer> offestMap = mfunc.getOffsetMap();
         int stackCount = mfunc.getStackCount(); // 4 byte = 1 count
         stackCount += 4; // ra 8 + s0 8  = 16 byte = 4 count
-        if (!func.getType().equals(IRVoidType())) {
-            offestMap.put("ret", stackCount * 4);
-            stackCount += 1; // for ret value
-        }
         offestMap.put("ra", 8);
         offestMap.put("s0", 16);
         List<ValueRef> params = func.getParams();
@@ -162,6 +158,10 @@ public class codeGen {
                 stackCount += 2;
                 offestMap.put(param.getText(), stackCount * 8);
             }
+        }
+        if (!func.getType().equals(IRVoidType())) {
+            stackCount += 1;
+            offestMap.put("ret", stackCount * 4);
         }
         mfunc.setStackCount(stackCount);
         mfunc.setFrameSize(stackAlign(stackCount));
@@ -502,26 +502,6 @@ public class codeGen {
                 setDefUse(a0Reg, addw);
             }
         }
-        // ld
-        MCLoad raLoad = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("ra"),
-                new Immeidiate(block.getBlockFunc().getFrameSize() - 8), LD);
-        block.getMachineCodes().add(raLoad);
-        setDefUse(new PhysicsReg("sp"), raLoad);
-        setDefUse(new PhysicsReg("ra"), raLoad);
-
-        MCLoad s0Load = new MCLoad(new PhysicsReg("sp"), new PhysicsReg("s0"),
-                new Immeidiate(block.getBlockFunc().getFrameSize() - 16), LD);
-        block.getMachineCodes().add(s0Load);
-        setDefUse(new PhysicsReg("sp"), s0Load);
-        setDefUse(new PhysicsReg("s0"), s0Load);
-
-        // addi
-        MCBinaryInteger addi = new MCBinaryInteger(new PhysicsReg("sp"), new PhysicsReg("sp"),
-                new Immeidiate(block.getBlockFunc().getFrameSize()), ADDI);
-        block.getMachineCodes().add(addi);
-        setDefUse(new PhysicsReg("sp"), addi);
-        setDefUse(new PhysicsReg("sp"), addi);
-
         MCReturn ret = new MCReturn();
         block.getMachineCodes().add(ret);
     }
@@ -596,17 +576,13 @@ public class codeGen {
         builder.append(".text\n");
         for(FunctionBlock function: module.getFunctionBlocks()){
             builder.append(function.getFunctionName()).append(":").append("\n");
-            MachineFunction mfunc = funcMap.get(function);
-            int frameSize = mfunc.getFrameSize();
-            mfunc.getPreList().add(new MCBinaryInteger(spReg, spReg, new Immeidiate(-frameSize), ADDI));;
-            mfunc.getPreList().add(new MCStore(raReg, spReg, new Immeidiate(frameSize - 8), SD));
-            mfunc.getPreList().add(new MCStore(s0Reg, spReg, new Immeidiate(frameSize - 16), SD));
-            mfunc.getPreList().add(new MCBinaryInteger(s0Reg, spReg, new Immeidiate(frameSize), ADDI));
-            for (MachineCode code: funcMap.get(function).getPreList()) {
-                builder.append("    ");
-                builder.append(code.toString());
-                builder.append("\n");
+            MachineFunction mfun = funcMap.get(function);
+            mfun.allocate();
+            List<MachineBlock> retBlocks = new ArrayList<>();
+            for (BaseBlock retBlock: function.getRetBlocks()) {
+                retBlocks.add(blockMap.get(retBlock));
             }
+            mfun.restore(retBlocks);
             for(BaseBlock block: function.getBaseBlocks()){
                 MachineBlock machineBlock = blockMap.get(block);
                 builder.append(machineBlock.getBlockName()).append(":\n");

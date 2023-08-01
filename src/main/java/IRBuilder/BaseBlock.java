@@ -12,6 +12,7 @@ public class BaseBlock implements ValueRef{
     private final String label;
     private final int baseBlockId;
     private final List<Instruction> instructions;
+    private FunctionBlock functionBlock;
 
     private List<ValueRef> predList = new ArrayList<>();
     private List<ValueRef> succList = new ArrayList<>();
@@ -20,6 +21,7 @@ public class BaseBlock implements ValueRef{
     public static BaseBlock IRAppendBasicBlock(FunctionBlock function, String label) {
         BaseBlock baseBlock = new BaseBlock(label);
         function.addBaseBlock(baseBlock);
+        baseBlock.setFunctionBlock(function);
         return baseBlock;
     }
 
@@ -84,6 +86,12 @@ public class BaseBlock implements ValueRef{
     
     public List<Instruction> getInstructions() {
         return instructions;
+    }
+    public void setFunctionBlock(FunctionBlock functionBlock) {
+        this.functionBlock = functionBlock;
+    }
+    public FunctionBlock getFunctionBlock() {
+        return functionBlock;
     }
 
 }

@@ -13,6 +13,7 @@ public class FunctionBlock implements ValueRef{
     private final List<ValueRef> paramsValueRef;
     private List<ValueRef> caller; // call the function
     private List<ValueRef> callee; // called by the function
+    private List<BaseBlock> retBlocks;
 
     public FunctionBlock(String functionName, FunctionType type) {
         this.functionName = functionName;
@@ -21,6 +22,7 @@ public class FunctionBlock implements ValueRef{
         this.paramsValueRef = new ArrayList<ValueRef>();
         this.caller = new ArrayList<ValueRef>();
         this.callee = new ArrayList<ValueRef>();
+        this.retBlocks = new ArrayList<BaseBlock>();
         int count = 0;
         for (Type paramType : type.getParamsType()) {
             ValueRef valRegister = new BaseRegister(functionName + (count++), paramType);
@@ -34,15 +36,12 @@ public class FunctionBlock implements ValueRef{
     public List<ValueRef> getParams() {
         return paramsValueRef;
     }
-
     public void addBaseBlock(BaseBlock baseBlock) {
         baseBlocks.add(baseBlock);
     }
-    
     public String getFunctionName() {
         return functionName;
     }
-    
     public List<BaseBlock> getBaseBlocks() {
         return baseBlocks;
     }
@@ -103,7 +102,16 @@ public class FunctionBlock implements ValueRef{
         callee.add(callFunction);
     }
 
-    public List<ValueRef> getCaller(){ return caller;}
-
-    public List<ValueRef> getCallee(){ return callee;}
+    public List<ValueRef> getCaller(){
+        return caller;
+    }
+    public List<ValueRef> getCallee(){
+        return callee;
+    }
+    public List<BaseBlock> getRetBlocks() {
+        return retBlocks;
+    }
+    public void addRetBlock(BaseBlock retBlock) {
+        this.retBlocks.add(retBlock);
+    }
 }

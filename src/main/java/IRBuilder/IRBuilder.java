@@ -38,6 +38,7 @@ public class IRBuilder {
 
     public static void IRBuildRet(IRBuilder builder, ValueRef valueRef) {
         builder.currentBaseBlock.appendInstr(new RetInstruction(generateList(valueRef), builder.currentBaseBlock));
+        builder.currentBaseBlock.getFunctionBlock().addRetBlock(builder.currentBaseBlock);
         if(valueRef == null){
             builder.emit(RET + " " + "void");
         }else {
