@@ -481,7 +481,7 @@ public class codeGen {
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
         if (null == offsetMap.get(srcName)) {
             MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
-            MCLoad ld = new MCLoad(new PhysicsReg("t0"), dest, LW); // TODO: la when src.isAddress = true and LD?
+            MCLoad ld = new MCLoad(new PhysicsReg("t0"), dest, LW);
             block.getMachineCodes().add(la);
             block.getMachineCodes().add(ld);
             setDefUse(src, la);
@@ -505,10 +505,10 @@ public class codeGen {
             // return not void
             MachineOperand src = parseOperand(rets.get(0)); // rets.get(0) retValueRef
             if(src.isImm()){
-                MCLi li = new MCLi(a0Reg, src); // todo: 如何调用确定的寄存器？
+                MCLi li = new MCLi(a0Reg, src);
                 block.getMachineCodes().add(li);
                 setDefUse(src, li);
-                setDefUse(a0Reg, li); // TODO:?
+                setDefUse(a0Reg, li);
             } else {
                 MCBinaryInteger addw = new MCBinaryInteger(a0Reg, src, new Immeidiate(0), ADDW);
                 block.getMachineCodes().add(addw);
