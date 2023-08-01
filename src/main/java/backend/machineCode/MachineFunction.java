@@ -8,6 +8,7 @@ import backend.reg.PhysicsReg;
 import instruction.Instruction;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static backend.machineCode.MachineConstants.*;
 
@@ -66,7 +67,7 @@ public class MachineFunction {
         restoreList.add(new MCLoad(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 8), LD));
         restoreList.add(new MCLoad(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 16), LD));
         restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));;
-        for (MachineBlock retBlock : retBlocks) {
+        for (MachineBlock retBlock : retBlocks.stream().distinct().toList()) {
             retBlock.addInstrsBeforeLast(restoreList);
         }
     }

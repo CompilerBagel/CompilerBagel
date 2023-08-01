@@ -184,7 +184,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         localScopeCounter++;
         currentScope = new LocalScope(scopeName, currentScope);
         ValueRef ret = super.visitBlock(ctx);
-        currentBlock = (BaseBlock) ret;
         currentScope = currentScope.getEnclosingScope();
         return ret;
     }
@@ -488,7 +487,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         if (ctx.exp() != null) {
             result = visit(ctx.exp());
         }
-        currentFunction.addRetBlock(currentBlock);
         IRBuildRet(builder, result);
         return result;
     }
@@ -718,7 +716,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             cmpResult = IRBuildICmp(builder, IRIntSGT, lVal, rVal, "icmp_GT");
         }
 
-        // return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
         return cmpResult;
     }
 
@@ -727,13 +724,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
         ValueRef cmpResult = null;
-
         if (ctx.EQ() != null) {
             cmpResult = IRBuildICmp(builder, IRIntEQ, lVal, rVal, "icmp_EQ");
         } else if (ctx.NEQ() != null) {
             cmpResult = IRBuildICmp(builder, IRIntNE, lVal, rVal, "icmp_NE");
         }
-        // return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
         return cmpResult;
     }
 
@@ -742,7 +737,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef lVal = this.visit(ctx.cond(0));
         ValueRef rVal = this.visit(ctx.cond(1));
         ValueRef cmpResult = IRBuildAnd(builder, lVal, rVal, "and_");
-        // return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
         return cmpResult;
     }
 
