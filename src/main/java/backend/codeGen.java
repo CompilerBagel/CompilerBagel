@@ -408,8 +408,14 @@ public class codeGen {
             }
             i++;
         }
-
-        MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
+        MachineFunction mcFunction = funcMap.get(instr.getFunction());
+        MCCall call;
+        if(mcFunction != null) {
+            call = new MCCall(funcMap.get(instr.getFunction()), operands);
+        } else {
+            MachineFunction outFunc = new MachineFunction(instr.getFunction().getFunctionName());
+            call = new MCCall(outFunc, operands);
+        }
         for(MachineOperand operand: operands) {
             operand.addUse(call);
         }
@@ -507,32 +513,33 @@ public class codeGen {
         if (pointer.getType() instanceof PointerType) {
             if (pointer instanceof GlobalRegister) {
                 Symbol globalSymbol = globalMap.get(((GlobalRegister) pointer).getIdentity());
-                MCLoad la = new MCLoad(new BaseRegister(pointer.getText(), int32Type), new Label(globalSymbol.getName(), globalSymbol), LA);
+                BaseRegister vReg = new BaseRegister(pointer.getText(), pointer.getType());
+                MCLoad la = new MCLoad(vReg, new Label(globalSymbol.getName(), globalSymbol), LA);
+                block.getMachineCodes().add(la);
+                setDefUse(vReg, la);
             }
 
-            boolean hasReg = false;
-            ArrayType arrayType = (ArrayType) instr.getPointedType(pointer, 0);
-            int index = ((ConstIntValueRef) instr.getOperands().get(3)).getValue();
-            int offset = arrayType.getOtherDimensionLength(index) * 4;
-            /*for (int i = 3; i < instr.getOperands().size(); i ++) {
-                ValueRef op = instr.getOperands().get(i);
-                if (op instanceof ConstIntValueRef) {
-                    ArrayType arrayType = (ArrayType) instr.getPointedType(pointer, i - 2);
-                    offset += (((ConstIntValueRef) op).getValue() * arrayType.getOtherDimensionLength(((ConstIntValueRef) op).getValue()) * 4);
-                } else {
-                    hasReg = true;
+            int offset;
+            int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
+            Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
+            if (baseType instanceof ArrayType) {
+                int dims = 0;
+                Type tmp = baseType;
+                while (tmp instanceof ArrayType) {
+                    tmp = ((ArrayType) tmp).getElementType();
+                    dims ++;
                 }
-            }*/
-            if (hasReg) {
-
-            } else  {
-                int base = offsetMap.get(pointer.getText());
-                MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
-                MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(-(offset + base)), ADDI);
-                offsetMap.put(instr.getOperands().get(0).getText(), offset + base);
-                block.getMachineCodes().add(add);
-                setDefUse(baseReg, add);
+                offset = ((ArrayType) baseType).getOtherDimensionLength(dims, index) * 4;
+            } else {
+                offset = index * 4;
             }
+
+            int base = offsetMap.get(pointer.getText());
+            MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
+            MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(-(offset + base)), ADDI);
+            offsetMap.put(instr.getOperands().get(0).getText(), offset + base);
+            block.getMachineCodes().add(add);
+            setDefUse(baseReg, add);
         }
     }
 
