@@ -58,12 +58,11 @@ public class ArrayType implements Type{
         return total;
     }
 
-    public int getOtherDimensionLength(int index) {
-        int len = 1;
-        int size = elementDimension.size();
-        for (int i = 1; i < size; i ++) {
-            len *= elementDimension.get(i);
+    public int getOtherDimensionLength(int dims, int index) {
+        int curDim = elementDimension.size() - dims;
+        for (int i = curDim + 1; i < elementDimension.size(); i ++) {
+            index *= elementDimension.get(i);
         }
-        return len;
+        return index;
     }
 }
