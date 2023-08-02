@@ -6,7 +6,7 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
-// import antlr.*;
+//import antlr.*;
 
 import java.util.*;
 
@@ -51,7 +51,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     }
 
     private void addLibs(GlobalScope globalScope){
-/*        FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
+        FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
         globalScope.define("getint", addLib("getint", getIntType), getIntType);
 
         FunctionType getchType = new FunctionType(new ArrayList<>(), int32Type);
@@ -113,7 +113,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         List<Type> endTimeTypeParams = new ArrayList<>();
         endTimeTypeParams.add(int32Type);
         FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
-        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);*/
+        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
 
     }
 
@@ -265,6 +265,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                             paramList.add(arrayPtr.get(counter1++));
                             elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array");
                         }
+
                         IRBuildStore(builder, init.get(i),elementPtr);
                         arrayPtr.clear();
                     }
@@ -295,6 +296,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             List<Integer> paramCount = new ArrayList<>();
             for (SysYParser.ConstExpContext constExpContext : varDefContext.constExp()) {
                 ValueRef temp = this.visit(constExpContext.exp());
+
                 paramCount.add(Integer.parseInt(temp.getText()));
             }
             for (int i = paramCount.size() - 1; i >= 0; i--) {
@@ -337,31 +339,33 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 //                        IRSetInitializer(module, initVariable, init);
 //                    }else{
 
-                        List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
-                        for(int i = 0;i<init.size();i++){
+                    List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
+                    for(int i = 0;i<init.size();i++){
 
-                            int totalCount = init.size();
-                            int temp = 1;
-                            int counter = i;
+                        int totalCount = init.size();
+                        int temp = 1;
+                        int counter = i;
 
-                            arrayPtr.add(new ConstIntValueRef(0));
-                            for(int j = 0;j<elementDimension.size();j++){
-                                totalCount/=elementDimension.get(j);
-                                arrayPtr.add(new ConstIntValueRef(counter/totalCount));
-                                counter -= (counter/totalCount)*totalCount;
-                            }
-                            int counter1 = 1;
-                            List<ValueRef> paramList = new ArrayList<ValueRef>();
+                        arrayPtr.add(new ConstIntValueRef(0));
+                        for(int j = 0;j<elementDimension.size();j++){
+                            totalCount/=elementDimension.get(j);
+                            arrayPtr.add(new ConstIntValueRef(counter/totalCount));
+                            counter -= (counter/totalCount)*totalCount;
+                        }
+                        int counter1 = 1;
+                        List<ValueRef> paramList = new ArrayList<ValueRef>();
+                        paramList.add(intZero);
+                        paramList.add(arrayPtr.get(counter1++));
+                        ValueRef elementPtr = IRBuildGEP(builder,variable,paramList,2,"array");
+                        for(int j = 0;j<elementDimension.size()-1;j++){
+                            paramList.clear();
                             paramList.add(intZero);
                             paramList.add(arrayPtr.get(counter1++));
-                            ValueRef elementPtr = IRBuildGEP(builder,variable,paramList,2,"array");
-                            for(int j = 0;j<elementDimension.size()-1;j++){
-                                paramList.clear();
-                                paramList.add(intZero);
-                                paramList.add(arrayPtr.get(counter1++));
-                            }
-                            IRBuildStore(builder, init.get(i),elementPtr);
-                            arrayPtr.clear();
+                            elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array");
+                        }
+
+                        IRBuildStore(builder, init.get(i),elementPtr);
+                        arrayPtr.clear();
 //                        }
                     }
                 }
@@ -580,8 +584,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 return IRBuildNeg(builder, operand, "neg_");
             case "!":
                 operand = IRBuildICmp(builder, 1, new ConstIntValueRef(0), operand, "icmp_");
-                 operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
-                 operand = IRBuildZExt(builder, operand, int32Type, "zext_");
+                operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
+                operand = IRBuildZExt(builder, operand, int32Type, "zext_");
                 return operand;
             default:
                 break;
@@ -683,12 +687,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx) {
         ValueRef conditionVal = this.visit(ctx.cond());
-         ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+        ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
 
-         IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
+        IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
 
         IRPositionBuilderAtEnd(builder, trueBlock);
         this.visit(ctx.stmt(0));
@@ -763,8 +767,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder, condBlock);
         ValueRef conditionVal = this.visit(ctx.cond());
-         ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
-         IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
+        ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
+        IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
 //        IRBuildCondBr(builder, conditionVal, bodyBlock, afterBlock);
 
         IRPositionBuilderAtEnd(builder, bodyBlock);
