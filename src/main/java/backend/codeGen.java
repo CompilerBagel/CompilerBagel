@@ -521,7 +521,12 @@ public class codeGen {
             int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
             Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
             if (baseType instanceof ArrayType) {
-                int dims = ((ArrayType) baseType).getElementDimension().size();
+                int dims = 0;
+                Type tmp = baseType;
+                while (tmp instanceof ArrayType) {
+                    tmp = ((ArrayType) tmp).getElementType();
+                    dims ++;
+                }
                 offset = ((ArrayType) baseType).getOtherDimensionLength(dims, index) * 4;
             } else {
                 offset = index * 4;
