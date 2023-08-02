@@ -59,7 +59,7 @@ public class ArrayType implements Type{
     }
 
     public int getOtherDimensionLength(int dims, int index) {
-        int curDim = elementDimension.size() - dims;
+        int curDim = elementDimension.size() - dims - 1;
         for (int i = curDim + 1; i < elementDimension.size(); i ++) {
             index *= elementDimension.get(i);
         }
