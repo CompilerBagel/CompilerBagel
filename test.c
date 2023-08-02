@@ -1,9 +1,21 @@
-int f(int x, int y) {
-    return x + y;
-}
-int main() {
-    int a = 3;
-    int b = 4;
-    int c = f(a, b);
-    return c;
+// Use complex expression in if structure
+int main () {
+    int a;
+    int b;
+    int c;
+    int d;
+    int result;
+    a = 5;
+    b = 5;
+    c = 1;
+    d = -2;
+    result = 2;
+    if ((d * 1 / 2) < 0 || (a - b) != 0 && (c + 3) / 2 != 0) {
+        result = 3;
+    }
+    if ((d + 2 + 67) < 0 || (a - b) != 0 && (c + 2) / 2 != 0) {
+        result = 4;
+
+    }
+    return result;
 }

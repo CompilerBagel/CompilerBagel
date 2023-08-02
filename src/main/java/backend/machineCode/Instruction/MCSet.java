@@ -29,6 +29,11 @@ public class MCSet extends MachineCode {
     }
 
     @Override
+    public boolean isUselessCode() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "slt " + dest.getRegister() + ", " + left.getRegister() + ", " + right.getRegister();
     }

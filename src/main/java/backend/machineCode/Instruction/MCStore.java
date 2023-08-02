@@ -71,4 +71,9 @@ public class MCStore extends MachineCode {
             this.src = newOperand;
         }
     }
+
+    @Override
+    public boolean isUselessCode() {
+        return false;
+    }
 }

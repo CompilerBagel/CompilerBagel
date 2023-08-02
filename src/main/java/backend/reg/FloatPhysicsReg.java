@@ -3,7 +3,7 @@ package backend.reg;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FloatPhysicsReg extends Reg {
+public class FloatPhysicsReg extends PhysicsReg {
     private String regName;
     private int index;
     public static int regNum = 32;

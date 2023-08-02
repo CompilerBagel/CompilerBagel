@@ -1,9 +1,12 @@
 package backend;
 
+import IRBuilder.BaseRegister;
+import Type.Type;
 import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineFunction;
 import backend.machineCode.MachineOperand;
+import backend.reg.FloatPhysicsReg;
 import backend.reg.PhysicsReg;
 
 import java.util.HashMap;
@@ -11,7 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static backend.reg.PhysicsReg.*;
-
+import static Type.FloatType.IRFloatType;
 public class RegisterAllocate {
     private static final int K = 14; // number of colors
     private static final int NONE_ALLOCATE = -1;
@@ -20,6 +23,7 @@ public class RegisterAllocate {
     private List<MachineOperand> nodes;
     private final HashMap<MachineOperand, PhysicsReg> allocatedReg = new HashMap<>();
     private final HashMap<MachineOperand, Integer> color = new HashMap<>();
+    private static final Type floatType = IRFloatType();
 
     public RegisterAllocate(List<MachineFunction> functions) {
         this.functions = functions;
@@ -185,6 +189,18 @@ public class RegisterAllocate {
         PhysicsReg reg = allocatedReg.get(operand);
         if (reg != null) {
             return reg;
+        }
+        if (operand instanceof BaseRegister) {
+            if (((BaseRegister) operand).getType() == floatType) {
+                // allocate a0 ~ a7
+                for (int i = 11; i <= 17; i++) {
+                    if (FloatPhysicsReg.isAvailableReg(i)) {
+                        reg = FloatPhysicsReg.getPhysicsReg(i);
+                        allocatedReg.put(operand, reg);
+                        return reg;
+                    }
+                }
+            }
         }
         // allocate a0 ~ a7
         for (int i = 11; i <= 17; i++) {

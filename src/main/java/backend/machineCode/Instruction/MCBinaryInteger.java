@@ -57,4 +57,9 @@ public class MCBinaryInteger extends MachineCode {
             right = newOperand;
         }
     }
+
+    @Override
+    public boolean isUselessCode() {
+        return false;
+    }
 }
