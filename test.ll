@@ -17,166 +17,134 @@ declare void @after_main()
 declare void @_sysy_starttime(i32 %0)
 declare void @_sysy_stoptime(i32 %0)
 
-@g0 = global i32 0
-@h1 = global i32 0
-@f2 = global i32 0
-@e3 = global i32 0
-define i32 @EightWhile() {
-EightWhileEntry1:
-  %a0 = alloca i32, align 4
-  store i32 0, i32* %a0, align 4
-  store i32 5, i32* %a0, align 4
-  %b3 = alloca i32, align 4
-  store i32 0, i32* %b3, align 4
-  %c5 = alloca i32, align 4
-  store i32 0, i32* %c5, align 4
-  store i32 6, i32* %b3, align 4
-  store i32 7, i32* %c5, align 4
-  %d9 = alloca i32, align 4
-  store i32 0, i32* %d9, align 4
-  store i32 10, i32* %d9, align 4
-  br label %condBlock2
-condBlock2:
-  %a12 = load i32, i32* %a0, align 4
-  %icmp_LT13 = icmp slt i32 %a12, 20
-  %icmp_14 = icmp ne i1 %icmp_LT13, 0
-  br i1 %icmp_14, label %bodyBlock3, label %afterBlock4
-bodyBlock3:
-  %a15 = load i32, i32* %a0, align 4
-  %add_16 = add i32 %a15, 3
-  store i32 %add_16, i32* %a0, align 4
-  br label %condBlock5
-afterBlock4:
-  %a81 = load i32, i32* %a0, align 4
-  %b82 = load i32, i32* %b3, align 4
-  %d83 = load i32, i32* %d9, align 4
-  %add_84 = add i32 %b82, %d83
-  %add_85 = add i32 %a81, %add_84
-  %c86 = load i32, i32* %c5, align 4
-  %add_87 = add i32 %add_85, %c86
-  %e88 = load i32, i32* @e3, align 4
-  %d89 = load i32, i32* %d9, align 4
-  %add_90 = add i32 %e88, %d89
-  %g91 = load i32, i32* @g0, align 4
-  %sub_92 = sub i32 %add_90, %g91
-  %h93 = load i32, i32* @h1, align 4
-  %add_94 = add i32 %sub_92, %h93
-  %sub_95 = sub i32 %add_87, %add_94
-  ret i32 %sub_95
-  ret i32 0
-condBlock5:
-  %b18 = load i32, i32* %b3, align 4
-  %icmp_LT19 = icmp slt i32 %b18, 10
-  %icmp_20 = icmp ne i1 %icmp_LT19, 0
-  br i1 %icmp_20, label %bodyBlock6, label %afterBlock7
-bodyBlock6:
-  %b21 = load i32, i32* %b3, align 4
-  %add_22 = add i32 %b21, 1
-  store i32 %add_22, i32* %b3, align 4
-  br label %condBlock8
-afterBlock7:
-  %b78 = load i32, i32* %b3, align 4
-  %sub_79 = sub i32 %b78, 2
-  store i32 %sub_79, i32* %b3, align 4
-  br label %condBlock2
-condBlock8:
-  %c24 = load i32, i32* %c5, align 4
-  %icmp_EQ25 = icmp eq i32 %c24, 7
-  %icmp_26 = icmp ne i1 %icmp_EQ25, 0
-  br i1 %icmp_26, label %bodyBlock9, label %afterBlock10
-bodyBlock9:
-  %c27 = load i32, i32* %c5, align 4
-  %sub_28 = sub i32 %c27, 1
-  store i32 %sub_28, i32* %c5, align 4
-  br label %condBlock11
-afterBlock10:
-  %c75 = load i32, i32* %c5, align 4
-  %add_76 = add i32 %c75, 1
-  store i32 %add_76, i32* %c5, align 4
-  br label %condBlock5
-condBlock11:
-  %d30 = load i32, i32* %d9, align 4
-  %icmp_LT31 = icmp slt i32 %d30, 20
-  %icmp_32 = icmp ne i1 %icmp_LT31, 0
-  br i1 %icmp_32, label %bodyBlock12, label %afterBlock13
-bodyBlock12:
-  %d33 = load i32, i32* %d9, align 4
-  %add_34 = add i32 %d33, 3
-  store i32 %add_34, i32* %d9, align 4
-  br label %condBlock14
-afterBlock13:
-  %d72 = load i32, i32* %d9, align 4
-  %sub_73 = sub i32 %d72, 1
-  store i32 %sub_73, i32* %d9, align 4
-  br label %condBlock8
-condBlock14:
-  %e36 = load i32, i32* @e3, align 4
-  %icmp_GT37 = icmp sgt i32 %e36, 1
-  %icmp_38 = icmp ne i1 %icmp_GT37, 0
-  br i1 %icmp_38, label %bodyBlock15, label %afterBlock16
-bodyBlock15:
-  %e39 = load i32, i32* @e3, align 4
-  %sub_40 = sub i32 %e39, 1
-  store i32 %sub_40, i32* @e3, align 4
-  br label %condBlock17
-afterBlock16:
-  %e69 = load i32, i32* @e3, align 4
-  %add_70 = add i32 %e69, 1
-  store i32 %add_70, i32* @e3, align 4
-  br label %condBlock11
-condBlock17:
-  %f42 = load i32, i32* @f2, align 4
-  %icmp_GT43 = icmp sgt i32 %f42, 2
-  %icmp_44 = icmp ne i1 %icmp_GT43, 0
-  br i1 %icmp_44, label %bodyBlock18, label %afterBlock19
-bodyBlock18:
-  %f45 = load i32, i32* @f2, align 4
-  %sub_46 = sub i32 %f45, 2
-  store i32 %sub_46, i32* @f2, align 4
-  br label %condBlock20
-afterBlock19:
-  %f66 = load i32, i32* @f2, align 4
-  %add_67 = add i32 %f66, 1
-  store i32 %add_67, i32* @f2, align 4
-  br label %condBlock14
-condBlock20:
-  %g48 = load i32, i32* @g0, align 4
-  %icmp_LT49 = icmp slt i32 %g48, 3
-  %icmp_50 = icmp ne i1 %icmp_LT49, 0
-  br i1 %icmp_50, label %bodyBlock21, label %afterBlock22
-bodyBlock21:
-  %g51 = load i32, i32* @g0, align 4
-  %add_52 = add i32 %g51, 10
-  store i32 %add_52, i32* @g0, align 4
-  br label %condBlock23
-afterBlock22:
-  %g63 = load i32, i32* @g0, align 4
-  %sub_64 = sub i32 %g63, 8
-  store i32 %sub_64, i32* @g0, align 4
-  br label %condBlock17
-condBlock23:
-  %h54 = load i32, i32* @h1, align 4
-  %icmp_LT55 = icmp slt i32 %h54, 10
-  %icmp_56 = icmp ne i1 %icmp_LT55, 0
-  br i1 %icmp_56, label %bodyBlock24, label %afterBlock25
-bodyBlock24:
-  %h57 = load i32, i32* @h1, align 4
-  %add_58 = add i32 %h57, 8
-  store i32 %add_58, i32* @h1, align 4
-  br label %condBlock23
-afterBlock25:
-  %h60 = load i32, i32* @h1, align 4
-  %sub_61 = sub i32 %h60, 1
-  store i32 %sub_61, i32* @h1, align 4
-  br label %condBlock20
-}
 define i32 @main() {
-mainEntry26:
-  store i32 1, i32* @g0, align 4
-  store i32 2, i32* @h1, align 4
-  store i32 4, i32* @e3, align 4
-  store i32 6, i32* @f2, align 4
-  %EightWhile100 = call i32 @EightWhile()
-  ret i32 %EightWhile100
+mainEntry1:
+  %c0 = alloca [1 x [4 x [2 x [3 x i32]]]], align 4
+  %array1 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array2 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array1, i32 0, i32 0
+  %array3 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array2, i32 0, i32 0
+  %array4 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array3, i32 0, i32 0
+  store i32 0, [3 x i32]* %array4, align 4
+  %array6 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array7 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array6, i32 0, i32 0
+  %array8 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array7, i32 0, i32 0
+  %array9 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array8, i32 0, i32 1
+  store i32 0, [3 x i32]* %array9, align 4
+  %array11 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array12 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array11, i32 0, i32 0
+  %array13 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array12, i32 0, i32 0
+  %array14 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array13, i32 0, i32 2
+  store i32 0, [3 x i32]* %array14, align 4
+  %array16 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array17 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array16, i32 0, i32 0
+  %array18 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array17, i32 0, i32 1
+  %array19 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array18, i32 0, i32 0
+  store i32 0, [3 x i32]* %array19, align 4
+  %array21 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array22 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array21, i32 0, i32 0
+  %array23 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array22, i32 0, i32 1
+  %array24 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array23, i32 0, i32 1
+  store i32 0, [3 x i32]* %array24, align 4
+  %array26 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array27 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array26, i32 0, i32 0
+  %array28 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array27, i32 0, i32 1
+  %array29 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array28, i32 0, i32 2
+  store i32 0, [3 x i32]* %array29, align 4
+  %array31 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array32 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array31, i32 0, i32 1
+  %array33 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array32, i32 0, i32 0
+  %array34 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array33, i32 0, i32 0
+  store i32 0, [3 x i32]* %array34, align 4
+  %array36 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array37 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array36, i32 0, i32 1
+  %array38 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array37, i32 0, i32 0
+  %array39 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array38, i32 0, i32 1
+  store i32 0, [3 x i32]* %array39, align 4
+  %array41 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array42 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array41, i32 0, i32 1
+  %array43 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array42, i32 0, i32 0
+  %array44 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array43, i32 0, i32 2
+  store i32 0, [3 x i32]* %array44, align 4
+  %array46 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array47 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array46, i32 0, i32 1
+  %array48 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array47, i32 0, i32 1
+  %array49 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array48, i32 0, i32 0
+  store i32 0, [3 x i32]* %array49, align 4
+  %array51 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array52 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array51, i32 0, i32 1
+  %array53 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array52, i32 0, i32 1
+  %array54 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array53, i32 0, i32 1
+  store i32 0, [3 x i32]* %array54, align 4
+  %array56 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array57 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array56, i32 0, i32 1
+  %array58 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array57, i32 0, i32 1
+  %array59 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array58, i32 0, i32 2
+  store i32 0, [3 x i32]* %array59, align 4
+  %array61 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array62 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array61, i32 0, i32 2
+  %array63 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array62, i32 0, i32 0
+  %array64 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array63, i32 0, i32 0
+  store i32 0, [3 x i32]* %array64, align 4
+  %array66 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array67 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array66, i32 0, i32 2
+  %array68 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array67, i32 0, i32 0
+  %array69 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array68, i32 0, i32 1
+  store i32 0, [3 x i32]* %array69, align 4
+  %array71 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array72 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array71, i32 0, i32 2
+  %array73 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array72, i32 0, i32 0
+  %array74 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array73, i32 0, i32 2
+  store i32 0, [3 x i32]* %array74, align 4
+  %array76 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array77 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array76, i32 0, i32 2
+  %array78 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array77, i32 0, i32 1
+  %array79 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array78, i32 0, i32 0
+  store i32 0, [3 x i32]* %array79, align 4
+  %array81 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array82 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array81, i32 0, i32 2
+  %array83 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array82, i32 0, i32 1
+  %array84 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array83, i32 0, i32 1
+  store i32 0, [3 x i32]* %array84, align 4
+  %array86 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array87 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array86, i32 0, i32 2
+  %array88 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array87, i32 0, i32 1
+  %array89 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array88, i32 0, i32 2
+  store i32 0, [3 x i32]* %array89, align 4
+  %array91 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array92 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array91, i32 0, i32 3
+  %array93 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array92, i32 0, i32 0
+  %array94 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array93, i32 0, i32 0
+  store i32 0, [3 x i32]* %array94, align 4
+  %array96 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array97 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array96, i32 0, i32 3
+  %array98 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array97, i32 0, i32 0
+  %array99 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array98, i32 0, i32 1
+  store i32 0, [3 x i32]* %array99, align 4
+  %array101 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array102 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array101, i32 0, i32 3
+  %array103 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array102, i32 0, i32 0
+  %array104 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array103, i32 0, i32 2
+  store i32 0, [3 x i32]* %array104, align 4
+  %array106 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array107 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array106, i32 0, i32 3
+  %array108 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array107, i32 0, i32 1
+  %array109 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array108, i32 0, i32 0
+  store i32 0, [3 x i32]* %array109, align 4
+  %array111 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array112 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array111, i32 0, i32 3
+  %array113 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array112, i32 0, i32 1
+  %array114 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array113, i32 0, i32 1
+  store i32 0, [3 x i32]* %array114, align 4
+  %array116 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %array117 = getelementptr [4 x [2 x [3 x i32]]]*, [4 x [2 x [3 x i32]]]* %array116, i32 0, i32 3
+  %array118 = getelementptr [2 x [3 x i32]]*, [4 x [2 x [3 x i32]]]* %array117, i32 0, i32 1
+  %array119 = getelementptr [3 x i32]*, [2 x [3 x i32]]* %array118, i32 0, i32 2
+  store i32 0, [3 x i32]* %array119, align 4
+  %c121 = getelementptr [1 x [4 x [2 x [3 x i32]]]], [1 x [4 x [2 x [3 x i32]]]]* %c0, i32 0, i32 0
+  %c122 = getelementptr [4 x [2 x [3 x i32]]], [4 x [2 x [3 x i32]]]* %c121, i32 0, i32 0
+  %c123 = getelementptr [2 x [3 x i32]], [2 x [3 x i32]]* %c122, i32 0, i32 0
+  %c124 = getelementptr [3 x i32], [3 x i32]* %c123, i32 0, i32 0
+  %c125 = load i32, i32* %c124, align 4
+  ret i32 %c125
   ret i32 0
 }

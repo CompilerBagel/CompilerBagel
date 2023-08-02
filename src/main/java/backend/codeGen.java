@@ -5,6 +5,7 @@ import Type.Type;
 import backend.machineCode.*;
 import backend.machineCode.Instruction.*;
 import backend.reg.PhysicsReg;
+import backend.reg.Reg;
 import instruction.*;
 
 import java.io.BufferedWriter;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.util.*;
 
 import Type.PointerType;
+import Type.ArrayType;
 import static Type.FloatType.IRFloatType;
 import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
@@ -212,8 +214,9 @@ public class codeGen {
             offsetMap.put(resName, stackCount * 4);
             stackCount ++;
         } else {
-            offsetMap.put(resName, stackCount * 8);
-            stackCount += 2;
+            int size = (((ArrayType)(instr.getPointedType())).getLength()) * 4 + stackCount * 4;
+            offsetMap.put(resName, size);
+            stackCount += (size / 4);
         }
         mfunc.setStackCount(stackCount);
         mfunc.setFrameSize(stackAlign(stackCount));
@@ -464,7 +467,39 @@ public class codeGen {
     }
 
     public void parseGetElemPtrInstr(GetElemPtrInstruction instr, MachineBlock block) {
+        ValueRef pointer = instr.getPointer();
+        Map<String, Integer> offsetMap = block.getBlockFunc().getOffsetMap();
 
+        if (pointer.getType() instanceof PointerType) {
+            if (pointer instanceof GlobalRegister) {
+                Symbol globalSymbol = globalMap.get(((GlobalRegister) pointer).getIdentity());
+                MCLoad la = new MCLoad(new BaseRegister(pointer.getText(), int32Type), new Label(globalSymbol.getName(), globalSymbol), LA);
+            }
+
+            boolean hasReg = false;
+            ArrayType arrayType = (ArrayType) instr.getPointedType(pointer, 0);
+            int index = ((ConstIntValueRef) instr.getOperands().get(3)).getValue();
+            int offset = arrayType.getOtherDimensionLength(index) * 4;
+            /*for (int i = 3; i < instr.getOperands().size(); i ++) {
+                ValueRef op = instr.getOperands().get(i);
+                if (op instanceof ConstIntValueRef) {
+                    ArrayType arrayType = (ArrayType) instr.getPointedType(pointer, i - 2);
+                    offset += (((ConstIntValueRef) op).getValue() * arrayType.getOtherDimensionLength(((ConstIntValueRef) op).getValue()) * 4);
+                } else {
+                    hasReg = true;
+                }
+            }*/
+            if (hasReg) {
+
+            } else  {
+                int base = offsetMap.get(pointer.getText());
+                MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
+                MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(-(offset + base)), ADDI);
+                offsetMap.put(instr.getOperands().get(0).getText(), offset + base);
+                block.getMachineCodes().add(add);
+                setDefUse(baseReg, add);
+            }
+        }
     }
 
     public void parseLoadInstr(LoadInstruction instr, MachineBlock block) {

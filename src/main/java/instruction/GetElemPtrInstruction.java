@@ -31,6 +31,34 @@ public class GetElemPtrInstruction extends Instruction{
         }
     }
 
+    public ValueRef getBase() {
+        return base;
+    }
+
+    public ValueRef getPointer() {
+        return operands.get(1);
+    }
+
+    public Type getPointedType(ValueRef pointer, int depth) {
+        Type pointedType = null;
+        if (pointer.getType() instanceof PointerType) {
+            pointedType = ((PointerType) pointer.getType()).getBaseType();
+            for (int i = 1; i < depth; i++) {
+                if (pointedType instanceof ArrayType) {
+                    pointedType = ((ArrayType) pointedType).getElementType();
+                }
+            }
+        } else if (pointer.getType() instanceof ArrayType) {
+            pointedType = ((ArrayType) pointer.getType()).getElementType();
+            for (int i = 1; i < depth; i++) {
+                if (pointedType instanceof ArrayType) {
+                    pointedType = ((ArrayType) pointedType).getElementType();
+                }
+            }
+        }
+        return pointedType;
+    }
+
     @Override
     public String toString() {
         ValueRef resRegister = operands.get(0);

@@ -28,4 +28,8 @@ public class ConstIntValueRef implements ValueRef{
     public Type getType() {
         return type;
     }
+
+    public int getValue(){
+        return value;
+    }
 }

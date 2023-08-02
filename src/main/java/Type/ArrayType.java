@@ -50,4 +50,20 @@ public class ArrayType implements Type{
         return elementDimension;
     }
 
+    public int getLength() {
+        int total = 1;
+        for (Integer integer : elementDimension) {
+            total *= integer;
+        }
+        return total;
+    }
+
+    public int getOtherDimensionLength(int index) {
+        int len = 1;
+        int size = elementDimension.size();
+        for (int i = 1; i < size; i ++) {
+            len *= elementDimension.get(i);
+        }
+        return len;
+    }
 }
