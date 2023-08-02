@@ -38,7 +38,8 @@ public class codeGen {
     private HashMap<String, MachineOperand> operandMap;
     private StringBuilder globalSb;
     private Map<String, Symbol> globalMap;
-    
+
+    private final HashMap<ValueRef, Integer> paramOrder = new HashMap<ValueRef, Integer>();
     public static void serializeBlocks(List<MachineBlock> blocks) {
         List<MachineBlock> sequence = new ArrayList<>();
         Set<MachineBlock> done = new HashSet<>(); // 已经序列化的基本块
@@ -150,6 +151,7 @@ public class codeGen {
         offestMap.put("ra", 8);
         offestMap.put("s0", 16);
         List<ValueRef> params = func.getParams();
+        int i = 0;
         for (ValueRef param: params) {
             if (param.getType().equals(IRInt32Type()) || param.getType().equals(IRFloatType())) {
                 stackCount ++;
@@ -158,6 +160,8 @@ public class codeGen {
                 stackCount += 2;
                 offestMap.put(param.getText(), stackCount * 8);
             }
+            paramOrder.put(param, i);
+            i++;
         }
         if (!func.getType().equals(IRVoidType())) {
             stackCount += 1;
@@ -540,6 +544,11 @@ public class codeGen {
             setDefUse(dest, la);
         } else {
             int offset = offsetMap.get(destName);
+            if (paramOrder.get((BaseRegister)src) != null) {
+                int paramOrd = paramOrder.get((BaseRegister)src);
+                src = PhysicsReg.getPhysicsReg(10 + paramOrd);
+            }
+
             MCStore store = new MCStore(src, s0Reg, new Immeidiate(-offset), SW);
             block.getMachineCodes().add(store);
             setDefUse(src, store);
