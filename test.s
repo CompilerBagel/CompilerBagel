@@ -1,19 +1,5 @@
 .global main
 .data
-    getch:
-    before_main:
-    getfarray:
-    putint:
-    putfarray:
-    end_time:
-    getarray:
-    after_main:
-    getint:
-    putarray:
-    start_time:
-    putfloat:
-    putch:
-    getfloat:
 .text
 main:
 mainEntry1:

@@ -26,4 +26,9 @@ public class MCReturn extends MachineCode {
     
     }
 
+    @Override
+    public boolean isUselessCode() {
+        return false;
+    }
+
 }

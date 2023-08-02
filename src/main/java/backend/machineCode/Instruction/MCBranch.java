@@ -42,4 +42,9 @@ public class MCBranch extends MachineCode {
     public void replaceUse(final MachineOperand oldOperand, final MachineOperand newOperand) {
     
     }
+
+    @Override
+    public boolean isUselessCode() {
+        return false;
+    }
 }

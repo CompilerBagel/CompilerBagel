@@ -38,6 +38,11 @@ public class MCJump extends MachineCode {
     }
 
     @Override
+    public boolean isUselessCode() {
+        return false;
+    }
+
+    @Override
     public String toString(){
         if(type.equals(J)) {
             return "j\t" + label;
