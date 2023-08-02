@@ -223,8 +223,14 @@ public class IRBuilder {
     }
 
     public static void IRSetInitializer(IRModule module, ValueRef globalVar, ValueRef constRef, String globalName) {
-        int initValue = Integer.valueOf(constRef.getText());
-        module.getGlobalSymbol(globalName).setInitValue(initValue);
+        if(constRef instanceof ConstIntValueRef) {
+            int initValue = Integer.valueOf(constRef.getText());
+            module.getGlobalSymbol(globalName).setInitValue(initValue);
+        }
+        if(constRef instanceof ConstFloatValueRef){
+            Float initValue = Float.valueOf(constRef.getText());
+            module.getGlobalSymbol(globalName).setInitValue(initValue);
+        }
         module.emit(constRef.getText());
     }
 
@@ -350,7 +356,15 @@ public class IRBuilder {
         } else {
             resType = baseType;
         }
-
+//        Type assign = baseType;
+//        while(assign instanceof PointerType || assign instanceof ArrayType){
+//            if(assign instanceof PointerType){
+//                assign = ((PointerType) assign).getBaseType();
+//            }
+//            if(assign instanceof ArrayType){
+//                assign = ((ArrayType) assign).getElementType();
+//            }
+//        }
         resType = new PointerType(resType);
 
         ValueRef resRegister = new BaseRegister(varName, resType);

@@ -23,7 +23,8 @@ import static Type.VoidType.IRVoidType;
 public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRModule module = IRModuleCreateWithName("module");
     IRBuilder builder = IRCreateBuilder();
-    private final Map<String,Integer> ConstVarMap = new LinkedHashMap<>();
+    private final Map<String,Integer> ConstIntVarMap = new LinkedHashMap<>();
+    private final Map<String, Float> ConstFloatVarMap = new LinkedHashMap<>();
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
     private static final Type int1Type = IRInt1Type();
@@ -214,7 +215,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRAddGlobal(module, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
-                    ConstVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
+                    if(assign instanceof ConstIntValueRef){
+                        ConstIntVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
+                    }
+                    if (assign instanceof ConstFloatValueRef) {
+                        ConstFloatVarMap.put(constVariable.getText(),Float.parseFloat(((ConstFloatValueRef)assign).getText()));
+                    }
+
+
                     IRSetInitializer(module, constVariable, assign, constName);
                 } else {
                     if(constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
@@ -225,7 +233,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
                     ValueRef storeRes = IRBuildStore(builder, assign, constVariable);
-                    ConstVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
+                    if(assign instanceof ConstIntValueRef) {
+                        ConstIntVarMap.put(constVariable.getText(), Integer.parseInt(((ConstIntValueRef) assign).getText()));
+                    }
+                    if (assign instanceof ConstFloatValueRef) {
+                        ConstFloatVarMap.put(constVariable.getText(),Float.parseFloat(((ConstFloatValueRef)assign).getText()));
+                    }
                 } else {
                     //TODO: 正确性验证
                     if (constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
@@ -537,16 +550,30 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitMulExp(SysYParser.MulExpContext ctx) {
         ValueRef left = visit(ctx.exp(0));
         ValueRef right = visit(ctx.exp(1));
-        if(ConstVarMap.get(left.getText())!=null){
-            left = new ConstIntValueRef(ConstVarMap.get(left.getText()));
+        if(ConstIntVarMap.get(left.getText())!=null){
+            left = new ConstIntValueRef(ConstIntVarMap.get(left.getText()));
         }
-        if(ConstVarMap.get(right.getText())!=null){
-            right = new ConstIntValueRef(ConstVarMap.get(right.getText()));
+        if (ConstFloatVarMap.get(left.getText())!=null) {
+            left = new ConstFloatValueRef(ConstFloatVarMap.get(left.getText()));
+        }
+        if(ConstIntVarMap.get(right.getText())!=null){
+            right = new ConstIntValueRef(ConstIntVarMap.get(right.getText()));
+        }
+        if (ConstFloatVarMap.get(right.getText())!=null) {
+            right = new ConstFloatValueRef(ConstFloatVarMap.get(right.getText()));
         }
         if (ctx.MUL() != null) {
-            return IRBuildCalc(builder, left, right, "mul_", MUL);
+            if(left.getType() == int32Type && right.getType() == int32Type) {
+                return IRBuildCalc(builder, left, right, "mul_", MUL);
+            }else{
+                return IRBuildCalc(builder, left, right, "fmul_", FMUL);
+            }
         } else if (ctx.DIV() != null) {
-            return IRBuildCalc(builder, left, right, "sdiv_", SDIV);
+            if(left.getType() == int32Type && right.getType() == int32Type) {
+                return IRBuildCalc(builder, left, right, "sdiv_", SDIV);
+            }else{
+                return IRBuildCalc(builder, left, right, "fdiv_", FDIV);
+            }
         } else if (ctx.MOD() != null) {
             return IRBuildSRem(builder, left, right, "srem_");
         }
@@ -558,16 +585,30 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitPlusExp(SysYParser.PlusExpContext ctx) {
         ValueRef left = visit(ctx.exp(0));
         ValueRef right = visit(ctx.exp(1));
-        if(ConstVarMap.get(left.getText())!=null){
-            left = new ConstIntValueRef(ConstVarMap.get(left.getText()));
+        if(ConstIntVarMap.get(left.getText())!=null){
+            left = new ConstIntValueRef(ConstIntVarMap.get(left.getText()));
         }
-        if(ConstVarMap.get(right.getText())!=null){
-            right = new ConstIntValueRef(ConstVarMap.get(right.getText()));
+        if (ConstFloatVarMap.get(left.getText())!=null) {
+            left = new ConstFloatValueRef(ConstFloatVarMap.get(left.getText()));
+        }
+        if(ConstIntVarMap.get(right.getText())!=null){
+            right = new ConstIntValueRef(ConstIntVarMap.get(right.getText()));
+        }
+        if (ConstFloatVarMap.get(right.getText())!=null) {
+            right = new ConstFloatValueRef(ConstFloatVarMap.get(right.getText()));
         }
         if (ctx.PLUS() != null) {
-            return IRBuildCalc(builder, left, right, "add_", ADD);
+            if(left.getType() == int32Type && right.getType() == int32Type) {
+                return IRBuildCalc(builder, left, right, "add_", ADD);
+            }else{
+                return IRBuildCalc(builder, left, right, "fadd_", FADD);
+            }
         } else if (ctx.MINUS() != null) {
-            return IRBuildCalc(builder, left, right, "sub_", SUB);
+            if(left.getType() == int32Type && right.getType() == int32Type) {
+                return IRBuildCalc(builder, left, right, "sub_", SUB);
+            }else{
+                return IRBuildCalc(builder, left, right, "fsub_", FSUB);
+            }
         }
 
         return null;
@@ -611,8 +652,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         String variableName = ctx.lVal().IDENT().getText();
         ValueRef variable = currentScope.getValueRef(variableName);
         Type varType = currentScope.getType(variableName);
-        if(ConstVarMap.get(variable.getText())!=null){
-            return new ConstIntValueRef(ConstVarMap.get(variable.getText()));
+        if(ConstIntVarMap.get(variable.getText())!=null){
+            return new ConstIntValueRef(ConstIntVarMap.get(variable.getText()));
+        }
+        if(ConstFloatVarMap.get(variable.getText())!=null){
+            return new ConstFloatValueRef(ConstFloatVarMap.get(variable.getText()));
         }
         ValueRef lValPointer = visitLVal(ctx.lVal());
         if(arrayAddr){
@@ -648,7 +692,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         if(lvalType == int32Type || lvalType == floatType){
             return lValPointer;
         }
-        if(lvalType.getText().equals(new PointerType(int32Type).getText())){
+        if(lvalType.getText().equals(new PointerType(int32Type).getText()) || lvalType.getText().equals(new PointerType(floatType).getText())){
             if(ctx.exp().isEmpty()){
                 return lValPointer;
             }else{
