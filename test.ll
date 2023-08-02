@@ -36,10 +36,16 @@ mainEntry2:
   %b11 = alloca i32, align 4
   store i32 2, i32* %b11, align 4
   %c13 = alloca i32, align 4
-  %a14 = load i32, i32* %a9, align 4
-  %f15 = call i32 @f(i32 %a14, i32 2)
-  store i32 %f15, i32* %c13, align 4
+  store i32 3, i32* %c13, align 4
+  %d15 = alloca i32, align 4
+  store i32 0, i32* %d15, align 4
   %c17 = load i32, i32* %c13, align 4
-  ret i32 %c17
+  %a18 = load i32, i32* %a9, align 4
+  %b19 = load i32, i32* %b11, align 4
+  %f20 = call i32 @f(i32 %a18, i32 %b19)
+  %add_21 = add i32 %c17, %f20
+  store i32 %add_21, i32* %d15, align 4
+  %d23 = load i32, i32* %d15, align 4
+  ret i32 %d23
   ret i32 0
 }

@@ -362,10 +362,29 @@ public class codeGen {
         BaseRegister dest = (BaseRegister) instr.getOperands().get(0);
         List<ValueRef> params = instr.getParams();
         List<MachineOperand> operands = new ArrayList<>();
+
+        // push a0, a1, a2, ...
+        int paramCnt = params.size();
+        MachineFunction mcFunc = block.getBlockFunc();
+        int stackCount = mcFunc.getStackCount();
+        Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
+
+        for (int i = 1; i < Integer.max(paramCnt, 4); i++) {
+            int offset = stackCount * 8;
+            offsetMap.put("phyReg_a" + i, offset);
+            stackCount += 2;
+            MCStore store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), s0Reg, new Immeidiate(-offset), SW);
+            block.getMachineCodes().add(store);
+        }
+        mcFunc.setStackCount(stackCount);
+        mcFunc.setFrameSize(stackAlign(stackCount));
+
+        int i = 0;
         for (ValueRef param: params) {
             MachineOperand op = parseOperand(param);
             if (op.isImm()){
                 BaseRegister tmp = new BaseRegister("li", param.getType());
+                tmp.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + i));
                 MCLi li = new MCLi(tmp, op);
                 setDefUse(tmp, li);
                 block.getMachineCodes().add(li);
@@ -373,6 +392,7 @@ public class codeGen {
             } else {
                 // BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
                 BaseRegister src = new BaseRegister(param.getText(), param.getType());
+                src.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + i));
                 MCMove mv = new MCMove(op, src);
                 setDefUse(src, mv);
                 setDefUse(op, mv);
@@ -381,6 +401,7 @@ public class codeGen {
                 // operands.add(vReg);
                 operands.add(src);
             }
+            i++;
         }
 
         MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
@@ -388,7 +409,14 @@ public class codeGen {
             operand.addUse(call);
         }
         setDefUse(dest, call);
+        dest.setPhysicsReg(a0Reg);
         block.getMachineCodes().add(call);
+
+        for (i = 1; i < Integer.max(paramCnt, 4); i++) {
+            int offset = offsetMap.get("phyReg_a" + i);
+            MCLoad load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(10 + i), new Immeidiate(-offset), LW);
+            block.getMachineCodes().add(load);
+        }
     }
 
     public void parseCondInstr(CondInstruction instr, MachineBlock block){
