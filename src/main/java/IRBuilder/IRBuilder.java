@@ -166,15 +166,13 @@ public class IRBuilder {
         PointerType pointerType = null;
         ValueRef resRegister = null;
         if (type == FpToSi && origin.getType() == floatType) {
-            pointerType = new PointerType(int32Type);
-            resRegister = new BaseRegister("conv", pointerType);
+            resRegister = new BaseRegister("conv", int32Type);
             builder.emit(resRegister.getText() + " = fptosi float " +
                     origin.getText() + " to i32");
             builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock
                     , FpToSi));
         } else if (type == SiToFp && origin.getType() == int32Type) {
-            pointerType = new PointerType(floatType);
-            resRegister = new BaseRegister("conv", pointerType);
+            resRegister = new BaseRegister("conv", floatType);
             builder.emit(resRegister.getText() + " = sitofp i32 "
                     + origin.getText() + " to float");
             builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock,
