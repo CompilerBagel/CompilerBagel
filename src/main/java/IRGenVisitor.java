@@ -724,7 +724,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             cmpResult = IRBuildICmp(builder, IRIntSGT, lVal, rVal, "icmp_GT");
         }
 
-        return cmpResult;
+        return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
     }
 
     @Override
@@ -737,24 +737,56 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.NEQ() != null) {
             cmpResult = IRBuildICmp(builder, IRIntNE, lVal, rVal, "icmp_NE");
         }
-        return cmpResult;
+        return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
     }
 
     @Override
     public ValueRef visitAndCond(SysYParser.AndCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
+        ValueRef cmp  = IRBuildICmp(builder, IRIntEQ , intZero, lVal, "icmp_NE");
+        BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "true_");
+        BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "false_");
+        BaseBlock after = IRAppendBasicBlock(currentFunction, "after_");
+        ValueRef res = IRBuildAlloca(builder,int32Type,"and_");
+        IRBuildStore(builder,lVal,res);
+
+        IRBuildCondBr(builder,cmp,trueBlock,falseBlock);
+        IRPositionBuilderAtEnd(builder,trueBlock);
+        IRBuildBr(builder, after);
+
+        IRPositionBuilderAtEnd(builder,falseBlock);
         ValueRef rVal = this.visit(ctx.cond(1));
-        ValueRef cmpResult = IRBuildAnd(builder, lVal, rVal, "and_");
-        return cmpResult;
+        IRBuildStore(builder,rVal,res);
+        IRBuildBr(builder,after);
+
+        IRPositionBuilderAtEnd(builder,after);
+        res = IRBuildLoad(builder, res , "load_");
+        return IRBuildZExt(builder,res,int32Type,"tmp_");
+
     }
 
     @Override
     public ValueRef visitOrCond(SysYParser.OrCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
+        ValueRef cmp  = IRBuildICmp(builder, IRIntNE , intZero, lVal, "icmp_NE");
+        BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "true_");
+        BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "false_");
+        BaseBlock after = IRAppendBasicBlock(currentFunction, "after_");
+        ValueRef res = IRBuildAlloca(builder,int32Type,"or_");
+        IRBuildStore(builder,lVal,res);
+
+        IRBuildCondBr(builder,cmp,trueBlock,falseBlock);
+        IRPositionBuilderAtEnd(builder,trueBlock);
+        IRBuildBr(builder, after);
+
+        IRPositionBuilderAtEnd(builder,falseBlock);
         ValueRef rVal = this.visit(ctx.cond(1));
-        ValueRef cmpResult = IRBuildOr(builder,  lVal, rVal, "or_");
-        // return IRBuildZExt(builder, cmpResult, int32Type, "zext_");
-        return cmpResult;
+        IRBuildStore(builder,rVal,res);
+        IRBuildBr(builder,after);
+
+        IRPositionBuilderAtEnd(builder,after);
+        res = IRBuildLoad(builder, res , "load_");
+        return IRBuildZExt(builder,res,int32Type,"tmp_");
     }
 
     @Override
@@ -780,6 +812,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         afterStack.pop();
 
         IRPositionBuilderAtEnd(builder, afterBlock);
+
         return null;
     }
 

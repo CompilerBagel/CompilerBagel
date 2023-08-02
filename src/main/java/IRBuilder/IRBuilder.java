@@ -350,12 +350,16 @@ public class IRBuilder {
         } else {
             resType = baseType;
         }
+
         resType = new PointerType(resType);
+
         ValueRef resRegister = new BaseRegister(varName, resType);
+
         StringBuilder indexStrBuilder = new StringBuilder();
         List<ValueRef> operands = new ArrayList<>();
         operands.add(resRegister);
         operands.add(valueRef);
+
         for (ValueRef index : indexs) {
             operands.add(index);
             indexStrBuilder.append(", ").append(int32Type.getText())
