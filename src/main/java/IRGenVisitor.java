@@ -471,10 +471,19 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         String funcName = ctx.IDENT().getText();
         FunctionBlock functionBlock = (FunctionBlock) globalScope.getValueRef(funcName);
         FunctionType functionType = (FunctionType) globalScope.getType(funcName);
-            int argc = functionType.getParamsType().size();
+        int argc = functionType.getParamsType().size();
         List<ValueRef> args = new ArrayList<>(argc);
         for (int i = 0; i < argc; i++) {
-            args.add(i, ctx.funcRParams().param(i).accept(this));
+            ValueRef param = ctx.funcRParams().param(i).accept(this);
+            if(param.getType() instanceof PointerType) {
+                if (((PointerType) param.getType()).getBaseType() instanceof ArrayType) {
+                    List<ValueRef> indexes = new ArrayList<>();
+                    indexes.add(intZero);
+                    indexes.add(intZero);
+                    param = IRBuildGEP(builder, param, indexes, indexes.size(), "new_ptr");
+                }
+            }
+            args.add(i, param);
         }
         return IRBuildCall(builder, functionBlock, args, argc, funcName);
     }
