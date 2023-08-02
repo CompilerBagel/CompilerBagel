@@ -359,8 +359,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                                 paramList.clear();
                                 paramList.add(intZero);
                                 paramList.add(arrayPtr.get(counter1++));
-                                List<Integer> dims = ((ArrayType)((PointerType) elementPtr.getType()).getBaseType()).getElementDimension();
-                                List<Integer> newDims = new ArrayList<>(dims.subList(1,dims.size()));
                             }
                             IRBuildStore(builder, init.get(i),elementPtr);
                             arrayPtr.clear();
