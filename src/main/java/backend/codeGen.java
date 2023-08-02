@@ -4,14 +4,17 @@ import IRBuilder.*;
 import Type.Type;
 import backend.machineCode.*;
 import backend.machineCode.Instruction.*;
+import backend.machineCode.Label;
 import backend.reg.PhysicsReg;
 import backend.reg.Reg;
 import instruction.*;
 
+import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 import Type.PointerType;
 import Type.ArrayType;
@@ -371,17 +374,16 @@ public class codeGen {
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
-
         for (int i = 1; i < Integer.max(paramCnt, 4); i++) {
-            int offset = stackCount * 8;
+            int offset = stackCount * 4;
             offsetMap.put("phyReg_a" + i, offset);
             stackCount += 2;
             MCStore store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), s0Reg, new Immeidiate(-offset), SW);
             block.getMachineCodes().add(store);
         }
+
         mcFunc.setStackCount(stackCount);
         mcFunc.setFrameSize(stackAlign(stackCount));
-
         int i = 0;
         for (ValueRef param: params) {
             MachineOperand op = parseOperand(param);

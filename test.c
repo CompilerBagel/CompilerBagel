@@ -1,4 +1,9 @@
-int main(){
-    int c[1][4][2][3] = {};
-    return c[0][0][0][0];
+int f(int x, int y) {
+    return x + y;
+}
+int main() {
+    int a = 3;
+    int b = 4;
+    int c = f(a, b);
+    return c;
 }
