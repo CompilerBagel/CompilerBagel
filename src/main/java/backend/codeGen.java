@@ -406,8 +406,14 @@ public class codeGen {
             }
             i++;
         }
-
-        MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
+        MachineFunction mcFunction = funcMap.get(instr.getFunction());
+        MCCall call;
+        if(mcFunction != null) {
+            call = new MCCall(funcMap.get(instr.getFunction()), operands);
+        } else {
+            MachineFunction outFunc = new MachineFunction(instr.getFunction().getFunctionName());
+            call = new MCCall(outFunc, operands);
+        }
         for(MachineOperand operand: operands) {
             operand.addUse(call);
         }
