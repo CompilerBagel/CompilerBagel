@@ -1,6 +1,6 @@
-export CLASSPATH=/usr/local/lib/antlr-*-complete.jar
+export CLASSPATH=./lib/antlr-4.12.0-complete.jar
 
-ANTLR = java -jar /usr/local/lib/antlr-*-complete.jar -listener -visitor -long-messages
+ANTLR = java -jar ./lib/antlr-4.12.0-complete.jar -listener -visitor -long-messages
 JAVAC = javac -g
 JAVA = java
 

@@ -367,23 +367,6 @@ public class IRBuilder {
         return resRegister;
     }
 
-    public static ValueRef IRBuildGEP(IRBuilder builder, ValueRef valueRef, List<ValueRef> indexs, int indexSize, String varName, Type type) {
-        ValueRef resRegister = new BaseRegister(varName, type);
-        StringBuilder indexStrBuilder = new StringBuilder();
-        List<ValueRef> operands = new ArrayList<>();
-        operands.add(resRegister);
-        operands.add(valueRef);
-        for (ValueRef index : indexs) {
-            operands.add(index);
-            indexStrBuilder.append(", ").append(int32Type.getText())
-                    .append(" ").append(index.getText());
-        }
-        builder.appendInstr(new GetElemPtrInstruction(operands, builder.currentBaseBlock));
-        builder.emit(resRegister.getText() + " = " + GETPTR + " " + type.getText() + ", "
-                + valueRef.getTypeText() + " " + valueRef.getText() + indexStrBuilder.toString());
-        return resRegister;
-    }
-
     public static ValueRef IRBuildCall(IRBuilder builder, FunctionBlock function, List<ValueRef> args, int argc, String varName) {
         Type retType = ((FunctionType) function.getType()).getRetType();
         ValueRef resRegister = new BaseRegister(varName, retType);
