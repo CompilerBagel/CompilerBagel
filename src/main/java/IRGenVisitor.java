@@ -296,7 +296,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             List<Integer> paramCount = new ArrayList<>();
             for (SysYParser.ConstExpContext constExpContext : varDefContext.constExp()) {
                 ValueRef temp = this.visit(constExpContext.exp());
-
                 paramCount.add(Integer.parseInt(temp.getText()));
             }
             for (int i = paramCount.size() - 1; i >= 0; i--) {
@@ -361,9 +360,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                                 paramList.clear();
                                 paramList.add(intZero);
                                 paramList.add(arrayPtr.get(counter1++));
-                                elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array");
+                                List<Integer> dims = ((ArrayType)((PointerType) elementPtr.getType()).getBaseType()).getElementDimension();
+                                List<Integer> newDims = new ArrayList<>(dims.subList(1,dims.size()));
+                                Type newType = int32Type;
+                                for (int q = newDims.size() - 1; q >= 0; q--) {
+                                    newType = new ArrayType(newType, newDims.get(q));
+                                }
+                                elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array", new PointerType(newType));
                             }
-
                             IRBuildStore(builder, init.get(i),elementPtr);
                             arrayPtr.clear();
 //                        }
