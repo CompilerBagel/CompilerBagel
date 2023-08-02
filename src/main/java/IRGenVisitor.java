@@ -265,7 +265,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                             paramList.add(arrayPtr.get(counter1++));
                             elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array");
                         }
-
                         IRBuildStore(builder, init.get(i),elementPtr);
                         arrayPtr.clear();
                     }
@@ -362,11 +361,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                                 paramList.add(arrayPtr.get(counter1++));
                                 List<Integer> dims = ((ArrayType)((PointerType) elementPtr.getType()).getBaseType()).getElementDimension();
                                 List<Integer> newDims = new ArrayList<>(dims.subList(1,dims.size()));
-                                Type newType = int32Type;
-                                for (int q = newDims.size() - 1; q >= 0; q--) {
-                                    newType = new ArrayType(newType, newDims.get(q));
-                                }
-                                elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array", new PointerType(newType));
                             }
                             IRBuildStore(builder, init.get(i),elementPtr);
                             arrayPtr.clear();
