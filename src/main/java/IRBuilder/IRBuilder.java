@@ -166,15 +166,13 @@ public class IRBuilder {
         PointerType pointerType = null;
         ValueRef resRegister = null;
         if (type == FpToSi && origin.getType() == floatType) {
-            pointerType = new PointerType(int32Type);
-            resRegister = new BaseRegister("conv", pointerType);
+            resRegister = new BaseRegister("conv", int32Type);
             builder.emit(resRegister.getText() + " = fptosi float " +
                     origin.getText() + " to i32");
             builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock
                     , FpToSi));
         } else if (type == SiToFp && origin.getType() == int32Type) {
-            pointerType = new PointerType(floatType);
-            resRegister = new BaseRegister("conv", pointerType);
+            resRegister = new BaseRegister("conv", floatType);
             builder.emit(resRegister.getText() + " = sitofp i32 "
                     + origin.getText() + " to float");
             builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock,
@@ -223,8 +221,14 @@ public class IRBuilder {
     }
 
     public static void IRSetInitializer(IRModule module, ValueRef globalVar, ValueRef constRef, String globalName) {
-        int initValue = Integer.valueOf(constRef.getText());
-        module.getGlobalSymbol(globalName).setInitValue(initValue);
+        if(constRef instanceof ConstIntValueRef) {
+            int initValue = Integer.valueOf(constRef.getText());
+            module.getGlobalSymbol(globalName).setInitValue(initValue);
+        }
+        if(constRef instanceof ConstFloatValueRef){
+            Float initValue = Float.valueOf(constRef.getText());
+            module.getGlobalSymbol(globalName).setInitValue(initValue);
+        }
         module.emit(constRef.getText());
     }
 
@@ -350,12 +354,24 @@ public class IRBuilder {
         } else {
             resType = baseType;
         }
+//        Type assign = baseType;
+//        while(assign instanceof PointerType || assign instanceof ArrayType){
+//            if(assign instanceof PointerType){
+//                assign = ((PointerType) assign).getBaseType();
+//            }
+//            if(assign instanceof ArrayType){
+//                assign = ((ArrayType) assign).getElementType();
+//            }
+//        }
         resType = new PointerType(resType);
+
         ValueRef resRegister = new BaseRegister(varName, resType);
+
         StringBuilder indexStrBuilder = new StringBuilder();
         List<ValueRef> operands = new ArrayList<>();
         operands.add(resRegister);
         operands.add(valueRef);
+
         for (ValueRef index : indexs) {
             operands.add(index);
             indexStrBuilder.append(", ").append(int32Type.getText())

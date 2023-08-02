@@ -9,6 +9,10 @@ public final class IRConstants {
     public static final String ADD = "add";
     public static final String SUB = "sub";
     public static final String MUL = "mul";
+    public static final String FADD = "fadd";
+    public static final String FSUB = "fsub";
+    public static final String FMUL = "fmul";
+    public static final String FDIV = "fdiv";
     public static final String SDIV = "sdiv";
     public static final String SREM = "srem";
     public static final String XOR = "xor";
