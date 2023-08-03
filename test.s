@@ -1,56 +1,73 @@
 .global main
 .data
-    arr:
-        .word 1
-        .word 2
-        .word 33
-        .word 4
-        .word 5
-        .word 6
-    N:
-        .word -1
 .text
 main:
 mainEntry1:
-    addi sp, sp, -32
-    sd ra, 24(sp)
-    sd s0, 16(sp)
-    addi s0, sp, 32
-    li a1, 0
-    sw a1, -24(s0)
-    li a1, 0
-    sw a1, -28(s0)
+    addi sp, sp, -48
+    sd ra, 40(sp)
+    sd s0, 32(sp)
+    addi s0, sp, 48
+    li li, 0
+    sw li, -32(s0)
+    li li, 0
+    sw li, -36(s0)
     j	condBlock2
 condBlock2:
-    lw a1, -24(s0)
-    li a2, 6
-    slt a1, a1, a2
-    mv a1, a1
-    li a2, 0
-    subw a1, a1, a2
-    snez a2, a1
-    bne a2, zero, bodyBlock3
+    lw count, -36(s0)
+    li li, 2
+    subw tmp, count, li
+    snez icmp_NE, tmp
+    mv tmp_, icmp_NE
+    li li, 0
+    subw tmp, tmp_, li
+    snez icmp_, tmp
+    bne icmp_, zero, bodyBlock3
     j	afterBlock4
 bodyBlock3:
-    lw a2, -28(s0)
-    lw a3, -24(s0)
-    la a4, arr
-    li a5, 4
-    mulw a3, a3, a5
-    add a3, a4, a3
-    lw a3, 0(a3)
-    addw a2, a2, a3
-    sw a2, -28(s0)
-    lw a2, -24(s0)
-    addiw a2, a2, 1
-    sw a2, -24(s0)
+    lw count, -36(s0)
+    li li, 4
+    mulw offset, count, li
+    addi offset, offset, 24
+    sub %arr11, s0, offset
+    lw count, -36(s0)
+    sw count, 0(%arr11)
+    lw count, -36(s0)
+    addiw add_, count, 1
+    sw add_, -36(s0)
     j	condBlock2
 afterBlock4:
-    lw a2, -28(s0)
-    addw a0, a2, 0
-    ld ra, 24(sp)
-    ld s0, 16(sp)
-    addi sp, sp, 32
+    j	condBlock5
+condBlock5:
+    lw count, -36(s0)
+    li li, 2
+    subw tmp, count, li
+    snez icmp_NE, tmp
+    mv tmp_, icmp_NE
+    li li, 0
+    subw tmp, tmp_, li
+    snez icmp_, tmp
+    bne icmp_, zero, bodyBlock6
+    j	afterBlock7
+bodyBlock6:
+    lw count, -36(s0)
+    addiw sub_, count, -1
+    sw sub_, -36(s0)
+    lw sum, -32(s0)
+    lw count, -36(s0)
+    li li, 4
+    mulw offset, count, li
+    addi offset, offset, 24
+    sub %arr11, s0, offset
+    lw arr, 0(%arr11)
+    addw add_, sum, arr
+    sw add_, -32(s0)
+    j	condBlock5
+afterBlock7:
+    lw sum, -32(s0)
+    addi a0, sum, 0
+    ld ra, 40(sp)
+    ld s0, 32(sp)
+    addi sp, sp, 48
     ret
     li a0, 0
     ret

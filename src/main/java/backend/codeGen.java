@@ -227,7 +227,7 @@ public class codeGen {
             stackCount ++;
             offsetMap.put(resName, stackCount * 4);
         } else {
-            offsetMap.put(resName, stackCount * 4);
+            offsetMap.put(resName, stackCount * 4 + 4);
             int arrayLen = (((ArrayType)(instr.getPointedType())).getLength());
             stackCount += arrayLen;
         }
@@ -552,17 +552,16 @@ public class codeGen {
                     block.getMachineCodes().add(mul);
                     setDefUse(offset, mul);
                     setDefUse(indexOp, mul);
-                    setDefUse(tmp4, mul);
 
                     MCBinaryInteger addOffset = new MCBinaryInteger(offset, offset, new Immeidiate(base), ADDI);
                     block.getMachineCodes().add(addOffset);
                     setDefUse(offset, addOffset);
 
-                    MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, offset, SUB);
+                    MCBinaryInteger sub = new MCBinaryInteger(baseReg, s0Reg, offset, SUB);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
-                    block.getMachineCodes().add(add);
-                    setDefUse(baseReg, add);
-                    setDefUse(offset, add);
+                    block.getMachineCodes().add(sub);
+                    setDefUse(baseReg, sub);
+                    setDefUse(offset, sub);
                 }
             } else {
                 MachineOperand base = operandMap.get(pointer.getText());
@@ -636,7 +635,7 @@ public class codeGen {
                 block.getMachineCodes().add(ld);
                 setDefUse(src, la);
                 setDefUse(dest, ld);
-            } else if (((BaseRegister) src).getType() instanceof PointerType) {
+            } else if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
                 MCLoad lw = new MCLoad(src, dest, LW);
                 block.getMachineCodes().add(lw);
                 setDefUse(dest, lw);
@@ -660,7 +659,7 @@ public class codeGen {
                 setDefUse(src, li);
                 setDefUse(a0Reg, li);
             } else {
-                MCBinaryInteger addw = new MCBinaryInteger(a0Reg, src, new Immeidiate(0), ADDW);
+                MCBinaryInteger addw = new MCBinaryInteger(a0Reg, src, new Immeidiate(0), ADDI);
                 block.getMachineCodes().add(addw);
                 setDefUse(src, addw);
                 setDefUse(a0Reg, addw);
@@ -700,7 +699,7 @@ public class codeGen {
                 block.getMachineCodes().add(store);
                 setDefUse(src, store);
                 setDefUse(dest, la);
-            } else if (((BaseRegister) dest).getType() instanceof PointerType) {
+            } else if ((instr.getOperands().get(2)).getType() instanceof PointerType) {
                 MCStore store = new MCStore(src, dest, SW);
                 block.getMachineCodes().add(store);
                 setDefUse(src, store);
