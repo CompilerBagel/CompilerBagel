@@ -19,48 +19,44 @@ declare void @_sysy_stoptime(i32 %0)
 
 define i32 @main() {
 mainEntry1:
-  %arr11 = alloca [2 x i32], align 4
-  %sum12 = alloca i32, align 4
-  store i32 0, i32* %sum12, align 4
-  %count14 = alloca i32, align 4
-  store i32 0, i32* %count14, align 4
+  %arr11 = alloca [100 x i32], align 4
+  %i12 = alloca i32, align 4
+  store i32 0, i32* %i12, align 4
+  %sum14 = alloca i32, align 4
+  store i32 0, i32* %sum14, align 4
   br label %condBlock2
 condBlock2:
-  %count16 = load i32, i32* %count14, align 4
-  %icmp_NE17 = icmp ne i32 %count16, 2
-  %tmp_18 = zext i1 %icmp_NE17 to i32
-  %icmp_19 = icmp ne i32 %tmp_18, 0
-  br i1 %icmp_19, label %bodyBlock3, label %afterBlock4
+  %getint16 = call i32 @getint()
+  %icmp_17 = icmp ne i32 %getint16, 0
+  br i1 %icmp_17, label %bodyBlock3, label %afterBlock4
 bodyBlock3:
-  %count20 = load i32, i32* %count14, align 4
-  %arr21 = getelementptr [2 x i32], [2 x i32]* %arr11, i32 0, i32 %count20
-  %count22 = load i32, i32* %count14, align 4
-  store i32 %count22, i32* %arr21, align 4
-  %count24 = load i32, i32* %count14, align 4
-  %add_25 = add i32 %count24, 1
-  store i32 %add_25, i32* %count14, align 4
+  %i18 = load i32, i32* %i12, align 4
+  %arr19 = getelementptr [100 x i32], [100 x i32]* %arr11, i32 0, i32 %i18
+  %getint20 = call i32 @getint()
+  store i32 %getint20, i32* %arr19, align 4
+  %i22 = load i32, i32* %i12, align 4
+  %add_23 = add i32 %i22, 1
+  store i32 %add_23, i32* %i12, align 4
   br label %condBlock2
 afterBlock4:
   br label %condBlock5
 condBlock5:
-  %count27 = load i32, i32* %count14, align 4
-  %icmp_NE28 = icmp ne i32 %count27, 2
-  %tmp_29 = zext i1 %icmp_NE28 to i32
-  %icmp_30 = icmp ne i32 %tmp_29, 0
-  br i1 %icmp_30, label %bodyBlock6, label %afterBlock7
+  %i25 = load i32, i32* %i12, align 4
+  %icmp_26 = icmp ne i32 %i25, 0
+  br i1 %icmp_26, label %bodyBlock6, label %afterBlock7
 bodyBlock6:
-  %count31 = load i32, i32* %count14, align 4
-  %sub_32 = sub i32 %count31, 1
-  store i32 %sub_32, i32* %count14, align 4
-  %sum34 = load i32, i32* %sum12, align 4
-  %count35 = load i32, i32* %count14, align 4
-  %arr36 = getelementptr [2 x i32], [2 x i32]* %arr11, i32 0, i32 %count35
-  %arr37 = load i32, i32* %arr36, align 4
-  %add_38 = add i32 %sum34, %arr37
-  store i32 %add_38, i32* %sum12, align 4
+  %i27 = load i32, i32* %i12, align 4
+  %sub_28 = sub i32 %i27, 1
+  store i32 %sub_28, i32* %i12, align 4
+  %sum30 = load i32, i32* %sum14, align 4
+  %i31 = load i32, i32* %i12, align 4
+  %arr32 = getelementptr [100 x i32], [100 x i32]* %arr11, i32 0, i32 %i31
+  %arr33 = load i32, i32* %arr32, align 4
+  %add_34 = add i32 %sum30, %arr33
+  store i32 %add_34, i32* %sum14, align 4
   br label %condBlock5
 afterBlock7:
-  %sum40 = load i32, i32* %sum12, align 4
-  ret i32 %sum40
+  %sum36 = load i32, i32* %sum14, align 4
+  ret i32 %sum36
   ret i32 0
 }

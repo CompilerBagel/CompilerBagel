@@ -628,7 +628,7 @@ public class codeGen {
             setDefUse(dest, load);
             setDefUse(src, load);
         } else {
-            if (src instanceof Label) {
+            if (src.isLabel()) {
                 MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
                 MCLoad ld = new MCLoad(new PhysicsReg("t0"), dest, LW);
                 block.getMachineCodes().add(la);
@@ -692,7 +692,7 @@ public class codeGen {
             setDefUse(src, store);
             setDefUse(dest, store);
         } else {
-            if (dest instanceof Label) {
+            if (dest.isLabel()) {
                 MCLoad la = new MCLoad(dest, new PhysicsReg("t0"), LA);
                 MCStore store = new MCStore(src, new PhysicsReg("t0"), new Immeidiate(0), SW);
                 block.getMachineCodes().add(la);
