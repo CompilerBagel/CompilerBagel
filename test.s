@@ -42,12 +42,12 @@ condBlock2:
 bodyBlock3:
     lw a2, -28(s0)
     lw a3, -24(s0)
-    la a4, arr
+    la a4, a4
     li a5, 4
     mulw a3, a3, a5
     add a3, a4, a3
-    lw a2, 0(a3)
-    addw a2, a2, a2
+    lw a3, 0(a3)
+    addw a2, a2, a3
     sw a2, -28(s0)
     lw a2, -24(s0)
     addiw a2, a2, 1
