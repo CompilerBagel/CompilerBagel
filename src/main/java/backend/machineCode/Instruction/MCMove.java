@@ -49,4 +49,10 @@ public class MCMove extends MachineCode {
         }
     }
 
+    @Override
+    public boolean isUselessCode() {
+        // moving to the same register is useless, like mv a0, a0
+        return dest.getRegister().equals(src.getRegister());
+    }
+
 }

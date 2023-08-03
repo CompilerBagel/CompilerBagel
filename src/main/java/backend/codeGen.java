@@ -4,14 +4,17 @@ import IRBuilder.*;
 import Type.Type;
 import backend.machineCode.*;
 import backend.machineCode.Instruction.*;
+import backend.machineCode.Label;
 import backend.reg.PhysicsReg;
 import backend.reg.Reg;
 import instruction.*;
 
+import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 import Type.PointerType;
 import Type.ArrayType;
@@ -284,6 +287,9 @@ public class codeGen {
                 case IRConstants.XOR:
                     result = ((Immeidiate) left).getImmValue() ^ ((Immeidiate) right).getImmValue();
                     break;
+                case IRConstants.SREM:
+                    result = ((Immeidiate) left).getImmValue() % ((Immeidiate) right).getImmValue();
+                    break;
                 default:
                     assert(false);
                     break;
@@ -330,6 +336,10 @@ public class codeGen {
                 case IRConstants.XOR:
                     code = new MCBinaryInteger(dest, src, imm, XORI);
                     break;
+                case IRConstants.SREM:
+                    MachineOperand remRegOp = addLiOperation(imm, block);
+                    code = new MCBinaryInteger(dest, src, remRegOp, REM);
+                    break;
                 default:
                     break;
             }
@@ -357,6 +367,9 @@ public class codeGen {
                 case IRConstants.XOR:
                     code = new MCBinaryInteger(dest, left, right, XOR);
                     break;
+                case IRConstants.SREM:
+                    code = new MCBinaryInteger(dest, left, right, REM);
+                    break;
                 default:
                     break;
             }
@@ -378,17 +391,16 @@ public class codeGen {
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
-
         for (int i = 1; i < Integer.max(paramCnt, 4); i++) {
-            int offset = stackCount * 8;
+            int offset = stackCount * 4;
             offsetMap.put("phyReg_a" + i, offset);
             stackCount += 2;
             MCStore store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), s0Reg, new Immeidiate(-offset), SW);
             block.getMachineCodes().add(store);
         }
+
         mcFunc.setStackCount(stackCount);
         mcFunc.setFrameSize(stackAlign(stackCount));
-
         int i = 0;
         for (ValueRef param: params) {
             MachineOperand op = parseOperand(param);
@@ -413,8 +425,14 @@ public class codeGen {
             }
             i++;
         }
-
-        MCCall call = new MCCall(funcMap.get(instr.getFunction()), operands);
+        MachineFunction mcFunction = funcMap.get(instr.getFunction());
+        MCCall call;
+        if(mcFunction != null) {
+            call = new MCCall(funcMap.get(instr.getFunction()), operands);
+        } else {
+            MachineFunction outFunc = new MachineFunction(instr.getFunction().getFunctionName());
+            call = new MCCall(outFunc, operands);
+        }
         for(MachineOperand operand: operands) {
             operand.addUse(call);
         }
@@ -706,7 +724,7 @@ public class codeGen {
     public void parseZextInstr(ZextInstruction instr, MachineBlock block){
         MachineOperand rd = parseOperand(instr.getOperands().get(0));
         MachineOperand rs = parseOperand(instr.getOperands().get(1));
-        MCMove move = new MCMove(rd, rs);
+        MCMove move = new MCMove(rs, rd);
         block.getMachineCodes().add(move);
         setDefUse(rd, move);
         setDefUse(rs, move);

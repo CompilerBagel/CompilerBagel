@@ -28,4 +28,6 @@ public abstract class MachineCode {
     // optimization for operand
     public abstract void replaceDef(MachineOperand oldOperand, MachineOperand newOperand);
     public abstract void replaceUse(MachineOperand oldOperand, MachineOperand newOperand);
+
+    public abstract boolean isUselessCode();
 }

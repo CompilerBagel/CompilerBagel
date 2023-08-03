@@ -74,5 +74,10 @@ public class MCLoad extends MachineCode {
         }
     }
 
+    @Override
+    public boolean isUselessCode() {
+        return false;
+    }
+
 
 }

@@ -17,6 +17,8 @@ public final class MachineConstants {
     public static final String DIVW = "divw";
     public static final String XOR = "xor";
     public static final String XORI = "xori";
+    public static final String REM = "rem";
+    public static final String REMU = "remu";
     public static final String SW = "sw";
     public static final String SD = "sd";
     public static final String LW = "lw";

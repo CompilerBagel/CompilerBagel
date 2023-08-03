@@ -29,6 +29,19 @@ public class MCSetz extends MachineCode {
     }
 
     @Override
+    public boolean isUselessCode() {
+        return false;
+    }
+
+    /**
+     * seqz rd, rs1
+     * set rd = 1 if rs1 equal zero
+     *
+     * snez rd, rs1
+     * set rd = 1 if rs1 not equal zero
+     * @return
+     */
+    @Override
     public String toString() {
         if (type == IRConstants.IRIntEQ) {
             return "seqz " + dest.getRegister() + ", " + rs.getRegister();

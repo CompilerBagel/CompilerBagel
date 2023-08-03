@@ -28,6 +28,11 @@ public class MCLi extends MachineCode {
     }
 
     @Override
+    public boolean isUselessCode() {
+        return false;
+    }
+
+    @Override
     public String toString(){
         return "li " + dest.getRegister() + ", " + imm.getRegister();
     }
