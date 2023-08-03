@@ -26,6 +26,7 @@ public class MachineOperand {
     
     // type recognition
     public boolean isImm() { return t == operandType.imm;}
+    public boolean isLabel() { return t == operandType.label; }
     public boolean isVirtualReg() { return t == operandType.virtualReg;}
     public boolean isPhysicsReg() { return t == operandType.physicsReg;}
 

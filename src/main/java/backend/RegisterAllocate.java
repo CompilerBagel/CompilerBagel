@@ -129,7 +129,7 @@ public class RegisterAllocate {
 
                 for (MachineOperand use : uses) {
                     use.removeUse(code);
-                    if(use.isImm()) continue;
+                    if(use.isImm() || use.isLabel()) continue;
                     if (use.getPhysicsReg() != null) {
                         if (use.noUser()) {
                             use.getPhysicsReg().giveBack();
@@ -156,7 +156,7 @@ public class RegisterAllocate {
                 }
 
                 for (MachineOperand def : defs) {
-                    if(def.isImm()) continue;
+                    if(def.isImm() || def.isLabel()) continue;
                     if (def.getPhysicsReg() != null) {
                         if (def.noUser()) {
                             def.getPhysicsReg().giveBack();
