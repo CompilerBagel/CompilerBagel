@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.IOException;
-import antlr.*;
+// import antlr.*;
 import static IRBuilder.IRModule.PrintModuleToFile;
 import backend.codeGen;
 
@@ -32,9 +32,9 @@ public class Main {
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
         codeGen code = new codeGen();
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
-        code.PrintCodeToFile(mcDest);
+        // code.PrintCodeToFile(mcDest);
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
-        // code.PrintCodeToFile(mcDest);
+        code.PrintCodeToFile(mcDest);
     }
 }
