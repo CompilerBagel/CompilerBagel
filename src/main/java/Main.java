@@ -1,4 +1,5 @@
 import backend.RegisterAllocate;
+import backend.opt.RmUselessCode;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -33,8 +34,14 @@ public class Main {
         codeGen code = new codeGen();
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
         // code.PrintCodeToFile(rawMcDest);
+
+        // Allocate register
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
+
+        // Remove useless code
+        RmUselessCode rmUselessCode = new RmUselessCode(code.getMCFunctions());
+        rmUselessCode.remove();
         code.PrintCodeToFile(mcDest);
     }
 }

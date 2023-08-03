@@ -19,7 +19,6 @@ ifElseIfEntry1:
     li a2, 6
     subw a1, a1, a2
     seqz a1, a1
-    mv a1, a1
     li a2, 0
     subw a2, a2, a1
     snez a2, a2
@@ -33,7 +32,6 @@ false_3:
     li a2, 11
     subw a1, a1, a2
     seqz a1, a1
-    mv a1, a1
     sw a1, -32(s0)
     j	after_4
 after_4:
@@ -44,19 +42,17 @@ after_4:
     bne a1, zero, trueBlock5
     j	falseBlock6
 trueBlock5:
-    lw a1, -24(s0)
     ld ra, 40(sp)
     ld s0, 32(sp)
     addi sp, sp, 48
+    lw a1, -24(s0)
     addw a0, a1, 0
     ret
-    j	afterBlock7
 falseBlock6:
     lw a1, -28(s0)
     li a2, 10
     subw a1, a1, a2
     seqz a1, a1
-    mv a1, a1
     li a2, 0
     subw a2, a2, a1
     seqz a2, a2
@@ -64,13 +60,11 @@ falseBlock6:
     bne a2, zero, true_8
     j	false_9
 afterBlock7:
-    lw a1, -24(s0)
-    addw a0, a1, 0
     ld ra, 40(sp)
     ld s0, 32(sp)
     addi sp, sp, 48
-    ret
-    li a0, 0
+    lw a1, -24(s0)
+    addw a0, a1, 0
     ret
 true_8:
     j	after_10
@@ -79,7 +73,6 @@ false_9:
     li a2, 1
     subw a1, a1, a2
     seqz a1, a1
-    mv a1, a1
     sw a1, -36(s0)
     j	after_10
 after_10:
@@ -98,7 +91,6 @@ falseBlock12:
     li a2, 10
     subw a1, a1, a2
     seqz a1, a1
-    mv a1, a1
     li a2, 0
     subw a2, a2, a1
     seqz a2, a2
@@ -114,7 +106,6 @@ false_15:
     li a2, -5
     subw a1, a1, a2
     seqz a1, a1
-    mv a1, a1
     sw a1, -40(s0)
     j	after_16
 after_16:
@@ -152,15 +143,12 @@ mainEntry20:
     sw a1, -44(s0)
     sw a2, -52(s0)
     sw a3, -60(s0)
-    mv a0, a0
     call putint
     lw a1, -44(s0)
     lw a2, -52(s0)
-    lw a3, -60(s0)
-    li a0, 0
     ld ra, 72(sp)
     ld s0, 64(sp)
     addi sp, sp, 80
-    ret
+    lw a3, -60(s0)
     li a0, 0
     ret
