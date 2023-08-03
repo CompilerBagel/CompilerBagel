@@ -702,14 +702,7 @@ public class codeGen {
             dest = addLiOperation(dest, block);
         }
         String destName = dest.toString();
-        if (null == offsetMap.get(destName)) {
-            MCLoad la = new MCLoad(dest, new PhysicsReg("t0"), LA);
-            MCStore store = new MCStore(src, new PhysicsReg("t0"), new Immeidiate(0), SW);
-            block.getMachineCodes().add(la);
-            block.getMachineCodes().add(store);
-            setDefUse(src, store);
-            setDefUse(dest, la);
-        } else {
+        if (null != offsetMap.get(destName)) {
             int offset = offsetMap.get(destName);
             if (paramOrder.get((BaseRegister)src) != null) {
                 int paramOrd = paramOrder.get((BaseRegister)src);
@@ -720,6 +713,20 @@ public class codeGen {
             block.getMachineCodes().add(store);
             setDefUse(src, store);
             setDefUse(dest, store);
+        } else {
+            if ((instr.getOperands().get(2)).getType() instanceof PointerType) {
+                MCStore store = new MCStore(src, dest, SW);
+                block.getMachineCodes().add(store);
+                setDefUse(src, store);
+                setDefUse(dest, store);
+            } else {
+                MCLoad la = new MCLoad(dest, new PhysicsReg("t0"), LA);
+                MCStore store = new MCStore(src, new PhysicsReg("t0"), new Immeidiate(0), SW);
+                block.getMachineCodes().add(la);
+                block.getMachineCodes().add(store);
+                setDefUse(src, store);
+                setDefUse(dest, la);
+            }
         }
     }
 
