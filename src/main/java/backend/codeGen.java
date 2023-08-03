@@ -280,6 +280,9 @@ public class codeGen {
                 case IRConstants.XOR:
                     result = ((Immeidiate) left).getImmValue() ^ ((Immeidiate) right).getImmValue();
                     break;
+                case IRConstants.SREM:
+                    result = ((Immeidiate) left).getImmValue() % ((Immeidiate) right).getImmValue();
+                    break;
                 default:
                     assert(false);
                     break;
@@ -326,6 +329,10 @@ public class codeGen {
                 case IRConstants.XOR:
                     code = new MCBinaryInteger(dest, src, imm, XORI);
                     break;
+                case IRConstants.SREM:
+                    MachineOperand remRegOp = addLiOperation(imm, block);
+                    code = new MCBinaryInteger(dest, src, remRegOp, REM);
+                    break;
                 default:
                     break;
             }
@@ -353,6 +360,9 @@ public class codeGen {
                     break;
                 case IRConstants.XOR:
                     code = new MCBinaryInteger(dest, left, right, XOR);
+                    break;
+                case IRConstants.SREM:
+                    code = new MCBinaryInteger(dest, left, right, REM);
                     break;
                 default:
                     break;
@@ -636,7 +646,7 @@ public class codeGen {
     public void parseZextInstr(ZextInstruction instr, MachineBlock block){
         MachineOperand rd = parseOperand(instr.getOperands().get(0));
         MachineOperand rs = parseOperand(instr.getOperands().get(1));
-        MCMove move = new MCMove(rd, rs);
+        MCMove move = new MCMove(rs, rd);
         block.getMachineCodes().add(move);
         setDefUse(rd, move);
         setDefUse(rs, move);

@@ -33,6 +33,11 @@ public class MCSet extends MachineCode {
         return false;
     }
 
+    /**
+     * slt rd, rs1, rs2
+     * if rs1 < rs2 then rd = 1 else rd = 0
+     * @return
+     */
     @Override
     public String toString() {
         return "slt " + dest.getRegister() + ", " + left.getRegister() + ", " + right.getRegister();
