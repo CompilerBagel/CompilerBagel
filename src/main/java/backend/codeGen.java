@@ -135,10 +135,7 @@ public class codeGen {
         for (Map.Entry<String, Symbol> entry: map.entrySet()) {
             globalSb.append("    ").append(entry.getKey()).append(":").append("\n");
             List<Float> values = entry.getValue().getInitValue();
-            boolean isInt = false;
-            if (entry.getValue().getType().equals(IRInt32Type())) {
-                isInt = true;
-            }
+            boolean isInt = entry.getValue().getType().equals(IRInt32Type());
             for (Float value: values) {
                 if (isInt)
                     globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
@@ -264,28 +261,18 @@ public class codeGen {
 
         if(left.isImm() && right.isImm()) {
             int result = 0;
-            switch (instr.getType()){
-                case IRConstants.ADD:
-                    result = ((Immeidiate) left).getImmValue() + ((Immeidiate) right).getImmValue();
-                    break;
-                case IRConstants.SUB:
-                    result = ((Immeidiate) left).getImmValue() - ((Immeidiate) right).getImmValue();
-                    break;
-                case IRConstants.MUL:
-                    result = ((Immeidiate) left).getImmValue() * ((Immeidiate) right).getImmValue();
-                    break;
-                case IRConstants.SDIV:
-                    result = ((Immeidiate) left).getImmValue() / ((Immeidiate) right).getImmValue();
-                    break;
-                case IRConstants.XOR:
-                    result = ((Immeidiate) left).getImmValue() ^ ((Immeidiate) right).getImmValue();
-                    break;
-                case IRConstants.SREM:
-                    result = ((Immeidiate) left).getImmValue() % ((Immeidiate) right).getImmValue();
-                    break;
-                default:
-                    assert(false);
-                    break;
+            switch (instr.getType()) {
+                case IRConstants.ADD -> result = ((Immeidiate) left).getImmValue() + ((Immeidiate) right).getImmValue();
+                case IRConstants.SUB -> result = ((Immeidiate) left).getImmValue() - ((Immeidiate) right).getImmValue();
+                case IRConstants.MUL -> result = ((Immeidiate) left).getImmValue() * ((Immeidiate) right).getImmValue();
+                case IRConstants.SDIV ->
+                        result = ((Immeidiate) left).getImmValue() / ((Immeidiate) right).getImmValue();
+                case IRConstants.XOR -> result = ((Immeidiate) left).getImmValue() ^ ((Immeidiate) right).getImmValue();
+                case IRConstants.SREM ->
+                        result = ((Immeidiate) left).getImmValue() % ((Immeidiate) right).getImmValue();
+                default -> {
+                    assert (false);
+                }
             }
             MachineOperand src = new Immeidiate(result);
             MCMove move = new MCMove(src, dest);
@@ -344,28 +331,16 @@ public class codeGen {
             block.getMachineCodes().add(code);
         }else{
             MachineCode code = null;
+            String machineOp;
             Type varType = ((BaseRegister)left).getType();
-            switch (instr.getType()){
-                case IRConstants.ADD:
-                    code = new MCBinaryInteger(dest, left, right, ADDW);
-                    break;
-                case IRConstants.SUB:
-                    code = new MCBinaryInteger(dest, left, right, SUBW);
-                    break;
-                case IRConstants.MUL:
-                    code = new MCBinaryInteger(dest, left, right, MULW);
-                    break;
-                case IRConstants.SDIV:
-                    code = new MCBinaryInteger(dest, left, right, DIVW);
-                    break;
-                case IRConstants.XOR:
-                    code = new MCBinaryInteger(dest, left, right, XOR);
-                    break;
-                case IRConstants.SREM:
-                    code = new MCBinaryInteger(dest, left, right, REM);
-                    break;
-                default:
-                    break;
+            if (varType == int32Type) {
+                machineOp = intOperatorMap.get(instr.getType());
+            } else {
+                machineOp = floatOperatorMap.get(instr.getType());
+            }
+
+            if (machineOp != null) {
+                code = new MCBinaryInteger(dest, left, right, machineOp);
             }
             assert(code != null);
             setDefUse(dest, code);

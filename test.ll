@@ -21,16 +21,16 @@ define i32 @main() {
 mainEntry1:
   %a11 = alloca i32, align 4
   store i32 1, i32* %a11, align 4
-  %b13 = alloca float, align 4
-  store float 2.0, float* %b13, align 4
+  %b13 = alloca i32, align 4
+  store i32 2, i32* %b13, align 4
   %c15 = alloca i32, align 4
-  %a16 = load i32, i32* %a11, align 4
-  %b17 = load float, float* %b13, align 4
-  %conv18 = sitofp i32 %a16 to float
-  %add_19 = add float %conv18, %b17
-  %conv20 = fptosi float %add_19 to i32
-  store i32* %conv20, i32* %c15, align 4
-  %a22 = load i32, i32* %a11, align 4
-  ret i32 %a22
+  %b16 = load i32, i32* %b13, align 4
+  %b17 = load i32, i32* %b13, align 4
+  %mul_18 = mul i32 %b16, %b17
+  %a19 = load i32, i32* %a11, align 4
+  %add_20 = add i32 %mul_18, %a19
+  store i32 %add_20, i32* %c15, align 4
+  %c22 = load i32, i32* %c15, align 4
+  ret i32 %c22
   ret i32 0
 }

@@ -1,5 +1,11 @@
 package backend.machineCode;
 
+import IRBuilder.IRConstants;
+
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public final class MachineConstants {
     public MachineConstants() {
     }
@@ -45,5 +51,21 @@ public final class MachineConstants {
             "bgtu", "bgeu", "bltu", "bleu",
             "bgt", "bge", "blt", "ble"
     };
+
+    public static Map<String, String> intOperatorMap = Stream.of(new String[][] {
+            { IRConstants.ADD, ADDW },
+            { IRConstants.SUB, SUBW },
+            { IRConstants.MUL, MULW },
+            { IRConstants.SDIV, DIVW },
+            { IRConstants.XOR, XOR },
+            { IRConstants.SREM, REM },
+    }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+
+    public static Map<String, String> floatOperatorMap = Stream.of(new String[][] {
+            { IRConstants.ADD, FADD_S },
+            { IRConstants.SUB, FSUB_S },
+            { IRConstants.MUL, FMUL_S },
+            { IRConstants.SDIV, FDIV_S },
+    }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
 }
