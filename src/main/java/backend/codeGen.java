@@ -356,6 +356,8 @@ public class codeGen {
             setDefUse(dest, code);
             setDefUse(left, code);
             setDefUse(right, code);
+//            left.addUse(code);
+//            right.addUse(code);
             block.getMachineCodes().add(code);
         }
     }
@@ -553,6 +555,9 @@ public class codeGen {
                     setDefUse(offset, mul);
                     setDefUse(indexOp, mul);
                     setDefUse(tmp4, mul);
+//                    offset.setDef(mul);
+//                    indexOp.addUse(mul);
+//                    tmp4.addUse(mul);
 
                     MCBinaryInteger addOffset = new MCBinaryInteger(offset, offset, new Immeidiate(base), ADDI);
                     block.getMachineCodes().add(addOffset);
@@ -598,13 +603,18 @@ public class codeGen {
                     setDefUse(offset, mul);
                     setDefUse(indexOp, mul);
                     setDefUse(tmp4, mul);
-
+//                    offset.setDef(mul);
+//                    indexOp.addUse(mul);
+//                    tmp4.addUse(mul);
                     MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offset, ADD);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
                     setDefUse(offset, add);
                     setDefUse(base, add);
+//                    baseReg.setDef(add);
+//                    base.addUse(add);
+//                    offset.addUse(add);
                 }
             }
         }

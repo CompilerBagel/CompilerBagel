@@ -16,6 +16,14 @@ mainEntry1:
     sd ra, 24(sp)
     sd s0, 16(sp)
     addi s0, sp, 32
+    addi sp, sp, -32
+    sd ra, 24(sp)
+    sd s0, 16(sp)
+    addi s0, sp, 32
+    addi sp, sp, -32
+    sd ra, 24(sp)
+    sd s0, 16(sp)
+    addi s0, sp, 32
     li a1, 0
     sw a1, -24(s0)
     li a1, 0
@@ -35,8 +43,8 @@ bodyBlock3:
     lw a2, -28(s0)
     lw a3, -24(s0)
     la a4, arr
-    li a4, 4
-    mulw a3, a3, a4
+    li a5, 4
+    mulw a3, a3, a5
     add a3, a4, a3
     lw a2, 0(a3)
     addw a2, a2, a2
@@ -48,6 +56,12 @@ bodyBlock3:
 afterBlock4:
     lw a2, -28(s0)
     addw a0, a2, 0
+    ld ra, 24(sp)
+    ld s0, 16(sp)
+    addi sp, sp, 32
+    ld ra, 24(sp)
+    ld s0, 16(sp)
+    addi sp, sp, 32
     ld ra, 24(sp)
     ld s0, 16(sp)
     addi sp, sp, 32
