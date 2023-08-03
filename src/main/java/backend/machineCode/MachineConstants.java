@@ -19,6 +19,7 @@ public final class MachineConstants {
     public static final String ADDIW = "addiw";
     public static final String SUBIW = "subiw";
     public static final String MULW = "mulw";
+    public static final String MULI = "muli";
     public static final String DIVW = "divw";
     public static final String XOR = "xor";
     public static final String XORI = "xori";

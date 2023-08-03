@@ -135,7 +135,17 @@ public class codeGen {
         for (Map.Entry<String, Symbol> entry: map.entrySet()) {
             globalSb.append("    ").append(entry.getKey()).append(":").append("\n");
             List<Float> values = entry.getValue().getInitValue();
-            boolean isInt = entry.getValue().getType().equals(IRInt32Type());
+            boolean isInt = false;
+            if (entry.getValue().getType().equals(IRInt32Type())) {
+                isInt = true;
+            } else if (entry.getValue().getType() instanceof ArrayType) {
+                Type tmp = entry.getValue().getType();
+                while (tmp instanceof ArrayType) {
+                    tmp = ((ArrayType) tmp).getElementType();
+                }
+                if (tmp.equals(IRInt32Type()))
+                    isInt = true;
+            }
             for (Float value: values) {
                 if (isInt)
                     globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
@@ -215,12 +225,12 @@ public class codeGen {
         String resName = resRegister.getText();
         Type resType = ((PointerType) resRegister.getType()).getBaseType();
         if(resType.equals(IRInt32Type()) || resType.equals(IRFloatType())) {
-            offsetMap.put(resName, stackCount * 4);
             stackCount ++;
+            offsetMap.put(resName, stackCount * 4);
         } else {
             int size = (((ArrayType)(instr.getPointedType())).getLength()) * 4 + stackCount * 4;
-            offsetMap.put(resName, size);
             stackCount += (size / 4);
+            offsetMap.put(resName, size);
         }
         mfunc.setStackCount(stackCount);
         mfunc.setFrameSize(stackAlign(stackCount));
@@ -500,32 +510,97 @@ public class codeGen {
             if (pointer instanceof GlobalRegister) {
                 Symbol globalSymbol = globalMap.get(((GlobalRegister) pointer).getIdentity());
                 BaseRegister vReg = new BaseRegister(pointer.getText(), pointer.getType());
-                MCLoad la = new MCLoad(vReg, new Label(globalSymbol.getName(), globalSymbol), LA);
+                MachineOperand label = new Label(globalSymbol.getName(), globalSymbol);
+                MCLoad la = new MCLoad(label, vReg, LA);
+                operandMap.put(pointer.getText(), vReg);
                 block.getMachineCodes().add(la);
                 setDefUse(vReg, la);
+                setDefUse(label, la);
             }
 
-            int offset;
-            int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
-            Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
-            if (baseType instanceof ArrayType) {
-                int dims = 0;
-                Type tmp = baseType;
-                while (tmp instanceof ArrayType) {
-                    tmp = ((ArrayType) tmp).getElementType();
-                    dims ++;
+            if (null != offsetMap.get(pointer.getText())) {
+                int base = offsetMap.get(pointer.getText());
+                ValueRef indexReg = instr.getOperands().get(3);
+                MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
+                if (indexReg instanceof ConstIntValueRef) {
+                    int offset;
+                    int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
+                    Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
+                    if (baseType instanceof ArrayType) {
+                        int dims = 0;
+                        Type tmp = baseType;
+                        while (tmp instanceof ArrayType) {
+                            tmp = ((ArrayType) tmp).getElementType();
+                            dims ++;
+                        }
+                        offset = ((ArrayType) baseType).getOtherDimensionLength(dims, index) * 4;
+                    } else {
+                        offset = index * 4;
+                    }
+
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(-(offset + base)), ADDI);
+                    offsetMap.put(instr.getOperands().get(0).getText(), offset + base);
+                    block.getMachineCodes().add(add);
+                    setDefUse(baseReg, add);
+                } else if (indexReg instanceof BaseRegister) {
+                    MachineOperand indexOp = parseOperand(indexReg);
+                    BaseRegister offset = new BaseRegister("offset", int32Type);
+                    MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
+                    MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
+                    block.getMachineCodes().add(mul);
+                    setDefUse(offset, mul);
+                    setDefUse(indexOp, mul);
+
+                    MCBinaryInteger addOffset = new MCBinaryInteger(offset, offset, new Immeidiate(base), ADDI);
+                    block.getMachineCodes().add(addOffset);
+                    setDefUse(offset, addOffset);
+
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, offset, SUB);
+                    operandMap.put(instr.getOperands().get(0).getText(), baseReg);
+                    block.getMachineCodes().add(add);
+                    setDefUse(baseReg, add);
+                    setDefUse(offset, add);
                 }
-                offset = ((ArrayType) baseType).getOtherDimensionLength(dims, index) * 4;
             } else {
-                offset = index * 4;
-            }
+                MachineOperand base = operandMap.get(pointer.getText());
+                ValueRef indexReg = instr.getOperands().get(3);
+                MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
+                if (indexReg instanceof ConstIntValueRef) {
+                    int offset;
+                    int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
+                    Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
+                    if (baseType instanceof ArrayType) {
+                        int dims = 0;
+                        Type tmp = baseType;
+                        while (tmp instanceof ArrayType) {
+                            tmp = ((ArrayType) tmp).getElementType();
+                            dims ++;
+                        }
+                        offset = ((ArrayType) baseType).getOtherDimensionLength(dims, index) * 4;
+                    } else {
+                        offset = index * 4;
+                    }
 
-            int base = offsetMap.get(pointer.getText());
-            MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
-            MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(-(offset + base)), ADDI);
-            offsetMap.put(instr.getOperands().get(0).getText(), offset + base);
-            block.getMachineCodes().add(add);
-            setDefUse(baseReg, add);
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, new Immeidiate(offset), ADDI);
+                    operandMap.put(instr.getOperands().get(0).getText(), baseReg);
+                    block.getMachineCodes().add(add);
+                    setDefUse(baseReg, add);
+                } else if (indexReg instanceof BaseRegister){
+                    MachineOperand indexOp = parseOperand(indexReg);
+                    BaseRegister offset = new BaseRegister("offset", int32Type);
+                    MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
+                    MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
+                    block.getMachineCodes().add(mul);
+                    setDefUse(offset, mul);
+                    setDefUse(indexOp, mul);
+
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offset, ADD);
+                    operandMap.put(instr.getOperands().get(0).getText(), baseReg);
+                    block.getMachineCodes().add(add);
+                    setDefUse(baseReg, add);
+                    setDefUse(offset, add);
+                }
+            }
         }
     }
 
@@ -541,19 +616,26 @@ public class codeGen {
         String srcName = src.toString();
         MachineFunction mfunc = block.getBlockFunc();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
-        if (null == offsetMap.get(srcName)) {
-            MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
-            MCLoad ld = new MCLoad(new PhysicsReg("t0"), dest, LW);
-            block.getMachineCodes().add(la);
-            block.getMachineCodes().add(ld);
-            setDefUse(src, la);
-            setDefUse(dest, ld);
-        } else {
+        if (null != offsetMap.get(srcName)) {
             int offset = offsetMap.get(srcName);
             MCLoad load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), LW);
             block.getMachineCodes().add(load);
             setDefUse(dest, load);
             setDefUse(src, load);
+        } else {
+            if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
+                MCLoad lw = new MCLoad(src, dest, LW);
+                block.getMachineCodes().add(lw);
+                setDefUse(dest, lw);
+                setDefUse(src, lw);
+            } else {
+                MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
+                MCLoad ld = new MCLoad(new PhysicsReg("t0"), dest, LW);
+                block.getMachineCodes().add(la);
+                block.getMachineCodes().add(ld);
+                setDefUse(src, la);
+                setDefUse(dest, ld);
+            }
         }
     }
 

@@ -4,4 +4,3 @@ int main() {
     int c = b * b + a;
     return c;
 }
-
