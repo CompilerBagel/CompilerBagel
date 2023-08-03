@@ -1,6 +1,4 @@
+int arr[6] = {1, 2, 33, 4, 5, 6};
 int main() {
-    int a = 1;
-    int b = 2;
-    int c = b * b + a;
-    return c;
+  return arr[0] + arr[1];
 }
