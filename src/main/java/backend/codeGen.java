@@ -374,7 +374,7 @@ public class codeGen {
             stackCount += 2;
             int offset = stackCount * 4;
             offsetMap.put("phyReg_a" + i, offset);
-            MCStore store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), s0Reg, new Immeidiate(-offset), SW);
+            MCStore store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), s0Reg, new Immeidiate(-offset), SD);
             block.getMachineCodes().add(store);
         }
 
@@ -421,7 +421,7 @@ public class codeGen {
 
         for (i = 1; i < Integer.max(paramCnt, 4); i++) {
             int offset = offsetMap.get("phyReg_a" + i);
-            MCLoad load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(10 + i), new Immeidiate(-offset), LW);
+            MCLoad load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(10 + i), new Immeidiate(-offset), LD);
             block.getMachineCodes().add(load);
         }
     }
