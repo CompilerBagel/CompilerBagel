@@ -729,9 +729,6 @@ public class codeGen {
                 MachineOperand intOp = new Immeidiate(integer);
                 operandMap.put(operand.getText(), intOp);
                 return intOp;
-            } else if (operand instanceof BaseRegister) {
-                operandMap.put(operand.getText(), (MachineOperand) operand);
-                return (MachineOperand) operand;
             } else if (operand instanceof GlobalRegister) {
                 Type baseType = ((PointerType)operand.getType()).getBaseType();
                 if (baseType.equals(IRInt32Type())) {
@@ -742,6 +739,9 @@ public class codeGen {
                         return value;
                     }
                 }
+            }else if (operand instanceof BaseRegister) {
+                operandMap.put(operand.getText(), (MachineOperand) operand);
+                return (MachineOperand) operand;
             }
         } else {
             return operandMap.get(operand.getText());
