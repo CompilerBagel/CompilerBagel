@@ -709,11 +709,19 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if(ctx.exp().isEmpty()){
                 return lValPointer;
             }else{
-                List<ValueRef> indexes = new ArrayList<>();
-                ValueRef index = ctx.exp(0).accept(this);
-                indexes.add(index);
-                ValueRef pointer = IRBuildLoad(builder,lValPointer,lValName);
-                lValPointer = IRBuildGEP(builder, pointer, indexes, indexes.size(), lValName);
+//                for (int i = 0;i<ctx.exp().size()-1;i++) {
+                    List<ValueRef> indexes = new ArrayList<>();
+                    ValueRef index = ctx.exp(0).accept(this);
+                    indexes.add(index);
+                    ValueRef pointer = IRBuildLoad(builder, lValPointer, lValName);
+                    lValPointer = IRBuildGEP(builder, pointer, indexes, indexes.size(), lValName);
+//                }
+//                List<ValueRef> indexes = new ArrayList<>();
+//                ValueRef index = ctx.exp(ctx.exp().size()-1).accept(this);
+//                indexes.add(intZero);
+//                indexes.add(index);
+////                ValueRef pointer = IRBuildLoad(builder, lValPointer, lValName);
+//                lValPointer = IRBuildGEP(builder, lValPointer, indexes, indexes.size(), lValName);
             }
         }else {
             if(ctx.exp().size()==0){
@@ -800,18 +808,18 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitAndCond(SysYParser.AndCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
-        ValueRef cmp  = IRBuildICmp(builder, IRIntEQ , intZero, lVal, "icmp_NE");
+        ValueRef cmp  = IRBuildICmp(builder, IRIntEQ , intZero, lVal, "icmp_EQ");
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "true_");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "false_");
         BaseBlock after = IRAppendBasicBlock(currentFunction, "after_");
         ValueRef res = IRBuildAlloca(builder,int32Type,"and_");
         IRBuildStore(builder,lVal,res);
 
-        IRBuildCondBr(builder,cmp,trueBlock,falseBlock);
-        IRPositionBuilderAtEnd(builder,trueBlock);
+        IRBuildCondBr(builder,cmp,falseBlock,trueBlock);
+        IRPositionBuilderAtEnd(builder,falseBlock);
         IRBuildBr(builder, after);
 
-        IRPositionBuilderAtEnd(builder,falseBlock);
+        IRPositionBuilderAtEnd(builder,trueBlock);
         ValueRef rVal = this.visit(ctx.cond(1));
         IRBuildStore(builder,rVal,res);
         IRBuildBr(builder,after);
