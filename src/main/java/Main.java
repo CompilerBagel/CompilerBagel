@@ -1,10 +1,11 @@
 import backend.RegisterAllocate;
+import backend.opt.RmUselessCode;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.IOException;
-// import antlr.*;
+import antlr.*;
 import static IRBuilder.IRModule.PrintModuleToFile;
 import backend.codeGen;
 
@@ -32,9 +33,14 @@ public class Main {
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
         codeGen code = new codeGen();
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
-        // code.PrintCodeToFile(mcDest);
+        // code.PrintCodeToFile(rawMcDest);
+
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
+
+        // Remove useless code
+        RmUselessCode rmUselessCode = new RmUselessCode(code.getMCFunctions());
+        rmUselessCode.remove();
         code.PrintCodeToFile(mcDest);
     }
 }

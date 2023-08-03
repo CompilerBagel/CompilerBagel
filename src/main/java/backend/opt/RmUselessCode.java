@@ -1,5 +1,6 @@
 package backend.opt;
 
+import backend.machineCode.Instruction.MCReturn;
 import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineFunction;
@@ -27,8 +28,25 @@ public class RmUselessCode {
 
         for (MachineBlock block : blocks) {
             List<MachineCode> codes = block.getMachineCodes();
+            // Code itself is useless, like mv a0, a0
             codes.removeIf(MachineCode::isUselessCode);
+
+            // Code after ret is useless
+            Iterator<MachineCode> iterator = codes.iterator();
+            MachineCode lastCode = null;
+            while(iterator.hasNext()) {
+                MachineCode code = iterator.next();
+                if(lastCode instanceof MCReturn){
+                    iterator.remove();
+                    continue;
+                }
+                lastCode = code;
+            }
         }
+
+
+
+
     }
 
 
