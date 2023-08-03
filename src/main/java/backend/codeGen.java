@@ -567,7 +567,7 @@ public class codeGen {
             } else {
                 MachineOperand base = operandMap.get(pointer.getText());
                 ValueRef indexReg = instr.getOperands().get(3);
-                MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
+                MachineOperand baseReg = new BaseRegister(pointer.getText(), pointer.getType());
                 if (indexReg instanceof ConstIntValueRef) {
                     int offset;
                     int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
@@ -629,18 +629,18 @@ public class codeGen {
             setDefUse(dest, load);
             setDefUse(src, load);
         } else {
-            if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
-                MCLoad lw = new MCLoad(src, dest, LW);
-                block.getMachineCodes().add(lw);
-                setDefUse(dest, lw);
-                setDefUse(src, lw);
-            } else {
+            if (src instanceof Label) {
                 MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
                 MCLoad ld = new MCLoad(new PhysicsReg("t0"), dest, LW);
                 block.getMachineCodes().add(la);
                 block.getMachineCodes().add(ld);
                 setDefUse(src, la);
                 setDefUse(dest, ld);
+            } else if (((BaseRegister) src).getType() instanceof PointerType) {
+                MCLoad lw = new MCLoad(src, dest, LW);
+                block.getMachineCodes().add(lw);
+                setDefUse(dest, lw);
+                setDefUse(src, lw);
             }
         }
     }
@@ -693,18 +693,18 @@ public class codeGen {
             setDefUse(src, store);
             setDefUse(dest, store);
         } else {
-            if ((instr.getOperands().get(2)).getType() instanceof PointerType) {
-                MCStore store = new MCStore(src, dest, SW);
-                block.getMachineCodes().add(store);
-                setDefUse(src, store);
-                setDefUse(dest, store);
-            } else {
+            if (dest instanceof Label) {
                 MCLoad la = new MCLoad(dest, new PhysicsReg("t0"), LA);
                 MCStore store = new MCStore(src, new PhysicsReg("t0"), new Immeidiate(0), SW);
                 block.getMachineCodes().add(la);
                 block.getMachineCodes().add(store);
                 setDefUse(src, store);
                 setDefUse(dest, la);
+            } else if (((BaseRegister) dest).getType() instanceof PointerType) {
+                MCStore store = new MCStore(src, dest, SW);
+                block.getMachineCodes().add(store);
+                setDefUse(src, store);
+                setDefUse(dest, store);
             }
         }
     }
