@@ -645,7 +645,7 @@ public class codeGen {
     public void parseZextInstr(ZextInstruction instr, MachineBlock block){
         MachineOperand rd = parseOperand(instr.getOperands().get(0));
         MachineOperand rs = parseOperand(instr.getOperands().get(1));
-        MCMove move = new MCMove(rd, rs);
+        MCMove move = new MCMove(rs, rd);
         block.getMachineCodes().add(move);
         setDefUse(rd, move);
         setDefUse(rs, move);
