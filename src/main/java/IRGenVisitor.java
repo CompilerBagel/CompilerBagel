@@ -6,7 +6,7 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
-// import antlr.*;
+import antlr.*;
 
 
 import java.util.*;
@@ -198,6 +198,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type type = defineType(typeName);
             ValueRef constVariable;
             String constName = constDefContext.IDENT().getText();
+            if(constName.length()>20){
+                constName = constName.substring(0,20);
+            }
             // 初始化assign的值
             if (typeName.equals("int")) assign = intZero;
             else assign = floatZero;
@@ -303,6 +306,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type type = defineType(typeName);
             ValueRef variable;
             String variableName = varDefContext.IDENT().getText();
+            if(variableName.length()>20){
+                variableName = variableName.substring(0,20);
+            }
             // 初始化assign的值
             if (typeName.equals("int")) assign = intZero;
             else assign = floatZero;
@@ -651,6 +657,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitLvalExp(SysYParser.LvalExpContext ctx) {
         String variableName = ctx.lVal().IDENT().getText();
+        if(variableName.length()>20){
+            variableName = variableName.substring(0,20);
+        }
         ValueRef variable = currentScope.getValueRef(variableName);
         Type varType = currentScope.getType(variableName);
         if(ConstIntVarMap.get(variable.getText())!=null){
@@ -670,6 +679,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitLVal(SysYParser.LValContext ctx) {
         String lValName = ctx.IDENT().getText();
+        if(lValName.length()>20){
+            lValName = lValName.substring(0,20);
+        }
         ValueRef lValPointer = currentScope.getValueRef(lValName);
         Type lvalType = currentScope.getType(lValName);
 /*        if (ctx.exp().size() == 0) {
