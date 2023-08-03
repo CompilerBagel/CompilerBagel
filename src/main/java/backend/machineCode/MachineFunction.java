@@ -57,6 +57,7 @@ public class MachineFunction {
         return machineBlocks;
     }
     public void allocate() {
+        if(allocateList.size() != 0) return;
         allocateList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(-frameSize), ADDI));;
         allocateList.add(new MCStore(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 8), SD));
         allocateList.add(new MCStore(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize - 16), SD));
