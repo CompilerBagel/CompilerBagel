@@ -1,4 +1,11 @@
-int main(){
-    int e[4][2][1] = {{0, 6}, {3, 4}, {5, 6}, {7, 8}};
-    return e[0][1][0];
+const int N = -1;
+int arr[N + 2 * 4 - 99 / 99] = {1, 2, 33, 4, 5, 6};
+
+int main() {
+  int i = 0, sum = 0;
+  while (i < 6) {
+    sum = sum + arr[i];
+    i = i + 1;
+  }
+  return sum;
 }
