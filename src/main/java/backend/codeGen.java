@@ -377,9 +377,9 @@ public class codeGen {
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
         for (int i = 1; i < Integer.max(paramCnt, 4); i++) {
+            stackCount += 2;
             int offset = stackCount * 4;
             offsetMap.put("phyReg_a" + i, offset);
-            stackCount += 2;
             MCStore store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), s0Reg, new Immeidiate(-offset), SW);
             block.getMachineCodes().add(store);
         }
