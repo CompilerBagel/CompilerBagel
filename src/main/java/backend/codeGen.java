@@ -227,9 +227,9 @@ public class codeGen {
             stackCount ++;
             offsetMap.put(resName, stackCount * 4);
         } else {
-            int size = (((ArrayType)(instr.getPointedType())).getLength()) * 4 + stackCount * 4;
-            stackCount += (size / 4);
-            offsetMap.put(resName, size);
+            offsetMap.put(resName, stackCount * 4);
+            int arrayLen = (((ArrayType)(instr.getPointedType())).getLength());
+            stackCount += arrayLen;
         }
         mfunc.setStackCount(stackCount);
         mfunc.setFrameSize(stackAlign(stackCount));
