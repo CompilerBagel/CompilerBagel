@@ -1,6 +1,11 @@
-int main(){
-    const int a[4][2] = {{1, 2}, {3, 4}, {}, 7};
-    const int N = 3;
-    int d[N + 1][2] = {1, 2, {3}, {5}, a[3][0], 8};
-    return d[3][1];
+const int N = -1;
+int arr[N + 2 * 4 - 99 / 99] = {1, 2, 33, 4, 5, 6};
+
+int main() {
+  int i = 0, sum = 0;
+  while (i < 6) {
+    sum = sum + arr[i];
+    i = i + 1;
+  }
+  return sum;
 }
