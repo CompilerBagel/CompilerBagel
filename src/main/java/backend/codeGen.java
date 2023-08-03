@@ -135,6 +135,13 @@ public class codeGen {
             boolean isInt = false;
             if (entry.getValue().getType().equals(IRInt32Type())) {
                 isInt = true;
+            } else if (entry.getValue().getType() instanceof ArrayType) {
+                Type tmp = entry.getValue().getType();
+                while (tmp instanceof ArrayType) {
+                    tmp = ((ArrayType) tmp).getElementType();
+                }
+                if (tmp.equals(IRInt32Type()))
+                    isInt = true;
             }
             for (Float value: values) {
                 if (isInt)

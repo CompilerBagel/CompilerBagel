@@ -305,6 +305,12 @@ public class IRBuilder {
         for(int i = 0;i<paramList.size()-1;i++){
             emitStr.append("]");
         }
+
+        List<Float> initValues = new ArrayList<>();
+        for (ValueRef constInt: constValueRefList) {
+            initValues.add((float)((ConstIntValueRef) constInt).getValue());
+        }
+        module.getGlobalSymbol(((GlobalRegister) valueRef).getIdentity()).setInitValue(initValues);
         module.emit(emitStr.toString());
     }
 
