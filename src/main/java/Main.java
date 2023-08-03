@@ -35,7 +35,6 @@ public class Main {
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
         // code.PrintCodeToFile(rawMcDest);
 
-        // Allocate register
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
 

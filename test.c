@@ -1,25 +1,13 @@
-// test if-else-if
-int ifElseIf() {
-  int a;
-  a = 5;
-  int b;
-  b = 10;
-  if(a == 6 || b == 0xb) {
-    return a;
+int main() {
+  int arr[2], sum = 0;
+  int count = 0;
+  while (count != 2) {
+  	arr[count] = count;
+    count = count + 1;
   }
-  else {
-    if (b == 10 && a == 1)
-      a = 25;
-    else if (b == 10 && a == -5)
-      a = a + 15;
-    else
-      a = -+a;
+  while (count != 2) {
+    count = count - 1;
+    sum = sum + arr[count];
   }
-
-  return a;
-}
-
-int main(){
-  putint(ifElseIf());
-  return 0;
+  return sum;
 }
