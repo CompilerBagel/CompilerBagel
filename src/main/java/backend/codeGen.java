@@ -337,6 +337,7 @@ public class codeGen {
             block.getMachineCodes().add(code);
         }else{
             MachineCode code = null;
+            Type varType = ((BaseRegister)left).getType();
             switch (instr.getType()){
                 case IRConstants.ADD:
                     code = new MCBinaryInteger(dest, left, right, ADDW);

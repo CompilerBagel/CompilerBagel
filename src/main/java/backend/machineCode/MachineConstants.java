@@ -23,8 +23,10 @@ public final class MachineConstants {
     public static final String LD = "ld";
     public static final String J = "j";
     public static final String BNE = "bne";
-
-
+    public static final String FADD_S = "fadd.s";
+    public static final String FSUB_S = "fsub.s";
+    public static final String FMUL_S = "fmul.s";
+    public static final String FDIV_S = "fdiv.s";
     public static final int MCEQ = 0;
     public static final int MCNE = 1;
     public static final int MCGTU = 2;

@@ -1,5 +1,7 @@
-int main(){
-    int e[4][2][1] = {{0, 6}, {3, 4}, {5, 6}, {7, 8}};
-    return e[0][1][0];
+int main() {
+    int a = 1;
+    float b = 2.0;
+    int c = a + b;
+    return a;
 }
 
