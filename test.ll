@@ -17,15 +17,50 @@ declare void @after_main()
 declare void @_sysy_starttime(i32 %0)
 declare void @_sysy_stoptime(i32 %0)
 
-@N0 = global i32 -1
-@arr1 = global [6 x i32]  [i32 1, i32 2, i32 33, i32 4, i32 5, i32 6]
 define i32 @main() {
 mainEntry1:
-  %arr11 = getelementptr [6 x i32], [6 x i32]* @arr1, i32 0, i32 0
-  %arr12 = load i32, i32* %arr11, align 4
-  %arr13 = getelementptr [6 x i32], [6 x i32]* @arr1, i32 0, i32 1
-  %arr14 = load i32, i32* %arr13, align 4
-  %add_15 = add i32 %arr12, %arr14
-  ret i32 %add_15
+  %arr11 = alloca [100 x i32], align 4
+  %sum12 = alloca i32, align 4
+  store i32 0, i32* %sum12, align 4
+  %count14 = alloca i32, align 4
+  store i32 10, i32* %count14, align 4
+  br label %condBlock2
+condBlock2:
+  %count16 = load i32, i32* %count14, align 4
+  %icmp_NE17 = icmp ne i32 %count16, 0
+  %tmp_18 = zext i1 %icmp_NE17 to i32
+  %icmp_19 = icmp ne i32 %tmp_18, 0
+  br i1 %icmp_19, label %bodyBlock3, label %afterBlock4
+bodyBlock3:
+  %count20 = load i32, i32* %count14, align 4
+  %arr21 = getelementptr [100 x i32], [100 x i32]* %arr11, i32 0, i32 %count20
+  %count22 = load i32, i32* %count14, align 4
+  store i32 %count22, i32* %arr21, align 4
+  %count24 = load i32, i32* %count14, align 4
+  %sub_25 = sub i32 %count24, 1
+  store i32 %sub_25, i32* %count14, align 4
+  br label %condBlock2
+afterBlock4:
+  br label %condBlock5
+condBlock5:
+  %count27 = load i32, i32* %count14, align 4
+  %icmp_NE28 = icmp ne i32 %count27, 10
+  %tmp_29 = zext i1 %icmp_NE28 to i32
+  %icmp_30 = icmp ne i32 %tmp_29, 0
+  br i1 %icmp_30, label %bodyBlock6, label %afterBlock7
+bodyBlock6:
+  %count31 = load i32, i32* %count14, align 4
+  %add_32 = add i32 %count31, 1
+  store i32 %add_32, i32* %count14, align 4
+  %sum34 = load i32, i32* %sum12, align 4
+  %count35 = load i32, i32* %count14, align 4
+  %arr36 = getelementptr [100 x i32], [100 x i32]* %arr11, i32 0, i32 %count35
+  %arr37 = load i32, i32* %arr36, align 4
+  %add_38 = add i32 %sum34, %arr37
+  store i32 %add_38, i32* %sum12, align 4
+  br label %condBlock5
+afterBlock7:
+  %sum40 = load i32, i32* %sum12, align 4
+  ret i32 %sum40
   ret i32 0
 }
