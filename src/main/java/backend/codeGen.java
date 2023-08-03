@@ -643,7 +643,7 @@ public class codeGen {
             setDefUse(dest, load);
             setDefUse(src, load);
         } else {
-            if (src instanceof Label) {
+            if (src.isLabel()) {
                 MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
                 MCLoad ld = new MCLoad(new PhysicsReg("t0"), dest, LW);
                 block.getMachineCodes().add(la);
@@ -749,9 +749,6 @@ public class codeGen {
                 MachineOperand floatOp = new Immeidiate(floatNum);
                 operandMap.put(operand.getText(), floatOp);
                 return floatOp;
-            } else if (operand instanceof BaseRegister) {
-                operandMap.put(operand.getText(), (MachineOperand) operand);
-                return (MachineOperand) operand;
             } else if (operand instanceof GlobalRegister) {
                 Type baseType = ((PointerType) operand.getType()).getBaseType();
                 if (baseType.equals(IRInt32Type())) {
@@ -762,6 +759,9 @@ public class codeGen {
                         return value;
                     }
                 }
+            } else if (operand instanceof BaseRegister) {
+                operandMap.put(operand.getText(), (MachineOperand) operand);
+                return (MachineOperand) operand;
             }
         } else {
             return operandMap.get(operand.getText());
