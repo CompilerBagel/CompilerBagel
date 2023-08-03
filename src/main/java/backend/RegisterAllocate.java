@@ -156,6 +156,7 @@ public class RegisterAllocate {
                 }
 
                 for (MachineOperand def : defs) {
+                    def.removeUse(code);
                     if(def.isImm() || def.isLabel()) continue;
                     if (def.getPhysicsReg() != null) {
                         if (def.noUser()) {
