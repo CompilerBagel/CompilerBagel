@@ -17,7 +17,7 @@ public class Main {
         String source = args[0];
         String dest = args[1];
         String mcDest = args[2];
-        String rawMcDest = args[3];
+        // String rawMcDest = args[3];
 
         CharStream input = CharStreams.fromFileName(source);
         // Lexer
@@ -32,7 +32,7 @@ public class Main {
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
         codeGen code = new codeGen();
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
-        code.PrintCodeToFile(rawMcDest);
+        // code.PrintCodeToFile(rawMcDest);
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
         code.PrintCodeToFile(mcDest);

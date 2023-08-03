@@ -19,6 +19,11 @@ declare void @_sysy_stoptime(i32 %0)
 
 define i32 @main() {
 mainEntry1:
+  %a11 = alloca float, align 4
+  store float 2.0E10, float* %a11, align 4
+  %b13 = alloca float, align 4
+  %conv14 = sitofp i32 3 to float
+  store float %conv14, float* %b13, align 4
   ret i32 0
   ret i32 0
 }
