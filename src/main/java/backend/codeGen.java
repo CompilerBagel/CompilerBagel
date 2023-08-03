@@ -30,7 +30,6 @@ public class codeGen {
     private static final Type floatType = IRFloatType();
     private static final Type int1Type = IRInt1Type();
     private static final Type voidType = IRVoidType();
-    private final Type pointerToIntType = new PointerType(int32Type);
     private static final PhysicsReg spReg = PhysicsReg.getSpReg();
     private static final PhysicsReg s0Reg = PhysicsReg.getS0Reg();
     private static final PhysicsReg raReg = PhysicsReg.getRaReg();
@@ -56,7 +55,7 @@ public class codeGen {
         for (MachineBlock block : blocks) {
             serializeBlock(block, sequence, done, blockComparator);
         }
-        
+
     }
     
     private static void serializeBlock(MachineBlock block, List<MachineBlock> sequence, Set<MachineBlock> done,
@@ -259,6 +258,7 @@ public class codeGen {
             }
             MachineCode br = new MCBranch(1, condReg, new PhysicsReg(0), trueBlock.getLabel());
             MachineCode jump = new MCJump(falseBlock.getLabel());
+            setDefUse(condReg, br);
             block.getMachineCodes().add(br);
             block.getMachineCodes().add(jump);
         }
@@ -460,6 +460,7 @@ public class codeGen {
                 block.getMachineCodes().add(sub);
                 block.getMachineCodes().add(setz);
                 setDefUse(dest, setz);
+                setDefUse(res, setz);
                 setDefUse(left, sub);
                 setDefUse(right, sub);
                 setDefUse(res, sub);
@@ -471,6 +472,7 @@ public class codeGen {
                 block.getMachineCodes().add(sub);
                 block.getMachineCodes().add(setz);
                 setDefUse(dest, setz);
+                setDefUse(res, setz);
                 setDefUse(left, sub);
                 setDefUse(right, sub);
                 setDefUse(res, sub);
@@ -550,6 +552,7 @@ public class codeGen {
                     block.getMachineCodes().add(mul);
                     setDefUse(offset, mul);
                     setDefUse(indexOp, mul);
+                    setDefUse(tmp4, mul);
 
                     MCBinaryInteger addOffset = new MCBinaryInteger(offset, offset, new Immeidiate(base), ADDI);
                     block.getMachineCodes().add(addOffset);
@@ -585,6 +588,7 @@ public class codeGen {
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
+                    setDefUse(base, add);
                 } else if (indexReg instanceof BaseRegister){
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offset = new BaseRegister("offset", int32Type);
@@ -593,12 +597,14 @@ public class codeGen {
                     block.getMachineCodes().add(mul);
                     setDefUse(offset, mul);
                     setDefUse(indexOp, mul);
+                    setDefUse(tmp4, mul);
 
                     MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offset, ADD);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
                     setDefUse(offset, add);
+                    setDefUse(base, add);
                 }
             }
         }

@@ -7,6 +7,8 @@
         .word 4
         .word 5
         .word 6
+    N:
+        .word -1
 .text
 main:
 mainEntry1:
@@ -26,4 +28,5 @@ mainEntry1:
     ld s0, 16(sp)
     addi sp, sp, 32
     ret
-
+    li a0, 0
+    ret

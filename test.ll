@@ -17,12 +17,13 @@ declare void @after_main()
 declare void @_sysy_starttime(i32 %0)
 declare void @_sysy_stoptime(i32 %0)
 
-@arr0 = global [6 x i32]  [i32 1, i32 2, i32 33, i32 4, i32 5, i32 6]
+@N0 = global i32 -1
+@arr1 = global [6 x i32]  [i32 1, i32 2, i32 33, i32 4, i32 5, i32 6]
 define i32 @main() {
 mainEntry1:
-  %arr11 = getelementptr [6 x i32], [6 x i32]* @arr0, i32 0, i32 0
+  %arr11 = getelementptr [6 x i32], [6 x i32]* @arr1, i32 0, i32 0
   %arr12 = load i32, i32* %arr11, align 4
-  %arr13 = getelementptr [6 x i32], [6 x i32]* @arr0, i32 0, i32 1
+  %arr13 = getelementptr [6 x i32], [6 x i32]* @arr1, i32 0, i32 1
   %arr14 = load i32, i32* %arr13, align 4
   %add_15 = add i32 %arr12, %arr14
   ret i32 %add_15
