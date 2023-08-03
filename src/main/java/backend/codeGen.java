@@ -506,51 +506,96 @@ public class codeGen {
             if (pointer instanceof GlobalRegister) {
                 Symbol globalSymbol = globalMap.get(((GlobalRegister) pointer).getIdentity());
                 BaseRegister vReg = new BaseRegister(pointer.getText(), pointer.getType());
-                MCLoad la = new MCLoad(vReg, new Label(globalSymbol.getName(), globalSymbol), LA);
+                MachineOperand label = new Label(globalSymbol.getName(), globalSymbol);
+                MCLoad la = new MCLoad(label, vReg, LA);
+                operandMap.put(pointer.getText(), vReg);
                 block.getMachineCodes().add(la);
                 setDefUse(vReg, la);
+                setDefUse(label, la);
             }
 
-            int base = offsetMap.get(pointer.getText());
-            ValueRef indexReg = instr.getOperands().get(3);
-            MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
-            if (indexReg instanceof ConstIntValueRef) {
-                int offset;
-                int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
-                Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
-                if (baseType instanceof ArrayType) {
-                    int dims = 0;
-                    Type tmp = baseType;
-                    while (tmp instanceof ArrayType) {
-                        tmp = ((ArrayType) tmp).getElementType();
-                        dims ++;
+            if (null != offsetMap.get(pointer.getText())) {
+                int base = offsetMap.get(pointer.getText());
+                ValueRef indexReg = instr.getOperands().get(3);
+                MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
+                if (indexReg instanceof ConstIntValueRef) {
+                    int offset;
+                    int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
+                    Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
+                    if (baseType instanceof ArrayType) {
+                        int dims = 0;
+                        Type tmp = baseType;
+                        while (tmp instanceof ArrayType) {
+                            tmp = ((ArrayType) tmp).getElementType();
+                            dims ++;
+                        }
+                        offset = ((ArrayType) baseType).getOtherDimensionLength(dims, index) * 4;
+                    } else {
+                        offset = index * 4;
                     }
-                    offset = ((ArrayType) baseType).getOtherDimensionLength(dims, index) * 4;
-                } else {
-                    offset = index * 4;
+
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(-(offset + base)), ADDI);
+                    offsetMap.put(instr.getOperands().get(0).getText(), offset + base);
+                    block.getMachineCodes().add(add);
+                    setDefUse(baseReg, add);
+                } else if (indexReg instanceof BaseRegister) {
+                    MachineOperand indexOp = parseOperand(indexReg);
+                    BaseRegister offset = new BaseRegister("offset", int32Type);
+                    MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
+                    MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
+                    block.getMachineCodes().add(mul);
+                    setDefUse(offset, mul);
+                    setDefUse(indexOp, mul);
+
+                    MCBinaryInteger addOffset = new MCBinaryInteger(offset, offset, new Immeidiate(base), ADDI);
+                    block.getMachineCodes().add(addOffset);
+                    setDefUse(offset, addOffset);
+
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, offset, SUB);
+                    operandMap.put(instr.getOperands().get(0).getText(), baseReg);
+                    block.getMachineCodes().add(add);
+                    setDefUse(baseReg, add);
+                    setDefUse(offset, add);
                 }
-                MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(-(offset + base)), ADDI);
-                offsetMap.put(instr.getOperands().get(0).getText(), offset + base);
-                block.getMachineCodes().add(add);
-                setDefUse(baseReg, add);
-            } else if (indexReg instanceof BaseRegister) {
-                MachineOperand indexOp = parseOperand(indexReg);
-                BaseRegister offset = new BaseRegister("offset", int32Type);
-                MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
-                MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
-                block.getMachineCodes().add(mul);
-                setDefUse(offset, mul);
-                setDefUse(indexOp, mul);
+            } else {
+                MachineOperand base = operandMap.get(pointer.getText());
+                ValueRef indexReg = instr.getOperands().get(3);
+                MachineOperand baseReg = new BaseRegister(pointer.getText(), int32Type);
+                if (indexReg instanceof ConstIntValueRef) {
+                    int offset;
+                    int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
+                    Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
+                    if (baseType instanceof ArrayType) {
+                        int dims = 0;
+                        Type tmp = baseType;
+                        while (tmp instanceof ArrayType) {
+                            tmp = ((ArrayType) tmp).getElementType();
+                            dims ++;
+                        }
+                        offset = ((ArrayType) baseType).getOtherDimensionLength(dims, index) * 4;
+                    } else {
+                        offset = index * 4;
+                    }
 
-                MCBinaryInteger addOffset = new MCBinaryInteger(offset, offset, new Immeidiate(base), ADDI);
-                block.getMachineCodes().add(addOffset);
-                setDefUse(offset, addOffset);
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, new Immeidiate(offset), ADDI);
+                    operandMap.put(instr.getOperands().get(0).getText(), baseReg);
+                    block.getMachineCodes().add(add);
+                    setDefUse(baseReg, add);
+                } else if (indexReg instanceof BaseRegister){
+                    MachineOperand indexOp = parseOperand(indexReg);
+                    BaseRegister offset = new BaseRegister("offset", int32Type);
+                    MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
+                    MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
+                    block.getMachineCodes().add(mul);
+                    setDefUse(offset, mul);
+                    setDefUse(indexOp, mul);
 
-                MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, offset, SUB);
-                operandMap.put(instr.getOperands().get(0).getText(), baseReg);
-                block.getMachineCodes().add(add);
-                setDefUse(baseReg, add);
-                setDefUse(offset, add);
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offset, ADD);
+                    operandMap.put(instr.getOperands().get(0).getText(), baseReg);
+                    block.getMachineCodes().add(add);
+                    setDefUse(baseReg, add);
+                    setDefUse(offset, add);
+                }
             }
         }
     }

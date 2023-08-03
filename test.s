@@ -1,6 +1,11 @@
 .global main
 .data
     getch:
+    arr:
+    .word 1
+    .word 2
+    .word 3
+    .word 4
     before_main:
     getfarray:
     putint:
@@ -17,43 +22,18 @@
 .text
 main:
 mainEntry1:
-    addi sp, sp, -80
-    sd ra, 72(sp)
-    sd s0, 64(sp)
-    addi s0, sp, 80
-    addi a1, s0, -44
-    li a1, 1
-    sw a1, -44(s0)
-    addi a1, s0, -48
-    li a1, 2
-    sw a1, -48(s0)
-    addi a1, s0, -52
-    li a1, 33
-    sw a1, -52(s0)
-    addi a1, s0, -56
-    li a1, 4
-    sw a1, -56(s0)
-    addi a1, s0, -60
-    li a1, 5
-    sw a1, -60(s0)
-    addi a1, s0, -64
-    li a1, 6
-    sw a1, -64(s0)
-    li a1, 0
-    sw a1, -68(s0)
-    lw a1, -68(s0)
-    addiw a1, a1, 1
-    sw a1, -68(s0)
-    lw a1, -68(s0)
-    li a2, 4
-    mulw a1, a1, a2
-    addi a1, a1, 44
-    sub a1, s0, a1
+    addi sp, sp, -32
+    sd ra, 24(sp)
+    sd s0, 16(sp)
+    addi s0, sp, 32
+    la a1, arr
+    addi a1, a1, 8
+    addi a1, a1, 0
     lw a2, 0(a1)
     addw a0, a2, 0
-    ld ra, 72(sp)
-    ld s0, 64(sp)
-    addi sp, sp, 80
+    ld ra, 24(sp)
+    ld s0, 16(sp)
+    addi sp, sp, 32
     ret
     li a0, 0
     ret
