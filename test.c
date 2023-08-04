@@ -1,9 +1,9 @@
-int f(int x, int y) {
-    return x + y;
+int f(int a) {
+    return a;
 }
 
 int main() {
-    int x = 3;
-    int y = 4;
-    return 2 + f(x, y);
+    int n = 1;
+    f(n);
+    return 0;
 }
