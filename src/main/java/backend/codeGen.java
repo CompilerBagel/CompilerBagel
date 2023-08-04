@@ -288,7 +288,7 @@ public class codeGen {
 
         String machineOp;
         Type varType = ((BaseRegister) left).getType();
-        if (varType == int32Type) {
+        if (varType == int32Type || varType == int1Type){
             machineOp = intOperatorMap.get(instr.getType());
         } else {
             machineOp = floatOperatorMap.get(instr.getType());
