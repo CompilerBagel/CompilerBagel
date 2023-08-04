@@ -65,10 +65,10 @@ public final class MachineConstants {
     }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
     public static Map<String, String> floatOperatorMap = Stream.of(new String[][] {
-            { IRConstants.ADD, FADD_S },
-            { IRConstants.SUB, FSUB_S },
-            { IRConstants.MUL, FMUL_S },
-            { IRConstants.SDIV, FDIV_S },
+            { IRConstants.FADD, FADD_S },
+            { IRConstants.FSUB, FSUB_S },
+            { IRConstants.FMUL, FMUL_S },
+            { IRConstants.FDIV, FDIV_S },
     }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
 }
