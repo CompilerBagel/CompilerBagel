@@ -527,11 +527,27 @@ public class codeGen {
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offset = new BaseRegister("offset", int32Type);
-                    MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
-                    MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
-                    block.getMachineCodes().add(mul);
-                    setDefUse(offset, mul);
-                    setDefUse(indexOp, mul);
+                    Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
+                    if (baseType instanceof ArrayType) { // multi layer
+                        int dims = 0;
+                        Type tmp = baseType;
+                        while (tmp instanceof ArrayType) {
+                            tmp = ((ArrayType) tmp).getElementType();
+                            dims++;
+                        }
+                        int otherDimLen = ((ArrayType) baseType).getOtherDimensionLength(dims, 1) * 4;
+                        MachineOperand tmpNum = addLiOperation(new Immeidiate(otherDimLen), block);
+                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmpNum, MULW);
+                        block.getMachineCodes().add(mul);
+                        setDefUse(offset, mul);
+                        setDefUse(indexOp, mul);
+                    } else { // 1 layer
+                        MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
+                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
+                        block.getMachineCodes().add(mul);
+                        setDefUse(offset, mul);
+                        setDefUse(indexOp, mul);
+                    }
 
                     MachineOperand baseTmp = addLiOperation(new Immeidiate(base), block);
                     MCBinaryInteger addOffset = new MCBinaryInteger(offset, baseTmp, offset, SUB);
