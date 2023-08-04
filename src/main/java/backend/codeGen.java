@@ -851,7 +851,15 @@ public class codeGen {
             regOp.setDef(addiw);
             regOp.addUse(addiw);
             lowImm.addUse(addiw);
-            return regOp;
+
+            // fmv.w.x
+            BaseRegister resReg = new BaseRegister("res", floatType);
+            MachineOperand resOp = parseOperand(resReg);
+            MCFMv fmv = new MCFMv(resOp, regOp, FMV_W_X);
+            block.getMachineCodes().add(fmv);
+            setDefUse(resOp, fmv);
+            setDefUse(regOp, fmv);
+            return resOp;
 
         } else {
             BaseRegister reg = new BaseRegister("li", int32Type);

@@ -43,6 +43,8 @@ public final class MachineConstants {
     public static final String FLE = "fle.s";
     public static final String FCVT_S_W = "fcvt.s.w";
     public static final String FCVT_W_S = "fcvt.w.s";
+    public static final String FMV_X_W = "fmv.x.w";
+    public static final String FMV_W_X = "fmv.w.x";
     public static final int MCEQ = 0;
     public static final int MCNE = 1;
     public static final int MCGTU = 2;
