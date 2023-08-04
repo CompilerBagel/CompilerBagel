@@ -234,16 +234,16 @@ public class IRBuilder {
 
 
 
-    public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList) {
+    public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList, String globalVarName) {
         boolean flag = true;
-//        List<Float> initValue = new ArrayList<>();
+        List<Float> initValue = new ArrayList<>();
         for (int i = 0; i < constValueRefList.size(); i++) {
             if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
                 flag = false;
-//                initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
-//                break;
+                initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
             }
         }
+        module.getGlobalSymbol(globalVarName).setInitValue(initValue);
         if (flag) {
             module.emit("zeroinitializer");
             return;

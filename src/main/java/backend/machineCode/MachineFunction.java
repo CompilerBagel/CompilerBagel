@@ -65,7 +65,8 @@ public class MachineFunction {
         this.getEntryBlock().addInstrsAtHead(allocateList);
     }
     public void restore(List<MachineBlock> retBlocks) {
-        if(restoreList.size() != 0) return;
+        if(restoreList.size() != 0)
+            return;
         restoreList.add(new MCLoad(PhysicsReg.getSpReg(), PhysicsReg.getRaReg(), new Immeidiate(frameSize - 8), LD));
         restoreList.add(new MCLoad(PhysicsReg.getSpReg(), PhysicsReg.getS0Reg(), new Immeidiate(frameSize - 16), LD));
         restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));;

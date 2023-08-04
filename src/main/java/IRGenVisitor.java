@@ -230,7 +230,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     IRSetInitializer(module, constVariable, assign, constName);
                 } else {
                     if(constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
-                    IRSetInitializer(module, constVariable, init);
+                    IRSetInitializer(module, constVariable, init, constName);
                 }
             } else {
                 constVariable = IRBuildAlloca(builder, type, constName);
@@ -334,7 +334,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 } else {
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
 //                    for (int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
-                    IRSetInitializer(module, variable, init);
+                    IRSetInitializer(module, variable, init, variableName);
                 }
             } else {
                 variable = IRBuildAlloca(builder, type, variableName);

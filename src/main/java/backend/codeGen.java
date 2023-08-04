@@ -642,7 +642,7 @@ public class codeGen {
 
     public void parseReturnInstr(RetInstruction instr, MachineBlock block) {
         List<ValueRef> rets = instr.getOperands();
-        if (rets.size() != 0) {
+        if (null != rets.get(0)) {
             // return not void
             MachineOperand src = parseOperand(rets.get(0)); // rets.get(0) retValueRef
             if (src.isImm()) {
