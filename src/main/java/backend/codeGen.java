@@ -532,7 +532,8 @@ public class codeGen {
                     setDefUse(offset, mul);
                     setDefUse(indexOp, mul);
 
-                    MCBinaryInteger addOffset = new MCBinaryInteger(offset, offset, new Immeidiate(base), ADDI);
+                    MachineOperand baseTmp = addLiOperation(new Immeidiate(base), block);
+                    MCBinaryInteger addOffset = new MCBinaryInteger(offset, baseTmp, offset, SUB);
                     block.getMachineCodes().add(addOffset);
                     setDefUse(offset, addOffset);
 
