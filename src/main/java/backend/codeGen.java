@@ -471,8 +471,13 @@ public class codeGen {
         for(MachineOperand operand: operands) {
             operand.addUse(call);
         }
+        BaseRegister ret = new BaseRegister("ret", dest.getType());
+        MCMove mv = new MCMove(ret, dest);
+        ret.setPhysicsReg(a0Reg);
+        setDefUse(ret, mv);
+        setDefUse(dest, mv);
         setDefUse(dest, call);
-        dest.setPhysicsReg(a0Reg);
+
         block.getMachineCodes().add(call);
 
         for (i = 1; i < Integer.max(paramCnt, 4); i++) {
@@ -480,6 +485,8 @@ public class codeGen {
             MCLoad load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(10 + i), new Immeidiate(-offset), LD);
             block.getMachineCodes().add(load);
         }
+
+        block.getMachineCodes().add(mv);
     }
 
     public void parseCondInstr(CondInstruction instr, MachineBlock block){
