@@ -232,7 +232,6 @@ public class codeGen {
             stackCount++;
             offsetMap.put(resName, stackCount * 4);
         } else if (resType instanceof ArrayType) {
-            offsetMap.put(resName, stackCount * 4 + 4);
             int arrayLen = (((ArrayType) (instr.getPointedType())).getLength());
             stackCount += arrayLen;
             offsetMap.put(resName, stackCount * 4);
@@ -490,7 +489,7 @@ public class codeGen {
                     }
 
                     MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(offset - base), ADDI);
-                    offsetMap.put(instr.getOperands().get(0).getText(), offset + base);
+                    offsetMap.put(instr.getOperands().get(0).getText(), base - offset);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
                 } else if (indexReg instanceof BaseRegister) {
