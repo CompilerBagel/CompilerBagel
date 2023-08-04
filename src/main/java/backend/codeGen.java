@@ -363,7 +363,7 @@ public class codeGen {
         ret.setPhysicsReg(a0Reg);
         setDefUse(ret, mv);
         setDefUse(dest, mv);
-        setDefUse(dest, call);
+//        setDefUse(dest, call);
 
         block.getMachineCodes().add(call);
 

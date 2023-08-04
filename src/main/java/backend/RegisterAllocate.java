@@ -137,9 +137,9 @@ public class RegisterAllocate {
                         continue;
                     }
                     if (use instanceof PhysicsReg) {
-                        if (use.noUser()){
-                            ((PhysicsReg)use).giveBack();
-                        }
+//                        if (use.noUser()){
+//                            ((PhysicsReg)use).giveBack();
+//                        }
                         continue;
                     }
                     PhysicsReg allocatedReg = getReg(use);
@@ -165,9 +165,9 @@ public class RegisterAllocate {
                         continue;
                     }
                     if (def instanceof PhysicsReg) {
-                        if (def.noUser()){
-                            ((PhysicsReg)def).giveBack();
-                        }
+//                        if (def.noUser()){
+//                            ((PhysicsReg)def).giveBack();
+//                        }
                         continue;
                     }
                     PhysicsReg allocatedReg = getReg(def);
@@ -193,8 +193,8 @@ public class RegisterAllocate {
         }
         if (operand instanceof BaseRegister) {
             if (((BaseRegister) operand).getType() == floatType) {
-                // allocate a0 ~ a7
-                for (int i = 11; i <= 17; i++) {
+                // allocate ft0 ~ ft7
+                for (int i = 0; i <= 7; i++) {
                     if (FloatPhysicsReg.isAvailableReg(i)) {
                         reg = FloatPhysicsReg.getFloatPhysicsReg(i);
                         allocatedReg.put(operand, reg);
@@ -203,7 +203,7 @@ public class RegisterAllocate {
                 }
             }
         }
-        // allocate a0 ~ a7
+        // allocate a1 ~ a7
         for (int i = 11; i <= 17; i++) {
             if (isAvailableReg(i)) {
                 reg = getPhysicsReg(i);
