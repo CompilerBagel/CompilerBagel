@@ -142,21 +142,26 @@ public class codeGen {
             globalSb.append("    ").append(entry.getKey()).append(":").append("\n");
             List<Float> values = entry.getValue().getInitValue();
             boolean isInt = false;
-            if (entry.getValue().getType().equals(IRInt32Type())) {
-                isInt = true;
-            } else if (entry.getValue().getType() instanceof ArrayType) {
-                Type tmp = entry.getValue().getType();
-                while (tmp instanceof ArrayType) {
-                    tmp = ((ArrayType) tmp).getElementType();
-                }
-                if (tmp.equals(IRInt32Type()))
+            if (entry.getValue().isZero()) {
+                int len = ((ArrayType)entry.getValue().getType()).getLength() * 4;
+                globalSb.append("        .zero ").append(len).append("\n");
+            } else {
+                if (entry.getValue().getType().equals(IRInt32Type())) {
                     isInt = true;
-            }
-            for (Float value : values) {
-                if (isInt)
-                    globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
-                else
-                    globalSb.append("        " + ".word ").append(value).append("\n");
+                } else if (entry.getValue().getType() instanceof ArrayType) {
+                    Type tmp = entry.getValue().getType();
+                    while (tmp instanceof ArrayType) {
+                        tmp = ((ArrayType) tmp).getElementType();
+                    }
+                    if (tmp.equals(IRInt32Type()))
+                        isInt = true;
+                }
+                for (Float value : values) {
+                    if (isInt)
+                        globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
+                    else
+                        globalSb.append("        " + ".word ").append(value).append("\n");
+                }
             }
         }
     }

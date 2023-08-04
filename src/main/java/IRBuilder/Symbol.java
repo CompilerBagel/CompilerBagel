@@ -10,11 +10,19 @@ public class Symbol {
     String name;
     Type type;
     List<Float> initValue; // handle both non-array and array
-
+    boolean isZero = false;
     public Symbol(String name, Type type){
         this.name = name;
         this.type = type;
         this.initValue = new ArrayList<>();
+    }
+
+    public void setZero(boolean zero) {
+        isZero = zero;
+    }
+
+    public boolean isZero() {
+        return isZero;
     }
 
     private Instruction def = null;

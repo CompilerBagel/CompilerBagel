@@ -244,6 +244,7 @@ public class IRBuilder {
             }
         }
         module.getGlobalSymbol(globalVarName).setInitValue(initValue);
+        module.getGlobalSymbol(globalVarName).setZero(flag);
         if (flag) {
             module.emit("zeroinitializer");
             return;
