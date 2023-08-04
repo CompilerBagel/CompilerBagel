@@ -1,9 +1,11 @@
 int n;
 int select_sort(int A[],int n)
 {
-    int i;
-    int j;
-    int min;
+    // A: -28
+    // n: -32
+    int i; // -36
+    int j; // -40
+    int min; // -44
     i =0;
     while(i < n-1)
     {
@@ -11,7 +13,7 @@ int select_sort(int A[],int n)
         j = i + 1;
         while(j < n)
         {
-            if(A[min]>A[j])
+            if(A[min]>A[j]) // body 6
             {
                 min=j;
             }

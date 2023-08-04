@@ -506,6 +506,7 @@ public class codeGen {
                 if (indexReg instanceof ConstIntValueRef) {
                     int offset;
                     int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
+                    MachineOperand dest = parseOperand(instr.getOperands().get(0));
                     Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
                     if (baseType instanceof ArrayType) {
                         int dims = 0;
@@ -519,10 +520,10 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(offset - base), ADDI);
+                    MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, new Immeidiate(offset - base), ADDI);
                     offsetMap.put(instr.getOperands().get(0).getText(), base - offset);
                     block.getMachineCodes().add(add);
-                    setDefUse(baseReg, add);
+                    setDefUse(dest, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offset = new BaseRegister("offset", int32Type);
