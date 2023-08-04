@@ -233,9 +233,9 @@ public class codeGen {
             stackCount++;
             offsetMap.put(resName, stackCount * 4);
         } else if (resType instanceof ArrayType) {
-            offsetMap.put(resName, stackCount * 4 + 4);
             int arrayLen = (((ArrayType) (instr.getPointedType())).getLength());
             stackCount += arrayLen;
+            offsetMap.put(resName, stackCount * 4);
         } else if (resType instanceof PointerType) {
             stackCount += 2;
             offsetMap.put(resName, stackCount * 4);
@@ -518,8 +518,8 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(-(offset + base)), ADDI);
-                    offsetMap.put(instr.getOperands().get(0).getText(), offset + base);
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, s0Reg, new Immeidiate(offset - base), ADDI);
+                    offsetMap.put(instr.getOperands().get(0).getText(), base - offset);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
                 } else if (indexReg instanceof BaseRegister) {
@@ -543,7 +543,10 @@ public class codeGen {
                 }
             } else {
                 MachineOperand base = operandMap.get(pointer.getText());
-                ValueRef indexReg = instr.getOperands().get(3);
+                ValueRef indexReg;
+                if (instr.getOperands().size() < 4) {
+                    indexReg = instr.getOperands().get(2);
+                } else indexReg = instr.getOperands().get(3);
                 MachineOperand baseReg = new BaseRegister(pointer.getText(), pointer.getType());
                 if (indexReg instanceof ConstIntValueRef) {
                     int offset;
@@ -605,7 +608,12 @@ public class codeGen {
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
         if (null != offsetMap.get(srcName)) {
             int offset = offsetMap.get(srcName);
-            MCLoad load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), opcode);
+            MCLoad load;
+            if ((instr.getOperands().get(0)).getType() instanceof PointerType) {
+                load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), LD);
+            } else {
+                load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), opcode);
+            }
             block.getMachineCodes().add(load);
             setDefUse(dest, load);
             setDefUse(src, load);
@@ -673,7 +681,12 @@ public class codeGen {
                 src = PhysicsReg.getPhysicsReg(10 + paramOrd);
             }
 
-            MCStore store = new MCStore(src, s0Reg, new Immeidiate(-offset), opcode);
+            MCStore store;
+            if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
+                store = new MCStore(src, s0Reg, new Immeidiate(-offset), SD);
+            } else {
+                store = new MCStore(src, s0Reg, new Immeidiate(-offset), opcode);
+            }
             block.getMachineCodes().add(store);
             setDefUse(src, store);
             setDefUse(dest, store);
