@@ -852,7 +852,6 @@ public class codeGen {
           float: lui(high 20 bits) + addiw(low 12bits)
          */
         if (((Immeidiate) imm).isFloatImm()) {
-
             float num = ((Immeidiate) imm).getImmFloatValue();
             int high = FloatTools.getHigh20(num);
             int low = FloatTools.getLow12(num);
@@ -883,13 +882,31 @@ public class codeGen {
             return resOp;
 
         } else {
-            BaseRegister reg = new BaseRegister("li", int32Type);
-            MachineOperand regOp = parseOperand(reg);
-            MCLi li = new MCLi(regOp, imm);
-            block.getMachineCodes().add(li);
-            regOp.setDef(li);
-            imm.addUse(li);
-            return regOp;
+            int value = ((Immeidiate) imm).getImmValue();
+            if (value <= 2047 && value >= -2048) {
+                BaseRegister reg = new BaseRegister("li", int32Type);
+                MachineOperand regOp = parseOperand(reg);
+                MCLi li = new MCLi(regOp, imm);
+                block.getMachineCodes().add(li);
+                regOp.setDef(li);
+                imm.addUse(li);
+                return regOp;
+            } else {
+                int lowValue = value & 0x00000fff;
+                int highValue = (value | 0x00000fff) >> 12;
+                BaseRegister regHigh = new BaseRegister("luiHigh", int32Type);
+                BaseRegister regLow = new BaseRegister("luiLow", int32Type);
+                MCLui luiHigh = new MCLui(regHigh, new Immeidiate(highValue));
+                block.getMachineCodes().add(luiHigh);
+                regHigh.setDef(luiHigh);
+                MCLi liLow = new MCLi(regLow, new Immeidiate(lowValue));
+                block.getMachineCodes().add(liLow);
+                regLow.setDef(liLow);
+                MCBinaryInteger add = new MCBinaryInteger(regHigh, regHigh, regLow, ADD);
+                block.getMachineCodes().add(add);
+                regHigh.setDef(add);
+                return regHigh;
+            }
         }
     }
 }
