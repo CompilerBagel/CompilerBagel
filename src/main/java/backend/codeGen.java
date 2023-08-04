@@ -20,6 +20,7 @@ import Type.PointerType;
 import Type.ArrayType;
 import utils.FloatTools;
 
+import static IRBuilder.IRConstants.FpToSi;
 import static IRBuilder.IRConstants.MUL;
 
 import static Type.FloatType.IRFloatType;
@@ -708,7 +709,14 @@ public class codeGen {
     }
 
     public void parseTypeTransInstr(TypeTransInstruction instr, MachineBlock block) {
-
+        MachineOperand src = parseOperand(instr.getOperands().get(0));
+        MachineOperand dest = parseOperand(instr.getOperands().get(1));
+        int optType = instr.getOptType();
+        String fCvtOp = optType == FpToSi ? FCVT_W_S : FCVT_S_W;
+        MCFCvt fCvt = new MCFCvt(dest, src, fCvtOp);
+        block.getMachineCodes().add(fCvt);
+        setDefUse(dest, fCvt);
+        setDefUse(src, fCvt);
     }
 
     public void parseZextInstr(ZextInstruction instr, MachineBlock block) {
