@@ -692,7 +692,6 @@ public class codeGen {
             }
             block.getMachineCodes().add(store);
             setDefUse(src, store);
-            setDefUse(dest, store);
         } else {
             if (dest.isLabel()) {
                 MCLoad la = new MCLoad(dest, new PhysicsReg("t0"), LA);
