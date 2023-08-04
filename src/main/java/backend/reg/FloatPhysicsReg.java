@@ -78,6 +78,7 @@ public class FloatPhysicsReg extends PhysicsReg {
         this.regName = regName;
     }
 
+    @Override
     public void giveBack() {
         isAvailable[index] = true;
     }
@@ -86,6 +87,13 @@ public class FloatPhysicsReg extends PhysicsReg {
         super(t, identity);
     }
 
+    public static boolean isAvailableReg(int index) {
+        return isAvailable[index];
+    }
+    @Override
+    public void occupy() {
+        isAvailable[index] = false;
+    }
     @Override
     public String toString() {
         return regName;

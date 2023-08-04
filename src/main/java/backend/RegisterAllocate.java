@@ -196,7 +196,7 @@ public class RegisterAllocate {
                 // allocate a0 ~ a7
                 for (int i = 11; i <= 17; i++) {
                     if (FloatPhysicsReg.isAvailableReg(i)) {
-                        reg = FloatPhysicsReg.getPhysicsReg(i);
+                        reg = FloatPhysicsReg.getFloatPhysicsReg(i);
                         allocatedReg.put(operand, reg);
                         return reg;
                     }
