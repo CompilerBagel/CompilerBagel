@@ -162,7 +162,7 @@ public class codeGen {
         offestMap.put("ra", 8);
         offestMap.put("s0", 16);
         List<ValueRef> params = func.getParams();
-        int i = 0;
+/*        int i = 0;
         for (ValueRef param: params) {
             if (param.getType().equals(IRInt32Type()) || param.getType().equals(IRFloatType())) {
                 stackCount ++;
@@ -173,7 +173,7 @@ public class codeGen {
             }
             paramOrder.put(param, i);
             i++;
-        }
+        }*/
         if (!func.getType().equals(IRVoidType())) {
             stackCount += 1;
             offestMap.put("ret", stackCount * 4);
@@ -269,7 +269,59 @@ public class codeGen {
         MachineOperand left = parseOperand(instr.getOperands().get(1));
         MachineOperand right = parseOperand(instr.getOperands().get(2));
 
-        if(left.isImm() && right.isImm()) {
+        if (left.isImm()) {
+            left = addLiOperation(left, block);
+        }
+        if (right.isImm()) {
+            right = addLiOperation(right, block);
+        }
+
+        switch (instr.getType()) {
+            case IRConstants.ADD -> {
+                MachineCode add = new MCBinaryInteger(dest, left, right, ADDW);
+                setDefUse(dest, add);
+                setDefUse(left, add);
+                setDefUse(right, add);
+                block.getMachineCodes().add(add);
+            }
+            case IRConstants.SUB -> {
+                MachineCode sub = new MCBinaryInteger(dest, left, right, SUBW);
+                setDefUse(dest, sub);
+                setDefUse(left, sub);
+                setDefUse(right, sub);
+                block.getMachineCodes().add(sub);
+            }
+            case IRConstants.MUL -> {
+                MachineCode mul = new MCBinaryInteger(dest, left, right, MULW);
+                setDefUse(dest, mul);
+                setDefUse(left, mul);
+                setDefUse(right, mul);
+                block.getMachineCodes().add(mul);
+            }
+            case IRConstants.SDIV -> {
+                MachineCode div = new MCBinaryInteger(dest, left, right, DIVW);
+                setDefUse(dest, div);
+                setDefUse(left, div);
+                setDefUse(right, div);
+                block.getMachineCodes().add(div);
+            }
+            case IRConstants.XOR -> {
+                MachineCode xor = new MCBinaryInteger(dest, left, right, XOR);
+                setDefUse(dest, xor);
+                setDefUse(left, xor);
+                setDefUse(right, xor);
+                block.getMachineCodes().add(xor);
+            }
+            case IRConstants.SREM -> {
+                MachineCode rem = new MCBinaryInteger(dest, left, right, REM);
+                setDefUse(dest, rem);
+                setDefUse(left, rem);
+                setDefUse(right, rem);
+                block.getMachineCodes().add(rem);
+            }
+        }
+
+/*        if(left.isImm() && right.isImm()) {
             int result = 0;
             switch (instr.getType()) {
                 case IRConstants.ADD -> result = ((Immeidiate) left).getImmValue() + ((Immeidiate) right).getImmValue();
@@ -290,7 +342,6 @@ public class codeGen {
             setDefUse(src, move);
             setDefUse(dest, move);
             block.getMachineCodes().add(move);
-
         } else if(left.isImm() || right.isImm()){
             MachineOperand src = left.isImm() ? right : left;
             MachineOperand imm = left.isImm() ? left : right;
@@ -300,26 +351,26 @@ public class codeGen {
                     code = new MCBinaryInteger(dest, src, imm, ADDIW);
                     break;
                 case IRConstants.SUB:
-                    code = new MCBinaryInteger(dest, src, new Immeidiate(-((Immeidiate)imm).getImmValue()), ADDIW);
+                    code = new MCBinaryInteger(dest, src, imm, SUBIW);
                     break;
                 case IRConstants.MUL:
                     // add register to store the imm(mul operand can only be register)
-                    /*BaseRegister mulReg = new BaseRegister("li", int32Type);
+                    *//*BaseRegister mulReg = new BaseRegister("li", int32Type);
                     MachineOperand mulRegOp = parseOperand(mulReg);
                     MCLi mulLi = new MCLi(mulRegOp, imm);
                     block.getMachineCodes().add(mulLi);
                     mulRegOp.setDef(mulLi);
-                    imm.addUse(mulLi);*/
+                    imm.addUse(mulLi);*//*
                     MachineOperand mulRegOp = addLiOperation(imm, block);
                     code = new MCBinaryInteger(dest, src, mulRegOp, MULW);
                     break;
                 case IRConstants.SDIV:
-                   /* BaseRegister divReg = new BaseRegister("li", int32Type);
+                   *//* BaseRegister divReg = new BaseRegister("li", int32Type);
                     MachineOperand divRegOp = parseOperand(divReg);
                     MCLi divLi = new MCLi(divRegOp, imm);
                     block.getMachineCodes().add(divLi);
                     divRegOp.setDef(divLi);
-                    imm.addUse(divLi);*/
+                    imm.addUse(divLi);*//*
                     MachineOperand divRegOp = addLiOperation(imm, block);
                     code = new MCBinaryInteger(dest, src, divRegOp, DIVW);
                     break;
@@ -357,7 +408,7 @@ public class codeGen {
             setDefUse(left, code);
             setDefUse(right, code);
             block.getMachineCodes().add(code);
-        }
+        }*/
     }
     
     public void parseCallInstr(CallInstruction instr, MachineBlock block) {

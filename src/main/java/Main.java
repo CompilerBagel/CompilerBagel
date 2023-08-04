@@ -33,7 +33,7 @@ public class Main {
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
         codeGen code = new codeGen();
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
-        // code.PrintCodeToFile(rawMcDest);
+        // code.PrintCodeToFile(mcDest);
 
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
