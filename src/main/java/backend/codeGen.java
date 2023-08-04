@@ -18,6 +18,8 @@ import java.util.List;
 
 import Type.PointerType;
 import Type.ArrayType;
+
+import static IRBuilder.IRConstants.MUL;
 import static Type.FloatType.IRFloatType;
 import static Type.Int1Type.IRInt1Type;
 import static Type.Int32Type.IRInt32Type;
@@ -226,10 +228,13 @@ public class codeGen {
         if(resType.equals(IRInt32Type()) || resType.equals(IRFloatType())) {
             stackCount ++;
             offsetMap.put(resName, stackCount * 4);
-        } else {
+        } else if (resType instanceof ArrayType) {
             offsetMap.put(resName, stackCount * 4 + 4);
             int arrayLen = (((ArrayType)(instr.getPointedType())).getLength());
             stackCount += arrayLen;
+        } else if (resType instanceof PointerType) {
+            stackCount += 2;
+            offsetMap.put(resName, stackCount * 4);
         }
         mfunc.setStackCount(stackCount);
         mfunc.setFrameSize(stackAlign(stackCount));
@@ -291,7 +296,7 @@ public class codeGen {
                 setDefUse(right, sub);
                 block.getMachineCodes().add(sub);
             }
-            case IRConstants.MUL -> {
+            case MUL -> {
                 MachineCode mul = new MCBinaryInteger(dest, left, right, MULW);
                 setDefUse(dest, mul);
                 setDefUse(left, mul);
@@ -620,7 +625,7 @@ public class codeGen {
                 MachineOperand baseReg = new BaseRegister(pointer.getText(), pointer.getType());
                 if (indexReg instanceof ConstIntValueRef) {
                     int offset;
-                    int index = ((ConstIntValueRef) (instr.getOperands().get(3))).getValue();
+                    int index = ((ConstIntValueRef) (indexReg)).getValue();
                     Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
                     if (baseType instanceof ArrayType) {
                         int dims = 0;
@@ -643,7 +648,7 @@ public class codeGen {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offset = new BaseRegister("offset", int32Type);
                     MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
-                    MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
+                    MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MUL);
                     block.getMachineCodes().add(mul);
                     setDefUse(offset, mul);
                     setDefUse(indexOp, mul);
