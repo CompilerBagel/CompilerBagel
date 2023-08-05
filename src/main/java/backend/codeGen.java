@@ -5,6 +5,7 @@ import Type.Type;
 import backend.machineCode.*;
 import backend.machineCode.Instruction.*;
 import backend.machineCode.Label;
+import backend.reg.FloatPhysicsReg;
 import backend.reg.PhysicsReg;
 import backend.reg.Reg;
 import instruction.*;
@@ -39,6 +40,7 @@ public class codeGen {
     private static final PhysicsReg s0Reg = PhysicsReg.getS0Reg();
     private static final PhysicsReg raReg = PhysicsReg.getRaReg();
     private static final PhysicsReg a0Reg = PhysicsReg.getA0Reg();
+    public static final FloatPhysicsReg fa0Reg = FloatPhysicsReg.getFa0Reg();
 
     private static IRModule module;
     private List<MachineBlock> blocks = new ArrayList<>();
@@ -672,10 +674,26 @@ public class codeGen {
                 setDefUse(src, li);
                 setDefUse(a0Reg, li);
             } else {
-                MCBinaryInteger addw = new MCBinaryInteger(a0Reg, src, new Immeidiate(0), ADDI);
-                block.getMachineCodes().add(addw);
-                setDefUse(src, addw);
-                setDefUse(a0Reg, addw);
+                Type type = ((BaseRegister) src).getType();
+                if (type == int32Type) {
+                    MCBinaryInteger addw = new MCBinaryInteger(a0Reg, src, new Immeidiate(0), ADDI);
+                    block.getMachineCodes().add(addw);
+                    setDefUse(src, addw);
+                    setDefUse(a0Reg, addw);
+                } else {
+                    BaseRegister negRet = new BaseRegister("negRet", floatType);
+                    BaseRegister ret = new BaseRegister("ret", floatType);
+                    MCFNeg neg1 = new MCFNeg(negRet, src);
+                    MCFNeg neg2 = new MCFNeg(ret, negRet);
+                    negRet.setPhysicsReg(fa0Reg);
+                    ret.setPhysicsReg(fa0Reg);
+                    setDefUse(src, neg1);
+                    setDefUse(negRet, neg1);
+                    setDefUse(negRet, neg2);
+                    setDefUse(ret, neg2);
+                    block.getMachineCodes().add(neg1);
+                    block.getMachineCodes().add(neg2);
+                }
             }
         }
         MCReturn ret = new MCReturn();
@@ -734,6 +752,9 @@ public class codeGen {
         MachineOperand dest = parseOperand(instr.getOperands().get(1));
         int optType = instr.getOptType();
         String fCvtOp = optType == FpToSi ? FCVT_W_S : FCVT_S_W;
+        if (src.isImm()) {
+            src = addLiOperation(src, block);
+        }
         MCFCvt fCvt = new MCFCvt(dest, src, fCvtOp);
         block.getMachineCodes().add(fCvt);
         setDefUse(dest, fCvt);

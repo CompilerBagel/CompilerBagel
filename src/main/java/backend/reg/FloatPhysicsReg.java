@@ -66,6 +66,10 @@ public class FloatPhysicsReg extends PhysicsReg {
         return floatPhysicsRegs[index];
     }
 
+    public static FloatPhysicsReg getFa0Reg() {
+        return getFloatPhysicsReg(10);
+    }
+
     public FloatPhysicsReg(int index) {
         super(operandType.physicsReg, indexMap.get(index));
         this.index = index;
