@@ -51,6 +51,8 @@ public class codeGen {
     private Map<String, Symbol> globalMap;
 
     private final HashMap<ValueRef, Integer> paramOrder = new HashMap<ValueRef, Integer>();
+    private final HashMap<ValueRef, Integer> intParamOrder = new HashMap<ValueRef, Integer>();
+    private final HashMap<ValueRef, Integer> floatParamOrder = new HashMap<ValueRef, Integer>();
 
     public static void serializeBlocks(List<MachineBlock> blocks) {
         List<MachineBlock> sequence = new ArrayList<>();
@@ -180,16 +182,18 @@ public class codeGen {
         offestMap.put("s0", 16);
         List<ValueRef> params = func.getParams();
         int i = 0;
+        int intIndex = 0;;
+        int floatIndex = 0;
         for (ValueRef param : params) {
-//            if (param.getType().equals(IRInt32Type()) || param.getType().equals(IRFloatType())) {
-//                stackCount ++;
-//                offestMap.put(param.getText(), stackCount * 4);
-//            } else {
-//                stackCount += 2;
-//                offestMap.put(param.getText(), stackCount * 8);
-//            }
             paramOrder.put(param, i);
             i++;
+            if (param.getType() == floatType) {
+                floatParamOrder.put(param, floatIndex);
+                floatIndex++;
+            } else {
+                intParamOrder.put(param, intIndex);
+                intIndex++;
+            }
         }
         if (!func.getType().equals(IRVoidType())) {
             stackCount += 1;
@@ -334,25 +338,49 @@ public class codeGen {
         mcFunc.setStackCount(stackCount);
         mcFunc.setFrameSize(stackAlign(stackCount));
         int i = 0;
+        int intRegIndex = 0;
+        int floatRegIndex = 0;
         for (ValueRef param : params) {
             MachineOperand op = parseOperand(param);
             if (op.isImm()) {
-                BaseRegister tmp = new BaseRegister("li", param.getType());
-                tmp.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + i));
-                MCLi li = new MCLi(tmp, op);
-                setDefUse(tmp, li);
-                block.getMachineCodes().add(li);
+                // TODO: check the modify(li)
+                // BaseRegister tmp = new BaseRegister("li", param.getType());
+                MachineOperand tmp = addLiOperation(op, block);
+                if (((Immeidiate)op).isFloatImm()) {
+                    tmp.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
+                    floatRegIndex++;
+                }else {
+                    tmp.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + intRegIndex));
+                    intRegIndex++;
+                }
+                // MCLi li = new MCLi(tmp, op);
+                // setDefUse(tmp, li);
+                // block.getMachineCodes().add(li);
                 operands.add(tmp);
             } else {
-                // BaseRegister vReg = new BaseRegister(param.getText(), param.getType());
                 BaseRegister src = new BaseRegister(param.getText(), param.getType());
-                src.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + i));
-                MCMove mv = new MCMove(op, src);
-                setDefUse(src, mv);
-                setDefUse(op, mv);
-                // setDefUse(vReg, mv);
-                block.getMachineCodes().add(mv);
-                // operands.add(vReg);
+                if (src.getType() == floatType) {
+                    src.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
+                    floatRegIndex++;
+                    // Float number use twice fneg to move params to fa0, fa1, ...
+                    BaseRegister negParam = new BaseRegister("negParam", floatType);
+                    MCFNeg neg1 = new MCFNeg(negParam, op);
+                    MCFNeg neg2 = new MCFNeg(src, negParam);
+                    setDefUse(op, neg1);
+                    setDefUse(negParam, neg1);
+                    setDefUse(negParam, neg2);
+                    setDefUse(src, neg2);
+                    block.getMachineCodes().add(neg1);
+                    block.getMachineCodes().add(neg2);
+                } else {
+                    src.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + intRegIndex));
+                    intRegIndex++;
+                    // Use mv to move params to a0, a1, ...
+                    MCMove mv = new MCMove(op, src);
+                    setDefUse(src, mv);
+                    setDefUse(op, mv);
+                    block.getMachineCodes().add(mv);
+                }
                 operands.add(src);
             }
             i++;
@@ -745,7 +773,13 @@ public class codeGen {
             int offset = offsetMap.get(destName);
             if (paramOrder.get((BaseRegister) src) != null) {
                 int paramOrd = paramOrder.get((BaseRegister) src);
-                src = PhysicsReg.getPhysicsReg(10 + paramOrd);
+                if (((BaseRegister) src).getType() == floatType) {
+                    int floatOrd = floatParamOrder.get((BaseRegister) src);
+                    src = FloatPhysicsReg.getFloatPhysicsReg(10 + floatOrd);
+                } else {
+                    int intOrd = intParamOrder.get((BaseRegister) src);
+                    src = PhysicsReg.getPhysicsReg(10 + intOrd);
+                }
             }
 
             MCStore store;
