@@ -40,6 +40,8 @@ public class codeGen {
     private static final PhysicsReg s0Reg = PhysicsReg.getS0Reg();
     private static final PhysicsReg raReg = PhysicsReg.getRaReg();
     private static final PhysicsReg a0Reg = PhysicsReg.getA0Reg();
+    private static final PhysicsReg t0Reg = PhysicsReg.getPhysicsReg(5);
+    private static final PhysicsReg t1Reg = PhysicsReg.getPhysicsReg(6);
     public static final FloatPhysicsReg fa0Reg = FloatPhysicsReg.getFa0Reg();
 
     private static IRModule module;
@@ -359,6 +361,7 @@ public class codeGen {
                         // TODO
                         stackCount += 2;
 
+
                     } else {
                         tmp.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
                     }
@@ -372,12 +375,12 @@ public class codeGen {
             } else {
                 BaseRegister src = new BaseRegister(param.getText(), param.getType());
                 if (src.getType() == floatType) {
-                    src.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
-                    floatRegIndex++;
                     // Float number use twice fneg to move params to fa0, fa1, ...
+                    src.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
                     BaseRegister negParam = new BaseRegister("negParam", floatType);
                     MCFNeg neg1 = new MCFNeg(negParam, op);
                     MCFNeg neg2 = new MCFNeg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex), negParam);
+                    floatRegIndex++;
                     setDefUse(op, neg1);
                     setDefUse(negParam, neg1);
                     setDefUse(negParam, neg2);
@@ -385,10 +388,10 @@ public class codeGen {
                     block.getMachineCodes().add(neg1);
                     block.getMachineCodes().add(neg2);
                 } else {
-                    src.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + intRegIndex));
-                    intRegIndex++;
                     // Use mv to move params to a0, a1, ...
+                    src.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + intRegIndex));
                     MCMove mv = new MCMove(op, PhysicsReg.getPhysicsReg(10 + intRegIndex));
+                    intRegIndex++;
                     // setDefUse(src, mv);
                     setDefUse(op, mv);
                     block.getMachineCodes().add(mv);

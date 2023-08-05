@@ -97,7 +97,6 @@ public class PhysicsReg extends Reg {
     public static PhysicsReg getA0Reg() {
         return getPhysicsReg(10);
     }
-
     public static void setAvailable(int index, boolean available) {
         isAvailable[index] = available;
     }
