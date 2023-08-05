@@ -53,6 +53,7 @@ public class codeGen {
     private final HashMap<ValueRef, Integer> paramOrder = new HashMap<ValueRef, Integer>();
     private final HashMap<ValueRef, Integer> intParamOrder = new HashMap<ValueRef, Integer>();
     private final HashMap<ValueRef, Integer> floatParamOrder = new HashMap<ValueRef, Integer>();
+    private final HashMap<ValueRef, Integer> spillParamOrder = new HashMap<ValueRef, Integer>();
 
     public static void serializeBlocks(List<MachineBlock> blocks) {
         List<MachineBlock> sequence = new ArrayList<>();
@@ -182,15 +183,24 @@ public class codeGen {
         offestMap.put("s0", 16);
         List<ValueRef> params = func.getParams();
         int i = 0;
-        int intIndex = 0;;
+        int intIndex = 0;
         int floatIndex = 0;
+        int spillIndex = 0;
         for (ValueRef param : params) {
             paramOrder.put(param, i);
             i++;
             if (param.getType() == floatType) {
+                if (floatIndex > 7) {
+                    spillParamOrder.put(param, spillIndex);
+                    spillIndex++;
+                }
                 floatParamOrder.put(param, floatIndex);
                 floatIndex++;
             } else {
+                if (intIndex > 7) {
+                    spillParamOrder.put(param, spillIndex);
+                    spillIndex++;
+                }
                 intParamOrder.put(param, intIndex);
                 intIndex++;
             }
@@ -346,10 +356,10 @@ public class codeGen {
                 // TODO: check the modify(li)
                 // BaseRegister tmp = new BaseRegister("li", param.getType());
                 MachineOperand tmp = addLiOperation(op, block);
-                if (((Immeidiate)op).isFloatImm()) {
+                if (((Immeidiate) op).isFloatImm()) {
                     tmp.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
                     floatRegIndex++;
-                }else {
+                } else {
                     tmp.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + intRegIndex));
                     intRegIndex++;
                 }
@@ -717,7 +727,7 @@ public class codeGen {
             // return not void
             MachineOperand src = parseOperand(rets.get(0)); // rets.get(0) retValueRef
             if (src.isImm()) {
-                if (((Immeidiate)src).isFloatImm()) {
+                if (((Immeidiate) src).isFloatImm()) {
                     src = addLiOperation(src, block);
                     src.setPhysicsReg(fa0Reg);
                 } else {
@@ -772,13 +782,40 @@ public class codeGen {
         if (null != offsetMap.get(destName)) {
             int offset = offsetMap.get(destName);
             if (paramOrder.get((BaseRegister) src) != null) {
+                // Storing function parameters on the stack
                 int paramOrd = paramOrder.get((BaseRegister) src);
+
                 if (((BaseRegister) src).getType() == floatType) {
                     int floatOrd = floatParamOrder.get((BaseRegister) src);
-                    src = FloatPhysicsReg.getFloatPhysicsReg(10 + floatOrd);
+                    if (floatOrd > 7) {
+                        // load from stack
+                        int spillOrder = spillParamOrder.get((BaseRegister) src);
+                        BaseRegister ldReg = new BaseRegister("paramLd", floatType);
+                        MCLoad ld = new MCLoad(s0Reg, ldReg, new Immeidiate(spillOrder * 8), FLW);
+                        setDefUse(ldReg, ld);
+                        block.getMachineCodes().add(ld);
+                        src = ldReg;
+                    } else {
+                        // load from fa0-fa7
+                        src = FloatPhysicsReg.getFloatPhysicsReg(10 + floatOrd);
+                    }
+
                 } else {
                     int intOrd = intParamOrder.get((BaseRegister) src);
-                    src = PhysicsReg.getPhysicsReg(10 + intOrd);
+                    if (intOrd > 7) {
+                        // load from stack
+                        int spillOrder = spillParamOrder.get((BaseRegister) src);
+                        BaseRegister ldReg = new BaseRegister("paramLd", int32Type);
+                        MCLoad ld = new MCLoad(s0Reg, ldReg, new Immeidiate(spillOrder * 8), LD);
+                        setDefUse(ldReg, ld);
+                        block.getMachineCodes().add(ld);
+                        src = ldReg;
+
+                    }else {
+                        // load from a0-a7
+                        src = PhysicsReg.getPhysicsReg(10 + intOrd);
+                    }
+
                 }
             }
 
@@ -852,7 +889,7 @@ public class codeGen {
                         operandMap.put(((GlobalRegister) operand).getIdentity(), value);
                         return value;
                     }
-                } else if (baseType.equals(floatType)){
+                } else if (baseType.equals(floatType)) {
                     Symbol symbol = globalMap.get(((GlobalRegister) operand).getIdentity());
                     if (symbol.getType().equals(floatType)) {
                         MachineOperand value = new Label(symbol.getName(), symbol);
