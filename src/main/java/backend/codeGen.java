@@ -357,6 +357,8 @@ public class codeGen {
                 if (((Immeidiate) op).isFloatImm()) {
                     if (floatRegIndex > 7) {
                         // TODO
+                        stackCount += 2;
+
                     } else {
                         tmp.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
                     }
@@ -811,7 +813,7 @@ public class codeGen {
                         block.getMachineCodes().add(ld);
                         src = ldReg;
 
-                    }else {
+                    } else {
                         // load from a0-a7
                         src = PhysicsReg.getPhysicsReg(10 + intOrd);
                     }
