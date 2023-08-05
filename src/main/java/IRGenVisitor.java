@@ -739,13 +739,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 ValueRef index = ctx.exp(0).accept(this);
                 indexes.add(index);
                 ValueRef pointer = IRBuildLoad(builder, lValPointer, lValName);
-                lValPointer = IRBuildGEP(builder, lValPointer, indexes, indexes.size(), lValName);
+                lValPointer = IRBuildGEP(builder, pointer, indexes, indexes.size(), lValName);
                 for (int i = 1;i<ctx.exp().size();i++) {
                     List<ValueRef> interIndexes = new ArrayList<>();
                     ValueRef interIndex = ctx.exp(i).accept(this);
                     interIndexes.add(intZero);
                     interIndexes.add(interIndex);
-                    lValPointer = IRBuildGEP(builder, pointer, interIndexes, interIndexes.size(), lValName);
+                    lValPointer = IRBuildGEP(builder, lValPointer, interIndexes, interIndexes.size(), lValName);
                 }
             }
         }
