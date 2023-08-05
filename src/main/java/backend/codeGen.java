@@ -689,10 +689,16 @@ public class codeGen {
             // return not void
             MachineOperand src = parseOperand(rets.get(0)); // rets.get(0) retValueRef
             if (src.isImm()) {
-                MCLi li = new MCLi(a0Reg, src);
-                block.getMachineCodes().add(li);
-                setDefUse(src, li);
-                setDefUse(a0Reg, li);
+                if (((Immeidiate)src).isFloatImm()) {
+                    src = addLiOperation(src, block);
+                    src.setPhysicsReg(fa0Reg);
+                } else {
+                    MCLi li = new MCLi(a0Reg, src);
+                    block.getMachineCodes().add(li);
+                    setDefUse(src, li);
+                    setDefUse(a0Reg, li);
+                }
+
             } else {
                 Type type = ((BaseRegister) src).getType();
                 if (type == int32Type) {
@@ -913,14 +919,25 @@ public class codeGen {
             regOp.setDef(lui);
             highImm.addUse(lui);
 
-            // addiw
-            Immeidiate lowImm = new Immeidiate(low);
-            MCBinaryInteger addiw = new MCBinaryInteger(regOp, regOp, lowImm, ADDIW);
-            block.getMachineCodes().add(addiw);
-            regOp.setDef(addiw);
-            regOp.addUse(addiw);
-            lowImm.addUse(addiw);
-
+            if (low >= 2048) {
+                BaseRegister regLow = new BaseRegister("li", int32Type);
+                MCLi liLow = new MCLi(regLow, new Immeidiate(low));
+                regLow.setDef(liLow);
+                block.getMachineCodes().add(liLow);
+                MCBinaryInteger add = new MCBinaryInteger(regOp, regOp, regLow, ADD);
+                block.getMachineCodes().add(add);
+                regOp.setDef(add);
+                regOp.addUse(add);
+                regLow.addUse(add);
+            } else {
+                // addiw
+                Immeidiate lowImm = new Immeidiate(low);
+                MCBinaryInteger addiw = new MCBinaryInteger(regOp, regOp, lowImm, ADDIW);
+                block.getMachineCodes().add(addiw);
+                regOp.setDef(addiw);
+                regOp.addUse(addiw);
+                lowImm.addUse(addiw);
+            }
             // fmv.w.x
             BaseRegister resReg = new BaseRegister("res", floatType);
             MachineOperand resOp = parseOperand(resReg);
