@@ -337,7 +337,7 @@ public class codeGen {
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
-        for (int i = 1; i < Integer.max(paramCnt, 4); i++) {
+        for (int i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
             stackCount += 2;
             int offset = stackCount * 4;
             offsetMap.put("phyReg_a" + i, offset);
@@ -353,19 +353,19 @@ public class codeGen {
         for (ValueRef param : params) {
             MachineOperand op = parseOperand(param);
             if (op.isImm()) {
-                // TODO: check the modify(li)
-                // BaseRegister tmp = new BaseRegister("li", param.getType());
                 MachineOperand tmp = addLiOperation(op, block);
                 if (((Immeidiate) op).isFloatImm()) {
-                    tmp.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
+                    if (floatRegIndex > 7) {
+                        // TODO
+                    } else {
+                        tmp.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
+                    }
+
                     floatRegIndex++;
                 } else {
                     tmp.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + intRegIndex));
                     intRegIndex++;
                 }
-                // MCLi li = new MCLi(tmp, op);
-                // setDefUse(tmp, li);
-                // block.getMachineCodes().add(li);
                 operands.add(tmp);
             } else {
                 BaseRegister src = new BaseRegister(param.getText(), param.getType());
@@ -375,19 +375,19 @@ public class codeGen {
                     // Float number use twice fneg to move params to fa0, fa1, ...
                     BaseRegister negParam = new BaseRegister("negParam", floatType);
                     MCFNeg neg1 = new MCFNeg(negParam, op);
-                    MCFNeg neg2 = new MCFNeg(src, negParam);
+                    MCFNeg neg2 = new MCFNeg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex), negParam);
                     setDefUse(op, neg1);
                     setDefUse(negParam, neg1);
                     setDefUse(negParam, neg2);
-                    setDefUse(src, neg2);
+                    // setDefUse(src, neg2);
                     block.getMachineCodes().add(neg1);
                     block.getMachineCodes().add(neg2);
                 } else {
                     src.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + intRegIndex));
                     intRegIndex++;
                     // Use mv to move params to a0, a1, ...
-                    MCMove mv = new MCMove(op, src);
-                    setDefUse(src, mv);
+                    MCMove mv = new MCMove(op, PhysicsReg.getPhysicsReg(10 + intRegIndex));
+                    // setDefUse(src, mv);
                     setDefUse(op, mv);
                     block.getMachineCodes().add(mv);
                 }
@@ -430,7 +430,7 @@ public class codeGen {
         }
         block.getMachineCodes().add(call);
 
-        for (i = 1; i < Integer.max(paramCnt, 4); i++) {
+        for (i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
             int offset = offsetMap.get("phyReg_a" + i);
             MCLoad load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(10 + i), new Immeidiate(-offset), LD);
             block.getMachineCodes().add(load);
