@@ -356,7 +356,7 @@ public class IRBuilder {
     public static ValueRef IRBuildGEP(IRBuilder builder, ValueRef valueRef, List<ValueRef> indexs, int indexSize, String varName) {
         Type baseType = ((PointerType) valueRef.getType()).getBaseType();
         Type resType;
-        if (baseType instanceof ArrayType) {
+        if (baseType instanceof ArrayType && indexSize != 1) {
             resType = ((ArrayType) baseType).getElementType();
         } else {
             resType = baseType;

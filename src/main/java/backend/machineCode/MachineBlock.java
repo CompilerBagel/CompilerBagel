@@ -42,7 +42,7 @@ public class MachineBlock {
     }
     public boolean addInstrsBeforeLast(List<MachineCode> machineCodes) {
         if(this.machineCodes.size() < 3) {
-            this.machineCodes.addAll(0, machineCodes);
+            return this.machineCodes.addAll(0, machineCodes);
         }
         return this.machineCodes.addAll(this.machineCodes.size() - 3, machineCodes);
     }

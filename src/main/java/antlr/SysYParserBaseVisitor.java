@@ -1,4 +1,5 @@
-package antlr;// Generated from ./src/main/java/antlr/SysYParser.g4 by ANTLR 4.12.0
+// Generated from ./src/main/java/antlr/SysYParser.g4 by ANTLR 4.12.0
+package antlr;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
