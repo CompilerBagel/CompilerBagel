@@ -234,16 +234,17 @@ public class IRBuilder {
 
 
 
-    public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList) {
+    public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList, String globalVarName) {
         boolean flag = true;
-//        List<Float> initValue = new ArrayList<>();
+        List<Float> initValue = new ArrayList<>();
         for (int i = 0; i < constValueRefList.size(); i++) {
             if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
                 flag = false;
-//                initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
-//                break;
+                initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
             }
         }
+        module.getGlobalSymbol(globalVarName).setInitValue(initValue);
+        module.getGlobalSymbol(globalVarName).setZero(flag);
         if (flag) {
             module.emit("zeroinitializer");
             return;
@@ -349,7 +350,7 @@ public class IRBuilder {
     public static ValueRef IRBuildGEP(IRBuilder builder, ValueRef valueRef, List<ValueRef> indexs, int indexSize, String varName) {
         Type baseType = ((PointerType) valueRef.getType()).getBaseType();
         Type resType;
-        if (baseType instanceof ArrayType) {
+        if (baseType instanceof ArrayType && indexSize != 1) {
             resType = ((ArrayType) baseType).getElementType();
         } else {
             resType = baseType;
