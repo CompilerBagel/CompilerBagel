@@ -1,4 +1,5 @@
-package antlr;// Generated from ./src/main/java/antlr/SysYLexer.g4 by ANTLR 4.12.0
+// Generated from ./src/main/java/antlr/SysYLexer.g4 by ANTLR 4.12.0
+package antlr;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

@@ -10,6 +10,7 @@ public class Symbol {
     String name;
     Type type;
     List<Float> initValue; // handle both non-array and array
+
     boolean isZero = false;
     public Symbol(String name, Type type){
         this.name = name;
