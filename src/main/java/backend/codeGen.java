@@ -145,7 +145,7 @@ public class codeGen {
             List<Float> values = entry.getValue().getInitValue();
             boolean isInt = false;
             if (entry.getValue().isZero()) {
-                int len = ((ArrayType)entry.getValue().getType()).getLength() * 4;
+                int len = ((ArrayType) entry.getValue().getType()).getLength() * 4;
                 globalSb.append("        .zero ").append(len).append("\n");
             } else {
                 if (entry.getValue().getType().equals(IRInt32Type())) {
@@ -295,7 +295,7 @@ public class codeGen {
 
         String machineOp;
         Type varType = ((BaseRegister) left).getType();
-        if (varType == int32Type || varType == int1Type){
+        if (varType == int32Type || varType == int1Type) {
             machineOp = intOperatorMap.get(instr.getType());
         } else {
             machineOp = floatOperatorMap.get(instr.getType());
@@ -365,13 +365,28 @@ public class codeGen {
         for (MachineOperand operand : operands) {
             operand.addUse(call);
         }
-        BaseRegister ret = new BaseRegister("ret", dest.getType());
-        MCMove mv = new MCMove(ret, dest);
-        ret.setPhysicsReg(a0Reg);
-        setDefUse(ret, mv);
-        setDefUse(dest, mv);
-//        setDefUse(dest, call);
 
+        // Move the a0/fa0 to dest(Operand)
+        BaseRegister ret = new BaseRegister("ret", dest.getType());
+        MCMove mv = null;
+        MCFNeg neg1 = null;
+        MCFNeg neg2 = null;
+        if (ret.getType() == int32Type) {
+            mv = new MCMove(ret, dest);
+            ret.setPhysicsReg(a0Reg);
+            setDefUse(ret, mv);
+            setDefUse(dest, mv);
+        } else {
+            BaseRegister negRet = new BaseRegister("negRet", floatType);
+            neg1 = new MCFNeg(negRet, ret);
+            neg2 = new MCFNeg(dest, negRet);
+            negRet.setPhysicsReg(fa0Reg);
+            ret.setPhysicsReg(fa0Reg);
+            setDefUse(ret, neg1);
+            setDefUse(negRet, neg1);
+            setDefUse(negRet, neg2);
+            setDefUse(dest, neg2);
+        }
         block.getMachineCodes().add(call);
 
         for (i = 1; i < Integer.max(paramCnt, 4); i++) {
@@ -380,7 +395,9 @@ public class codeGen {
             block.getMachineCodes().add(load);
         }
 
-        block.getMachineCodes().add(mv);
+        if (mv != null) block.getMachineCodes().add(mv);
+        if (neg1 != null) block.getMachineCodes().add(neg1);
+        if (neg2 != null) block.getMachineCodes().add(neg2);
     }
 
     public void parseCondInstr(CondInstruction instr, MachineBlock block) {
@@ -863,6 +880,7 @@ public class codeGen {
         setDefUse(left, code);
         setDefUse(right, code);
     }
+
     /**
      * when we meet an imm but need a reg, add this
      *
