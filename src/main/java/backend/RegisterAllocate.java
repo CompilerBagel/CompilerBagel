@@ -117,6 +117,10 @@ public class RegisterAllocate {
         }
     }
 
+    /**
+     * allocate register for a MachineFunction
+     * @param function the MachineFunction whose operand need to allocate register
+     */
     private void funcEasyAllocate(MachineFunction function) {
         LinkedList<MachineBlock> blocks = function.getMachineBlocks();
         // giveBack a0~a7
@@ -186,6 +190,11 @@ public class RegisterAllocate {
         }
     }
 
+    /**
+     * find a register matched or available for operand
+     * @param operand the operand need to be allocated a register
+     * @return a PhysicsReg or FloatPhysicsReg for operand
+     */
     private PhysicsReg getReg(MachineOperand operand) {
         PhysicsReg reg = allocatedReg.get(operand);
         if (reg != null) {
@@ -205,6 +214,14 @@ public class RegisterAllocate {
         }
         // allocate a1 ~ a7
         for (int i = 11; i <= 17; i++) {
+            if (isAvailableReg(i)) {
+                reg = getPhysicsReg(i);
+                allocatedReg.put(operand, reg);
+                return reg;
+            }
+        }
+        // allocate t3-t6
+        for (int i = 28; i <= 31; i++) {
             if (isAvailableReg(i)) {
                 reg = getPhysicsReg(i);
                 allocatedReg.put(operand, reg);
