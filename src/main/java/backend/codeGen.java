@@ -402,12 +402,7 @@ public class codeGen {
         MCMove mv = null;
         MCFNeg neg1 = null;
         MCFNeg neg2 = null;
-        if (ret.getType() == int32Type) {
-            mv = new MCMove(ret, dest);
-            ret.setPhysicsReg(a0Reg);
-            setDefUse(ret, mv);
-            setDefUse(dest, mv);
-        } else {
+        if (ret.getType() == floatType) {
             BaseRegister negRet = new BaseRegister("negRet", floatType);
             neg1 = new MCFNeg(negRet, ret);
             neg2 = new MCFNeg(dest, negRet);
@@ -417,6 +412,11 @@ public class codeGen {
             setDefUse(negRet, neg1);
             setDefUse(negRet, neg2);
             setDefUse(dest, neg2);
+        } else {
+            mv = new MCMove(ret, dest);
+            ret.setPhysicsReg(a0Reg);
+            setDefUse(ret, mv);
+            setDefUse(dest, mv);
         }
         block.getMachineCodes().add(call);
 
