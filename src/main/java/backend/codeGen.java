@@ -159,10 +159,13 @@ public class codeGen {
                         isInt = true;
                 }
                 for (Float value : values) {
-                    if (isInt)
+                    if (isInt) {
                         globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
-                    else
-                        globalSb.append("        " + ".word ").append(value).append("\n");
+                    } else {
+                        String hexNumber = "0x" + Integer.toHexString(Float.floatToIntBits(value));
+                        globalSb.append("        " + ".word ").append(hexNumber).append("\n");
+                    }
+
                 }
             }
         }
@@ -805,6 +808,13 @@ public class codeGen {
                 if (baseType.equals(IRInt32Type())) {
                     Symbol symbol = globalMap.get(((GlobalRegister) operand).getIdentity());
                     if (symbol.getType().equals(IRInt32Type())) {
+                        MachineOperand value = new Label(symbol.getName(), symbol);
+                        operandMap.put(((GlobalRegister) operand).getIdentity(), value);
+                        return value;
+                    }
+                } else if (baseType.equals(floatType)){
+                    Symbol symbol = globalMap.get(((GlobalRegister) operand).getIdentity());
+                    if (symbol.getType().equals(floatType)) {
                         MachineOperand value = new Label(symbol.getName(), symbol);
                         operandMap.put(((GlobalRegister) operand).getIdentity(), value);
                         return value;
