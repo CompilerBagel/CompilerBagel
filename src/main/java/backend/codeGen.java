@@ -708,19 +708,32 @@ public class codeGen {
                     setDefUse(base, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
-                    BaseRegister offset = new BaseRegister("offset", int32Type);
-                    MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
-                    MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MUL);
+                    BaseRegister offsetReg = new BaseRegister("offsetReg", int32Type);
+                    int offset = 0;
+                    Type baseType = ((PointerType) instr.getOperands().get(0).getType()).getBaseType();
+                    if (baseType instanceof ArrayType) {
+                        int dims = 0;
+                        Type tmp = baseType;
+                        while (tmp instanceof ArrayType) {
+                            tmp = ((ArrayType) tmp).getElementType();
+                            dims++;
+                        }
+                        offset = ((ArrayType) baseType).getOtherDimensionLength(dims, 1) * 4;
+                    } else {
+                        offset = 4;
+                    }
+                    MachineOperand tmp = addLiOperation(new Immeidiate(offset), block);
+                    MCBinaryInteger mul = new MCBinaryInteger(offsetReg, indexOp, tmp, MUL);
                     block.getMachineCodes().add(mul);
-                    setDefUse(offset, mul);
+                    setDefUse(offsetReg, mul);
                     setDefUse(indexOp, mul);
-                    setDefUse(tmp4, mul);
+                    setDefUse(tmp, mul);
 
-                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offset, ADD);
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offsetReg, ADD);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
-                    setDefUse(offset, add);
+                    setDefUse(offsetReg, add);
                     setDefUse(base, add);
                 }
             }

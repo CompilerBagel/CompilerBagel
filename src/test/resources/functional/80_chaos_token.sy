@@ -124,10 +124,10 @@ putstr(
 __HELLO	)  ;	int i =	
  0 ; /* say
 
- 
+
 	hello to
- kemono friends 
-~ */ while (  
+ kemono friends
+~ */ while (
  
  1 ) {
 
