@@ -1,5 +1,7 @@
 package backend.machineCode;
 
+import backend.machineCode.Instruction.MCReturn;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +43,26 @@ public class MachineBlock {
         return this.machineCodes.addAll(0, machineCodes);
     }
     public boolean addInstrsBeforeLast(List<MachineCode> machineCodes) {
-        if(this.machineCodes.size() < 3) {
+        /*if(this.machineCodes.size() < 3) {
             return this.machineCodes.addAll(0, machineCodes);
         }
-        return this.machineCodes.addAll(this.machineCodes.size() - 3, machineCodes);
+        return this.machineCodes.addAll(this.machineCodes.size() - 3, machineCodes);*/
+        for (int i = this.machineCodes.size() - 1; i >= 0; i --) {
+            if (this.machineCodes.get(i) instanceof MCReturn) {
+                if (i == 0) {
+                    return this.machineCodes.addAll(0, machineCodes);
+                }
+                if (i == this.machineCodes.size() - 1 && !(this.machineCodes.get(i - 2) instanceof MCReturn)) {
+                    return this.machineCodes.addAll(this.machineCodes.size() - 1, machineCodes);
+                }
+                if (this.machineCodes.get(i - 1) instanceof MCReturn) {
+                    return this.machineCodes.addAll(i - 1, machineCodes);
+                }
+                if (this.machineCodes.get(i - 2) instanceof MCReturn) {
+                    return this.machineCodes.addAll(i - 2, machineCodes);
+                }
+            }
+        }
+        return false;
     }
 }
