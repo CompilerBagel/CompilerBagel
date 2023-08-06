@@ -8,7 +8,7 @@ import Type.PointerType;
 import Type.Type;
 import antlr.*;
 
-
+import java.lang.reflect.Field;
 import java.util.*;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
@@ -117,12 +117,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         endTimeTypeParams.add(int32Type);
         FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
         globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
+
     }
 
     private FunctionBlock addLib(String libName, FunctionType libType){
         FunctionBlock function = new FunctionBlock(libName, libType);
         Symbol funcSym = new Symbol(libName, libType);
-        //module.addGlobalSymbol(libName, funcSym);
+        module.addGlobalSymbol(libName, funcSym);
         return function;
     }
 
@@ -148,7 +149,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 if(ctx.funcFParams().funcFParam(i).L_BRACKT().size()>1){
                     Type baseType = defineType(paramTypeName);
                     for(int j = 1;j<ctx.funcFParams().funcFParam(i).L_BRACKT().size();j++){
-                        baseType = new ArrayType(baseType,Integer.parseInt(ctx.funcFParams().funcFParam(i).exp(j-1).getText()));
+                        ValueRef tempValue= ctx.funcFParams().funcFParam(i).exp(j-1).accept(this);
+                        if(tempValue instanceof ConstIntValueRef){
+                            baseType = new ArrayType(baseType, Integer.parseInt(((ConstIntValueRef) tempValue).getText()));
+                        }else{
+                            baseType = new ArrayType(baseType,Integer.parseInt(ctx.funcFParams().funcFParam(i).exp(j-1).getText()));
+                        }
                     }
                     paramsType.add(new PointerType(baseType));
                 }else {
@@ -239,7 +245,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     IRSetInitializer(module, constVariable, assign, constName);
                 } else {
                     if(constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
-                    IRSetInitializer(module, constVariable, init, constName);
+                    IRSetInitializer(module, constVariable, init,constName);
                 }
             } else {
                 constVariable = IRBuildAlloca(builder, type, constName);
@@ -254,46 +260,39 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     }
                 } else {
                     //TODO: 正确性验证
-                    if (constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
-//                    boolean flag = true;
-//                    for(int i = 0;i<init.size();i++){
-//                        if(!(init.get(i) instanceof ConstIntValueRef)){
-//                            flag = false;
-//                            break;
-//                        }
-//                    }
-//                    if(flag){
-//                        ValueRef initVariable = IRAddLocal(module , type , "__const.main."+variable.getText().substring(1));
-//                        IRSetInitializer(module, initVariable, init);
-//                    }else{
+                    if (constDefContext.ASSIGN() != null) {
+                        if (constDefContext.constInitVal().constInitVal().size() != 0) {
+                            if (constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
 
-                    List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
-                    for(int i = 0;i<init.size();i++){
+                            List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
+                            for (int i = 0; i < init.size(); i++) {
 
-                        int totalCount = init.size();
-                        int temp = 1;
-                        int counter = i;
+                                int totalCount = init.size();
+                                int temp = 1;
+                                int counter = i;
 
-                        arrayPtr.add(new ConstIntValueRef(0));
-                        for(int j = 0;j<elementDimension.size();j++){
-                            totalCount/=elementDimension.get(j);
-                            arrayPtr.add(new ConstIntValueRef(counter/totalCount));
-                            counter -= (counter/totalCount)*totalCount;
+                                arrayPtr.add(new ConstIntValueRef(0));
+                                for (int j = 0; j < elementDimension.size(); j++) {
+                                    totalCount /= elementDimension.get(j);
+                                    arrayPtr.add(new ConstIntValueRef(counter / totalCount));
+                                    counter -= (counter / totalCount) * totalCount;
+                                }
+                                int counter1 = 1;
+                                List<ValueRef> paramList = new ArrayList<ValueRef>();
+                                paramList.add(intZero);
+                                paramList.add(arrayPtr.get(counter1++));
+                                ValueRef elementPtr = IRBuildGEP(builder, constVariable, paramList, 2, "array");
+                                for (int j = 0; j < elementDimension.size() - 1; j++) {
+                                    paramList.clear();
+                                    paramList.add(intZero);
+                                    paramList.add(arrayPtr.get(counter1++));
+                                    elementPtr = IRBuildGEP(builder, elementPtr, paramList, 2, "array");
+                                }
+
+                                IRBuildStore(builder, init.get(i), elementPtr);
+                                arrayPtr.clear();
+                            }
                         }
-                        int counter1 = 1;
-                        List<ValueRef> paramList = new ArrayList<ValueRef>();
-                        paramList.add(intZero);
-                        paramList.add(arrayPtr.get(counter1++));
-                        ValueRef elementPtr = IRBuildGEP(builder,constVariable,paramList,2,"array");
-                        for(int j = 0;j<elementDimension.size()-1;j++){
-                            paramList.clear();
-                            paramList.add(intZero);
-                            paramList.add(arrayPtr.get(counter1++));
-                            elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array");
-                        }
-
-                        IRBuildStore(builder, init.get(i),elementPtr);
-                        arrayPtr.clear();
                     }
                 }
             }
@@ -343,7 +342,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 } else {
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
 //                    for (int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
-                    IRSetInitializer(module, variable, init, variableName);
+                    IRSetInitializer(module, variable, init,variableName);
                 }
             } else {
                 variable = IRBuildAlloca(builder, type, variableName);
@@ -355,47 +354,40 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 } else {
 
                     //TODO: 正确性验证
-                    if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
-//                    boolean flag = true;
-//                    for(int i = 0;i<init.size();i++){
-//                        if(!(init.get(i) instanceof ConstIntValueRef)){
-//                            flag = false;
-//                            break;
+                    if (varDefContext.ASSIGN() != null) {
+                        if (varDefContext.initVal().initVal().size() != 0) {
+                            if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
+
+                            List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
+                            for (int i = 0; i < init.size(); i++) {
+
+                                int totalCount = init.size();
+                                int temp = 1;
+                                int counter = i;
+
+                                arrayPtr.add(new ConstIntValueRef(0));
+                                for (int j = 0; j < elementDimension.size(); j++) {
+                                    totalCount /= elementDimension.get(j);
+                                    arrayPtr.add(new ConstIntValueRef(counter / totalCount));
+                                    counter -= (counter / totalCount) * totalCount;
+                                }
+                                int counter1 = 1;
+                                List<ValueRef> paramList = new ArrayList<ValueRef>();
+                                paramList.add(intZero);
+                                paramList.add(arrayPtr.get(counter1++));
+                                ValueRef elementPtr = IRBuildGEP(builder, variable, paramList, 2, "array");
+                                for (int j = 0; j < elementDimension.size() - 1; j++) {
+                                    paramList.clear();
+                                    paramList.add(intZero);
+                                    paramList.add(arrayPtr.get(counter1++));
+                                    elementPtr = IRBuildGEP(builder, elementPtr, paramList, 2, "array");
+                                }
+
+                                IRBuildStore(builder, init.get(i), elementPtr);
+                                arrayPtr.clear();
 //                        }
-//                    }
-//                    if(flag){
-//                        ValueRef initVariable = IRAddLocal(module , type , "__const.main."+variable.getText().substring(1));
-//                        IRSetInitializer(module, initVariable, init);
-//                    }else{
-
-                    List<ValueRef> arrayPtr = new ArrayList<ValueRef>(elementDimension.size());
-                    for(int i = 0;i<init.size();i++){
-
-                        int totalCount = init.size();
-                        int temp = 1;
-                        int counter = i;
-
-                        arrayPtr.add(new ConstIntValueRef(0));
-                        for(int j = 0;j<elementDimension.size();j++){
-                            totalCount/=elementDimension.get(j);
-                            arrayPtr.add(new ConstIntValueRef(counter/totalCount));
-                            counter -= (counter/totalCount)*totalCount;
+                            }
                         }
-                        int counter1 = 1;
-                        List<ValueRef> paramList = new ArrayList<ValueRef>();
-                        paramList.add(intZero);
-                        paramList.add(arrayPtr.get(counter1++));
-                        ValueRef elementPtr = IRBuildGEP(builder,variable,paramList,2,"array");
-                        for(int j = 0;j<elementDimension.size()-1;j++){
-                            paramList.clear();
-                            paramList.add(intZero);
-                            paramList.add(arrayPtr.get(counter1++));
-                            elementPtr = IRBuildGEP(builder,elementPtr, paramList, 2, "array");
-                        }
-
-                        IRBuildStore(builder, init.get(i),elementPtr);
-                        arrayPtr.clear();
-//                        }
                     }
                 }
             }
@@ -644,8 +636,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 return IRBuildNeg(builder, operand, "neg_");
             case "!":
                 operand = IRBuildICmp(builder, 1, new ConstIntValueRef(0), operand, "icmp_");
-                operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
-                operand = IRBuildZExt(builder, operand, int32Type, "zext_");
+                 operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
+                 operand = IRBuildZExt(builder, operand, int32Type, "zext_");
                 return operand;
             default:
                 break;
@@ -778,12 +770,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx) {
         ValueRef conditionVal = this.visit(ctx.cond());
-        ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+         ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
 
-        IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
+         IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
 
         IRPositionBuilderAtEnd(builder, trueBlock);
         this.visit(ctx.stmt(0));
@@ -890,8 +882,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder, condBlock);
         ValueRef conditionVal = this.visit(ctx.cond());
-        ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
-        IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
+         ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
+         IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
 //        IRBuildCondBr(builder, conditionVal, bodyBlock, afterBlock);
 
         IRPositionBuilderAtEnd(builder, bodyBlock);

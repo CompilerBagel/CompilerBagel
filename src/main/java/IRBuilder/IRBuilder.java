@@ -331,6 +331,15 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildICmp(IRBuilder builder, int icmpType, ValueRef lhs, ValueRef rhs, String text) {
+        Type resType = int32Type;
+        if (lhs.getType() == floatType || rhs.getType() == floatType) {
+            resType = floatType;
+        }
+        if (lhs.getType() == int32Type && rhs.getType() == floatType) {
+            lhs = typeTrans(builder, lhs, SiToFp);
+        } else if (lhs.getType() == floatType && rhs.getType() == int32Type) {
+            rhs = typeTrans(builder, rhs, SiToFp);
+        }
         ValueRef resRegister = new BaseRegister(text, int1Type);
         builder.appendInstr(new CondInstruction(generateList(resRegister, lhs, rhs), builder.currentBaseBlock, icmpType));
         builder.emit(resRegister.getText() + " = " + ICMP + " " + ICMPCodes[icmpType] + " "
@@ -392,7 +401,7 @@ public class IRBuilder {
 
     public static ValueRef IRBuildCall(IRBuilder builder, FunctionBlock function, List<ValueRef> args, int argc, String varName) {
         Type retType = ((FunctionType) function.getType()).getRetType();
-        ValueRef resRegister = new BaseRegister(varName, retType);
+        ValueRef resRegister = new BaseRegister(varName+"_call", retType);
         StringBuilder stringBuilder = new StringBuilder();
         List<ValueRef> operands = new ArrayList<>();
         operands.add(resRegister);
@@ -419,9 +428,7 @@ public class IRBuilder {
         builder.emit(stringBuilder.toString());
         return resRegister;
     }
-//    public static ValueRef IRBuildPhi(IRBuilder builder, Type type , String Name){
-//
-//    }
+
     public static ValueRef IRGetParam(FunctionBlock function, int i) {
         return function.getParam(i);
     }
