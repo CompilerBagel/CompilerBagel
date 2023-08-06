@@ -117,7 +117,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         endTimeTypeParams.add(int32Type);
         FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
         globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
-
     }
 
     private FunctionBlock addLib(String libName, FunctionType libType){

@@ -976,6 +976,17 @@ public class codeGen {
     public void PrintCodeToFile(String dest) {
         StringBuilder builder = new StringBuilder();
         builder.append(".global main\n");
+        builder.append(".align 1\n" +
+                ".global bagel_memset\n" +
+                "bagel_memset:\n" +
+                "    Block0:\n" +
+                "        beq t2,zero,Block1\n" +
+                "        sd t1,0(t0)\n" +
+                "        addi t2,t2,-8\n" +
+                "        addi t0,t0,8\n" +
+                "        j Block0\n" +
+                "    Block1:\n" +
+                "        ret\n");
         builder.append(".data\n");
         builder.append(globalSb);
         builder.append(".text\n");
