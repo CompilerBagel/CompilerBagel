@@ -395,7 +395,7 @@ public class IRBuilder {
 
     public static ValueRef IRBuildCall(IRBuilder builder, FunctionBlock function, List<ValueRef> args, int argc, String varName) {
         Type retType = ((FunctionType) function.getType()).getRetType();
-        ValueRef resRegister = new BaseRegister(varName, retType);
+        ValueRef resRegister = new BaseRegister(varName+"_call", retType);
         StringBuilder stringBuilder = new StringBuilder();
         List<ValueRef> operands = new ArrayList<>();
         operands.add(resRegister);
@@ -422,9 +422,7 @@ public class IRBuilder {
         builder.emit(stringBuilder.toString());
         return resRegister;
     }
-//    public static ValueRef IRBuildPhi(IRBuilder builder, Type type , String Name){
-//
-//    }
+
     public static ValueRef IRGetParam(FunctionBlock function, int i) {
         return function.getParam(i);
     }

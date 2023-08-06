@@ -149,7 +149,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 if(ctx.funcFParams().funcFParam(i).L_BRACKT().size()>1){
                     Type baseType = defineType(paramTypeName);
                     for(int j = 1;j<ctx.funcFParams().funcFParam(i).L_BRACKT().size();j++){
-                        baseType = new ArrayType(baseType,Integer.parseInt(ctx.funcFParams().funcFParam(i).exp(j-1).getText()));
+                        ValueRef tempValue= ctx.funcFParams().funcFParam(i).exp(j-1).accept(this);
+                        if(tempValue instanceof ConstIntValueRef){
+                            baseType = new ArrayType(baseType, Integer.parseInt(((ConstIntValueRef) tempValue).getText()));
+                        }else{
+                            baseType = new ArrayType(baseType,Integer.parseInt(ctx.funcFParams().funcFParam(i).exp(j-1).getText()));
+                        }
                     }
                     paramsType.add(new PointerType(baseType));
                 }else {
