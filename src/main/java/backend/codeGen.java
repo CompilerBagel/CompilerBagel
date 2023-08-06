@@ -781,6 +781,11 @@ public class codeGen {
                 setDefUse(src, lw);
             }
         }
+        /*
+        if (instr.getOperands().get(0).xxx > xxx) {
+            new Store()
+        }
+         */
     }
 
     public void parsePhiInstr(PhiInstruction instr, MachineBlock block) {
