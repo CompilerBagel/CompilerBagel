@@ -19,6 +19,7 @@ import java.util.List;
 
 import Type.PointerType;
 import Type.ArrayType;
+import Type.FunctionType;
 import utils.FloatTools;
 
 import static IRBuilder.IRConstants.FpToSi;
@@ -973,7 +974,7 @@ public class codeGen {
             for (BaseBlock retBlock : function.getRetBlocks()) {
                 retBlocks.add(blockMap.get(retBlock));
             }
-            mfun.restore(retBlocks);
+            mfun.restore(retBlocks, ((FunctionType) function.getType()).getRetType().equals(IRInt32Type()));
             for (BaseBlock block : function.getBaseBlocks()) {
                 MachineBlock machineBlock = blockMap.get(block);
                 builder.append(machineBlock.getBlockName()).append(":\n");

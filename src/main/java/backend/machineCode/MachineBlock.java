@@ -42,24 +42,31 @@ public class MachineBlock {
     public boolean addInstrsAtHead(List<MachineCode> machineCodes) {
         return this.machineCodes.addAll(0, machineCodes);
     }
-    public boolean addInstrsBeforeLast(List<MachineCode> machineCodes) {
+    public boolean addInstrsBeforeLast(List<MachineCode> machineCodes, boolean isInt) {
         /*if(this.machineCodes.size() < 3) {
             return this.machineCodes.addAll(0, machineCodes);
         }
         return this.machineCodes.addAll(this.machineCodes.size() - 3, machineCodes);*/
-        for (int i = this.machineCodes.size() - 1; i >= 0; i --) {
-            if (this.machineCodes.get(i) instanceof MCReturn) {
-                if (i == 0) {
-                    return this.machineCodes.addAll(0, machineCodes);
-                }
-                if (i == this.machineCodes.size() - 1 && !(this.machineCodes.get(i - 2) instanceof MCReturn)) {
-                    return this.machineCodes.addAll(this.machineCodes.size() - 1, machineCodes);
-                }
-                if (this.machineCodes.get(i - 1) instanceof MCReturn) {
-                    return this.machineCodes.addAll(i - 1, machineCodes);
-                }
-                if (this.machineCodes.get(i - 2) instanceof MCReturn) {
-                    return this.machineCodes.addAll(i - 2, machineCodes);
+        if (isInt) {
+            if (!(this.machineCodes.get(this.machineCodes.size() - 1) instanceof MCReturn)) {
+                return this.machineCodes.addAll(this.machineCodes.size() - 2, machineCodes);
+            } else if (this.machineCodes.size() == 2) {
+                return this.machineCodes.addAll(1, machineCodes);
+            } else {
+                return this.machineCodes.addAll(this.machineCodes.size() - 3, machineCodes);
+            }
+        } else {
+            for (int i = this.machineCodes.size() - 1; i >= 0; i --) {
+                if (this.machineCodes.get(i) instanceof MCReturn) {
+                    if (i == 0) {
+                        return this.machineCodes.addAll(0, machineCodes);
+                    } else  {
+                        if (this.machineCodes.get(i - 1) instanceof MCReturn) {
+                            return this.machineCodes.addAll(i - 1, machineCodes);
+                        } else {
+                            return this.machineCodes.addAll(i, machineCodes);
+                        }
+                    }
                 }
             }
         }
