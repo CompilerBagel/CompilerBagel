@@ -210,6 +210,14 @@ public class RegisterAllocate {
                         return reg;
                     }
                 }
+                for (int i = 18; i <= 31; i++) {
+                    if (FloatPhysicsReg.isAvailableReg(i)) {
+                        reg = FloatPhysicsReg.getFloatPhysicsReg(i);
+                        allocatedReg.put(operand, reg);
+                        return reg;
+                    }
+                }
+
             }
         }
         // allocate a1 ~ a7
@@ -222,6 +230,22 @@ public class RegisterAllocate {
         }
         // allocate t3-t6
         for (int i = 28; i <= 31; i++) {
+            if (isAvailableReg(i)) {
+                reg = getPhysicsReg(i);
+                allocatedReg.put(operand, reg);
+                return reg;
+            }
+        }
+        // allocate s0-s1
+        for (int i = 8; i <= 9; i++) {
+            if (isAvailableReg(i)) {
+                reg = getPhysicsReg(i);
+                allocatedReg.put(operand, reg);
+                return reg;
+            }
+        }
+        // allocate s2-s11
+        for (int i = 18; i <= 27; i++) {
             if (isAvailableReg(i)) {
                 reg = getPhysicsReg(i);
                 allocatedReg.put(operand, reg);
