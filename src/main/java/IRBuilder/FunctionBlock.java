@@ -76,6 +76,36 @@ public class FunctionBlock implements ValueRef{
     }
 
     @Override
+    public boolean getUsedByFunction() {
+        return false;
+    }
+
+    @Override
+    public void setUsedByFunction(boolean usedByFunction) {
+
+    }
+
+    @Override
+    public int getFloatNO() {
+        return -1;
+    }
+
+    @Override
+    public int getNoFloatNO() {
+        return -1;
+    }
+
+    @Override
+    public void setFloatNO(int floatNO) {
+
+    }
+
+    @Override
+    public void setNoFloatNO(int noFloatNO) {
+
+    }
+
+    @Override
     public String getText() {
         return "@" + functionName;
     }
