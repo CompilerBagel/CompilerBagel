@@ -280,7 +280,7 @@ public class codeGen {
                 arraySize -= 4;
                 stackCount -= 1;
             }
-            if (arraySize < 10000) {
+            if (arraySize < 2048) {
                 for (; arraySize > 0; arraySize -= 8) {
                     MCStore store = new MCStore(zero, s0Reg, new Immeidiate(-(stackCount * 4)), SD);
                     block.getMachineCodes().add(store);
@@ -404,16 +404,34 @@ public class codeGen {
         for (int i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
             stackCount += 2;
             int offset = stackCount * 4;
+            MCStore store;
+            if (isLegalImm(-offset)) {
+                store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), s0Reg, new Immeidiate(-offset), SD);
+            } else {
+                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), t0Reg, SD);
+                block.getMachineCodes().add(li);
+                block.getMachineCodes().add(add);
+            }
             offsetMap.put("phyReg_a" + i, offset);
-            MCStore store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), s0Reg, new Immeidiate(-offset), SD);
             block.getMachineCodes().add(store);
         }
         // push ft0, ft1
         for (int i = 0; i < 2; i++) {
             stackCount += 2;
             int offset = stackCount * 4;
+            MCStore store;
+            if (isLegalImm(-offset)) {
+                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), s0Reg, new Immeidiate(-offset), FSW);
+            } else {
+                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), t0Reg, FSW);
+                block.getMachineCodes().add(li);
+                block.getMachineCodes().add(add);
+            }
             offsetMap.put("floatPhyReg_a" + i, offset);
-            MCStore store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), s0Reg, new Immeidiate(-offset), FSW);
             block.getMachineCodes().add(store);
         }
 
@@ -443,7 +461,17 @@ public class codeGen {
                             MCMove move = new MCMove(spReg, t1Reg);
                             block.getMachineCodes().add(move);
                         }
-                        MCStore fsw = new MCStore(tmp, t1Reg, new Immeidiate(spillIndex * 8), FSW);
+                        int offset = spillIndex * 8;
+                        MCStore fsw;
+                        if (isLegalImm(offset)) {
+                            fsw = new MCStore(tmp, t1Reg, new Immeidiate(offset), FSW);
+                        } else {
+                            MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                            MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
+                            fsw = new MCStore(tmp, t0Reg, FSW);
+                            block.getMachineCodes().add(li);
+                            block.getMachineCodes().add(add);
+                        }
                         setDefUse(tmp, fsw);
                         spillIndex++;
                         block.getMachineCodes().add(fsw);
@@ -459,7 +487,16 @@ public class codeGen {
                             MCMove move = new MCMove(spReg, t1Reg);
                             block.getMachineCodes().add(move);
                         }
-                        MCStore sd = new MCStore(tmp, t1Reg, new Immeidiate(spillIndex * 8), SD);
+                        int offset = spillIndex * 8;
+                        MCStore sd;
+                        if (isLegalImm(offset)) {
+                            sd = new MCStore(tmp, t1Reg, new Immeidiate(offset), SD);
+                        } else {
+                            MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                            MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
+                            sd = new MCStore(tmp, t0Reg, SD);
+                            block.getMachineCodes().add(li);
+                        }
                         setDefUse(tmp, sd);
                         spillIndex++;
                         block.getMachineCodes().add(sd);
@@ -482,7 +519,16 @@ public class codeGen {
                                 MCMove move = new MCMove(spReg, t1Reg);
                                 block.getMachineCodes().add(move);
                             }
-                            MCStore fsw = new MCStore(op, t1Reg, new Immeidiate(spillIndex * 8), FSW);
+                            int offset = spillIndex * 8;
+                            MCStore fsw;
+                            if (isLegalImm(offset)) {
+                                fsw = new MCStore(op, t1Reg, new Immeidiate(offset), FSW);;
+                            } else {
+                                MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                                MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
+                                fsw = new MCStore(op, t0Reg, FSW);;
+                                block.getMachineCodes().add(li);
+                            }
                             setDefUse(op, fsw);
                             spillIndex++;
                             block.getMachineCodes().add(fsw);
@@ -514,7 +560,16 @@ public class codeGen {
                                 MCMove move = new MCMove(spReg, t1Reg);
                                 block.getMachineCodes().add(move);
                             }
-                            MCStore sd = new MCStore(op, t1Reg, new Immeidiate(spillIndex * 8), SD);
+                            int offset = spillIndex * 8;
+                            MCStore sd;
+                            if (isLegalImm(offset)) {
+                                sd = new MCStore(op, t1Reg, new Immeidiate(offset), SD);
+                            } else {
+                                MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                                MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
+                                sd = new MCStore(op, t0Reg, SD);
+                                block.getMachineCodes().add(li);
+                            }
                             setDefUse(op, sd);
                             spillIndex++;
                             block.getMachineCodes().add(sd);
@@ -572,12 +627,30 @@ public class codeGen {
 
         for (i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
             int offset = offsetMap.get("phyReg_a" + i);
-            MCLoad load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(10 + i), new Immeidiate(-offset), LD);
+            MCLoad load;
+            if (isLegalImm(-offset)) {
+                load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(10 + i), new Immeidiate(-offset), LD);
+            } else {
+                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                load = new MCLoad(t0Reg, PhysicsReg.getPhysicsReg(10 + i), LD);
+                block.getMachineCodes().add(li);
+                block.getMachineCodes().add(add);
+            }
             block.getMachineCodes().add(load);
         }
         for (i = 0; i < 2; i++) {
             int offset = offsetMap.get("floatPhyReg_a" + i);
-            MCLoad load = new MCLoad(s0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), new Immeidiate(-offset), FLW);
+            MCLoad load;
+            if (isLegalImm(-offset)) {
+                load = new MCLoad(s0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), new Immeidiate(-offset), FLW);
+            } else {
+                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                load = new MCLoad(t0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), FLW);
+                block.getMachineCodes().add(li);
+                block.getMachineCodes().add(add);
+            }
             block.getMachineCodes().add(load);
         }
         if (mv != null) block.getMachineCodes().add(mv);
@@ -1231,5 +1304,9 @@ public class codeGen {
             setDefUse(imm, li);
             return reg;
         }
+    }
+
+    private boolean isLegalImm(int imm) {
+        return imm >= -2048 && imm <= 2047;
     }
 }
