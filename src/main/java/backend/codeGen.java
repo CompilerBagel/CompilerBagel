@@ -44,6 +44,7 @@ public class codeGen {
     private static final PhysicsReg zero = PhysicsReg.getPhysicsReg(0);
     private static final PhysicsReg t0Reg = PhysicsReg.getPhysicsReg(5);
     private static final PhysicsReg t1Reg = PhysicsReg.getPhysicsReg(6);
+    private static final PhysicsReg t2Reg = PhysicsReg.getPhysicsReg(7);
     public static final FloatPhysicsReg fa0Reg = FloatPhysicsReg.getFa0Reg();
 
     private static IRModule module;
@@ -527,6 +528,7 @@ public class codeGen {
                         setDefUse(tmp, sd);
                         spillIndex++;
                         block.getMachineCodes().add(sd);
+                        tmp.setPhysicsReg(t2Reg);
                     } else {
                         tmp.setPhysicsReg(PhysicsReg.getPhysicsReg(10 + intRegIndex));
                     }
