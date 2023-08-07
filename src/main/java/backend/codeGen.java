@@ -262,12 +262,14 @@ public class codeGen {
             stackCount++;
             offsetMap.put(resName, stackCount * 4);
             mfunc.setStackCount(stackCount);
+            mfunc.setAlignSize(stackAlign(stackCount) - stackCount * 4);
             mfunc.setFrameSize(stackAlign(stackCount));
         } else if (resType instanceof ArrayType) {
             // 计算数组长度
             int arrayLen = (((ArrayType) (instr.getPointedType())).getLength());
             stackCount += arrayLen;
             mfunc.setStackCount(stackCount);
+            mfunc.setAlignSize(stackAlign(stackCount) - stackCount * 4);
             mfunc.setFrameSize(stackAlign(stackCount));
             offsetMap.put(resName, stackCount * 4);
             // 计算数组所占空间大小
@@ -303,6 +305,7 @@ public class codeGen {
             stackCount += 2;
             offsetMap.put(resName, stackCount * 4);
             mfunc.setStackCount(stackCount);
+            mfunc.setAlignSize(stackAlign(stackCount) - stackCount * 4);
             mfunc.setFrameSize(stackAlign(stackCount));
         }
     }
@@ -685,7 +688,7 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MachineOperand offsetReg = addLiOperation(new Immeidiate(base - offset), block);
+                    MachineOperand offsetReg = addLiOperation(new Immeidiate(-(base - offset)), block);
                     MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, offsetReg, ADD);
                     offsetMap.put(instr.getOperands().get(0).getText(), base - offset);
                     block.getMachineCodes().add(add);
@@ -808,15 +811,15 @@ public class codeGen {
         MachineFunction mfunc = block.getBlockFunc();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
         if (null != offsetMap.get(srcName)) {
-            int offset = offsetMap.get(srcName);
             MCLoad load;
             if ((instr.getOperands().get(0)).getType() instanceof PointerType) {
-                load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), LD);
+                load = new MCLoad(src, dest, new Immeidiate(0), LD);
             } else {
-                load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), opcode);
+                load = new MCLoad(src, dest, new Immeidiate(0), opcode);
             }
             block.getMachineCodes().add(load);
             setDefUse(dest, load);
+            setDefUse(src, load);
         } else {
             if (src.isLabel()) {
                 MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
@@ -1152,33 +1155,13 @@ public class codeGen {
             setDefUse(resOp, fmv);
             setDefUse(regOp, fmv);
             return resOp;
-
         } else {
-            int value = ((Immeidiate) imm).getImmValue();
-            if (value <= 2047 && value >= -2048) {
-                BaseRegister reg = new BaseRegister("li", int32Type);
-                MachineOperand regOp = parseOperand(reg);
-                MCLi li = new MCLi(regOp, imm);
-                block.getMachineCodes().add(li);
-                regOp.setDef(li);
-                imm.addUse(li);
-                return regOp;
-            } else {
-                int lowValue = value & 0x00000fff;
-                int highValue = (value | 0x00000fff) >> 12;
-                BaseRegister regHigh = new BaseRegister("luiHigh", int32Type);
-                // BaseRegister regLow = new BaseRegister("luiLow", int32Type);
-                MCLui luiHigh = new MCLui(regHigh, new Immeidiate(highValue));
-                block.getMachineCodes().add(luiHigh);
-                regHigh.setDef(luiHigh);
-                MCLi liLow = new MCLi(new PhysicsReg("t0"), new Immeidiate(lowValue));
-                block.getMachineCodes().add(liLow);
-                // regLow.setDef(liLow);
-                MCBinaryInteger add = new MCBinaryInteger(regHigh, regHigh, new PhysicsReg("t0"), ADD);
-                block.getMachineCodes().add(add);
-                regHigh.setDef(add);
-                return regHigh;
-            }
+            BaseRegister reg = new BaseRegister("li", int32Type);
+            MCLi li = new MCLi(reg, imm);
+            block.getMachineCodes().add(li);
+            reg.setDef(li);
+            imm.addUse(li);
+            return reg;
         }
     }
 }

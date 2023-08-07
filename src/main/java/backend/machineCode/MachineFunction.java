@@ -78,13 +78,16 @@ public class MachineFunction {
             allocateList.add(new MCBinaryInteger(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));
             this.getEntryBlock().addInstrsAtHead(allocateList);
         } else {
-            int calleeSize = frameSize - overflow;
-            allocateList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(-calleeSize), ADDI));;
-            allocateList.add(new MCStore(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(calleeSize- 8), SD));
-            allocateList.add(new MCStore(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(calleeSize - 16), SD));
-            allocateList.add(new MCBinaryInteger(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(calleeSize), ADDI));
+            allocateList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(-20), ADDI));;
+            allocateList.add(new MCStore(PhysicsReg.getRaReg(), PhysicsReg.getSpReg(), new Immeidiate(12), SD));
+            allocateList.add(new MCStore(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(4), SD));
+            allocateList.add(new MCBinaryInteger(PhysicsReg.getS0Reg(), PhysicsReg.getSpReg(), new Immeidiate(20), ADDI));
 
-            allocateList.add(new MCLi(PhysicsReg.getPhysicsReg(5), new Immeidiate(-overflow)));
+            int calleeSize = frameSize - alignSize - 20;
+            allocateList.add(new MCLi(PhysicsReg.getPhysicsReg(5), new Immeidiate(-calleeSize)));
+            allocateList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), PhysicsReg.getPhysicsReg(5), ADD));
+
+            allocateList.add(new MCLi(PhysicsReg.getPhysicsReg(5), new Immeidiate(-alignSize)));
             allocateList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), PhysicsReg.getPhysicsReg(5), ADD));
 
             this.getEntryBlock().addInstrsAtHead(allocateList);
@@ -101,13 +104,16 @@ public class MachineFunction {
                 retBlock.addInstrsBeforeLast(restoreList, isInt);
             }
         } else {
-            int calleeSize = frameSize - overflow;
-            restoreList.add(new MCLi(PhysicsReg.getPhysicsReg(5), new Immeidiate(overflow)));
+            restoreList.add(new MCLi(PhysicsReg.getPhysicsReg(5), new Immeidiate(alignSize)));
             restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), PhysicsReg.getPhysicsReg(5), ADD));
 
-            restoreList.add(new MCLoad(PhysicsReg.getSpReg(), PhysicsReg.getRaReg(), new Immeidiate(calleeSize - 8), LD));
-            restoreList.add(new MCLoad(PhysicsReg.getSpReg(), PhysicsReg.getS0Reg(), new Immeidiate(calleeSize - 16), LD));
-            restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(calleeSize), ADDI));;
+            int calleeSize = frameSize - alignSize - 20;
+            restoreList.add(new MCLi(PhysicsReg.getPhysicsReg(5), new Immeidiate(calleeSize)));
+            restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), PhysicsReg.getPhysicsReg(5), ADD));
+
+            restoreList.add(new MCLoad(PhysicsReg.getSpReg(), PhysicsReg.getRaReg(), new Immeidiate(12), LD));
+            restoreList.add(new MCLoad(PhysicsReg.getSpReg(), PhysicsReg.getS0Reg(), new Immeidiate(4), LD));
+            restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(20), ADDI));;
 
             for (MachineBlock retBlock : retBlocks.stream().distinct().toList()) {
                 retBlock.addInstrsBeforeLast(restoreList, isInt);
