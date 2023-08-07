@@ -685,10 +685,12 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, new Immeidiate(offset - base), ADDI);
+                    MachineOperand offsetReg = addLiOperation(new Immeidiate(base - offset), block);
+                    MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, offsetReg, ADD);
                     offsetMap.put(instr.getOperands().get(0).getText(), base - offset);
                     block.getMachineCodes().add(add);
                     setDefUse(dest, add);
+                    setDefUse(offsetReg, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offset = new BaseRegister("offset", int32Type);
@@ -748,11 +750,13 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, new Immeidiate(offset), ADDI);
+                    MachineOperand offsetReg = addLiOperation(new Immeidiate(offset), block);
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offsetReg, ADD);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
                     setDefUse(base, add);
+                    setDefUse(offsetReg, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offsetReg = new BaseRegister("offsetReg", int32Type);

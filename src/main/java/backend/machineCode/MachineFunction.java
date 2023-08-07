@@ -36,6 +36,7 @@ public class MachineFunction {
     private int frameSize; // 栈大小
     private int stackCount = 0; // real count
     private int overflow = 0;
+    private int alignSize = 0;
     public int getStackCount() {
         return stackCount;
     }
@@ -56,6 +57,9 @@ public class MachineFunction {
     }
     public int getOverflow() {
         return overflow;
+    }
+    public void setAlignSize(int alignSize) {
+        this.alignSize = alignSize;
     }
     // block
     public void addMachineBlock(MachineBlock block) {
