@@ -68,13 +68,13 @@ public class IRBuilder {
             float lhs = Float.valueOf(lhsValRef.getText());
             float rhs = Float.valueOf(rhsValRef.getText());
             switch (calcType) {
-                case ADD:
+                case FADD:
                     return new ConstFloatValueRef(lhs + rhs);
-                case SUB:
+                case FSUB:
                     return new ConstFloatValueRef(lhs - rhs);
-                case MUL:
+                case FMUL:
                     return new ConstFloatValueRef(lhs * rhs);
-                case SDIV:
+                case FDIV:
                     return new ConstFloatValueRef(lhs / rhs);
                 default:
                     System.err.println("IRBuildCalc wrong!");
