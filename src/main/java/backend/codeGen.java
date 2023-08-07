@@ -41,6 +41,7 @@ public class codeGen {
     private static final PhysicsReg s0Reg = PhysicsReg.getS0Reg();
     private static final PhysicsReg raReg = PhysicsReg.getRaReg();
     private static final PhysicsReg a0Reg = PhysicsReg.getA0Reg();
+    private static final PhysicsReg zero = PhysicsReg.getPhysicsReg(0);
     private static final PhysicsReg t0Reg = PhysicsReg.getPhysicsReg(5);
     private static final PhysicsReg t1Reg = PhysicsReg.getPhysicsReg(6);
     public static final FloatPhysicsReg fa0Reg = FloatPhysicsReg.getFa0Reg();
@@ -260,16 +261,49 @@ public class codeGen {
         if (resType.equals(IRInt32Type()) || resType.equals(IRFloatType())) {
             stackCount++;
             offsetMap.put(resName, stackCount * 4);
+            mfunc.setStackCount(stackCount);
+            mfunc.setFrameSize(stackAlign(stackCount));
         } else if (resType instanceof ArrayType) {
+            // 计算数组长度
             int arrayLen = (((ArrayType) (instr.getPointedType())).getLength());
             stackCount += arrayLen;
-            offsetMap.put(resName, stackCount * 4);
+            mfunc.setStackCount(stackCount);
+            mfunc.setFrameSize(stackAlign(stackCount));
+            // 计算数组所占空间大小
+            int arraySize = arrayLen * 4;
+            // 如果不是8的倍数，先分配第一个4字节，使其对齐
+            if (arraySize % 8 != 0) {
+                offsetMap.put(resName, stackCount * 4);
+                arraySize -= 4;
+                stackCount -= 1;
+            }
+            if (arraySize < 10000) {
+                for (; arraySize > 0; arraySize -= 8) {
+                    MCStore store = new MCStore(zero, s0Reg, new Immeidiate(-(stackCount * 4)), SD);
+                    block.getMachineCodes().add(store);
+                    stackCount -= 2;
+                }
+            } else {
+                int overflow = mfunc.getOverflow();
+                mfunc.setOverflow(overflow + arraySize);
+
+                MCLi liT0 = new MCLi(t0Reg, new Immeidiate(-(stackCount * 4)));
+                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                MCLi liT1 = new MCLi(t1Reg, new Immeidiate(0));
+                MCLi liT2 = new MCLi(PhysicsReg.getPhysicsReg(7), new Immeidiate(arraySize));
+                MCCall call = new MCCall(new MachineFunction("bagel_memset"), null);
+                block.getMachineCodes().add(liT0);
+                block.getMachineCodes().add(add);
+                block.getMachineCodes().add(liT1);
+                block.getMachineCodes().add(liT2);
+                block.getMachineCodes().add(call);
+            }
         } else if (resType instanceof PointerType) {
             stackCount += 2;
             offsetMap.put(resName, stackCount * 4);
+            mfunc.setStackCount(stackCount);
+            mfunc.setFrameSize(stackAlign(stackCount));
         }
-        mfunc.setStackCount(stackCount);
-        mfunc.setFrameSize(stackAlign(stackCount));
     }
 
     private int stackAlign(int stackCount) {
@@ -995,14 +1029,13 @@ public class codeGen {
     public void PrintCodeToFile(String dest) {
         StringBuilder builder = new StringBuilder();
         builder.append(".global main\n");
-        builder.append(".align 1\n" +
-                ".global bagel_memset\n" +
+        builder.append(".global bagel_memset\n" +
                 "bagel_memset:\n" +
                 "    Block0:\n" +
-                "        beq t2,zero,Block1\n" +
-                "        sd t1,0(t0)\n" +
-                "        addi t2,t2,-8\n" +
-                "        addi t0,t0,8\n" +
+                "        beq t2, zero, Block1\n" +
+                "        sd t1, 0(t0)\n" +
+                "        addi t2, t2, -8\n" +
+                "        addi t0, t0, 8\n" +
                 "        j Block0\n" +
                 "    Block1:\n" +
                 "        ret\n");
