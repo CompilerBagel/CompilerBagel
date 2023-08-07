@@ -377,13 +377,33 @@ public class codeGen {
             }
             if (type == floatType) {
                 if (destVirtualReg.getFloatNO() > 15) {
-                    MCStore sd = new MCStore(dest, t1Reg, new Immeidiate(spillIndex * 8), FSW);
+                    int offset = spillIndex * 8;
+                    MCStore sd;
+                    if (isLegalImm(offset)) {
+                        sd = new MCStore(dest, t1Reg, new Immeidiate(spillIndex * 8), FSW);
+                    } else {
+                        MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                        MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
+                        sd = new MCStore(dest, t0Reg, new Immeidiate(0), FSW);
+                        block.getMachineCodes().add(li);
+                        block.getMachineCodes().add(add);
+                    }
                     setDefUse(dest, sd);
                     block.getMachineCodes().add(sd);
                 }
             } else {
                 if (destVirtualReg.getNoFloatNO() > 15) {
-                    MCStore sd = new MCStore(dest, t1Reg, new Immeidiate(spillIndex * 8), SD);
+                    int offset = spillIndex * 8;
+                    MCStore sd;
+                    if (isLegalImm(offset)) {
+                        sd = new MCStore(dest, t1Reg, new Immeidiate(spillIndex * 8), SD);
+                    } else {
+                        MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                        MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
+                        sd = new MCStore(dest, t0Reg, new Immeidiate(0), SD);
+                        block.getMachineCodes().add(li);
+                        block.getMachineCodes().add(add);
+                    }
                     setDefUse(dest, sd);
                     block.getMachineCodes().add(sd);
                 }
@@ -821,6 +841,7 @@ public class codeGen {
                             tmp = ((ArrayType) tmp).getElementType();
                             dims++;
                         }
+
                         int otherDimLen = ((ArrayType) baseType).getOtherDimensionLength(dims, 1) * 4;
                         MachineOperand tmpNum = addLiOperation(new Immeidiate(otherDimLen), block);
                         MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmpNum, MULW);
@@ -834,6 +855,7 @@ public class codeGen {
                         setDefUse(offset, mul);
                         setDefUse(indexOp, mul);
                     }
+
 
                     MachineOperand baseTmp = addLiOperation(new Immeidiate(base), block);
                     MCBinaryInteger addOffset = new MCBinaryInteger(offset, baseTmp, offset, SUB);
@@ -892,6 +914,7 @@ public class codeGen {
                     } else {
                         offset = 4;
                     }
+
                     MachineOperand tmp = addLiOperation(new Immeidiate(offset), block);
                     MCBinaryInteger mul = new MCBinaryInteger(offsetReg, indexOp, tmp, MUL);
                     block.getMachineCodes().add(mul);
@@ -976,13 +999,33 @@ public class codeGen {
             }
             if (type == floatType) {
                 if (destVirtualReg.getFloatNO() > 15) {
-                    MCStore sd = new MCStore(dest, t1Reg, new Immeidiate(spillIndex * 8), FSW);
+                    int offset = spillIndex * 8;
+                    MCStore sd;
+                    if (isLegalImm(offset)) {
+                        sd = new MCStore(dest, t1Reg, new Immeidiate(offset), FSW);
+                    } else {
+                        MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                        MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
+                        sd = new MCStore(dest, t0Reg, new Immeidiate(0), FSW);
+                        block.getMachineCodes().add(li);
+                        block.getMachineCodes().add(add);
+                    }
                     setDefUse(dest, sd);
                     block.getMachineCodes().add(sd);
                 }
             } else {
                 if (destVirtualReg.getNoFloatNO() > 15) {
-                    MCStore sd = new MCStore(dest, t1Reg, new Immeidiate(spillIndex * 8), SD);
+                    int offset = spillIndex * 8;
+                    MCStore sd;
+                    if (isLegalImm(offset)) {
+                        sd = new MCStore(dest, t1Reg, new Immeidiate(offset), SD);
+                    } else {
+                        MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                        MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
+                        sd = new MCStore(dest, t0Reg, new Immeidiate(0), SD);
+                        block.getMachineCodes().add(li);
+                        block.getMachineCodes().add(add);
+                    }
                     setDefUse(dest, sd);
                     block.getMachineCodes().add(sd);
                 }
@@ -1064,7 +1107,17 @@ public class codeGen {
                         // load from stack
                         int spillOrder = spillParamOrder.get((BaseRegister) src);
                         BaseRegister ldReg = new BaseRegister("paramLd", floatType);
-                        MCLoad ld = new MCLoad(s0Reg, ldReg, new Immeidiate(spillOrder * 8), FLW);
+                        int spillOffset = spillOrder * 8;
+                        MCLoad ld;
+                        if (isLegalImm(spillOffset)) {
+                            ld = new MCLoad(s0Reg, ldReg, new Immeidiate(spillOffset), FLW);
+                        } else {
+                            MCLi li = new MCLi(t0Reg, new Immeidiate(spillOffset));
+                            MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                            ld = new MCLoad(t0Reg, ldReg, FLW);
+                            block.getMachineCodes().add(li);
+                            block.getMachineCodes().add(add);
+                        }
                         setDefUse(ldReg, ld);
                         block.getMachineCodes().add(ld);
                         src = ldReg;
@@ -1079,7 +1132,18 @@ public class codeGen {
                         // load from stack
                         int spillOrder = spillParamOrder.get((BaseRegister) src);
                         BaseRegister ldReg = new BaseRegister("paramLd", int32Type);
-                        MCLoad ld = new MCLoad(s0Reg, ldReg, new Immeidiate(spillOrder * 8), LD);
+
+                        int spillOffset = spillOrder * 8;
+                        MCLoad ld;
+                        if (isLegalImm(spillOffset)) {
+                            ld = new MCLoad(s0Reg, ldReg, new Immeidiate(spillOffset), LD);
+                        } else {
+                            MCLi li = new MCLi(t0Reg, new Immeidiate(spillOffset));
+                            MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                            ld = new MCLoad(t0Reg, ldReg, LD);
+                            block.getMachineCodes().add(li);
+                            block.getMachineCodes().add(add);
+                        }
                         setDefUse(ldReg, ld);
                         block.getMachineCodes().add(ld);
                         src = ldReg;
