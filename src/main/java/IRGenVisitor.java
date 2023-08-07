@@ -530,7 +530,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
 
             if(paramType instanceof PointerType) {
-                if ((!(((PointerType)paramType).getBaseType() instanceof ArrayType))&&param.getType() instanceof PointerType &&((PointerType) param.getType()).getBaseType() instanceof ArrayType) {
+                if ((!(((PointerType)paramType).getBaseType() instanceof ArrayType))&& param.getType() instanceof PointerType &&((PointerType) param.getType()).getBaseType() instanceof ArrayType) {
+                    List<ValueRef> indexes = new ArrayList<>();
+                    indexes.add(intZero);
+                    indexes.add(intZero);
+                    param = IRBuildGEP(builder, param, indexes, indexes.size(), "new_ptr");
+                }else if(!Objects.equals(paramType.getText(), param.getType().getText())){
                     List<ValueRef> indexes = new ArrayList<>();
                     indexes.add(intZero);
                     indexes.add(intZero);
@@ -779,6 +784,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 arrayAddr = true;
                 return lValPointer;
             }
+
             for (SysYParser.ExpContext expContext : ctx.exp()) {
                 List<ValueRef> indexes = new ArrayList<>();
                 if (lvalType instanceof ArrayType) {
