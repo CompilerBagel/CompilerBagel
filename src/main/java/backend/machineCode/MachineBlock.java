@@ -42,12 +42,12 @@ public class MachineBlock {
     public boolean addInstrsAtHead(List<MachineCode> machineCodes) {
         return this.machineCodes.addAll(0, machineCodes);
     }
-    public boolean addInstrsBeforeLast(List<MachineCode> machineCodes, boolean isInt) {
+    public boolean addInstrsBeforeLast(List<MachineCode> machineCodes, boolean isIntOrFloat) {
         /*if(this.machineCodes.size() < 3) {
             return this.machineCodes.addAll(0, machineCodes);
         }
         return this.machineCodes.addAll(this.machineCodes.size() - 3, machineCodes);*/
-        if (isInt) {
+        if (isIntOrFloat) {
             if (!(this.machineCodes.get(this.machineCodes.size() - 1) instanceof MCReturn)) {
                 return this.machineCodes.addAll(this.machineCodes.size() - 2, machineCodes);
             } else if (this.machineCodes.size() == 2) {

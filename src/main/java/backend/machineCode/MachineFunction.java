@@ -93,7 +93,7 @@ public class MachineFunction {
             this.getEntryBlock().addInstrsAtHead(allocateList);
         }
     }
-    public void restore(List<MachineBlock> retBlocks, boolean isInt) {
+    public void restore(List<MachineBlock> retBlocks, boolean isIntOrFloat) {
         if(restoreList.size() != 0)
             return;
         if (frameSize < 2048) {
@@ -101,7 +101,7 @@ public class MachineFunction {
             restoreList.add(new MCLoad(PhysicsReg.getSpReg(), PhysicsReg.getS0Reg(), new Immeidiate(frameSize - 16), LD));
             restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(frameSize), ADDI));;
             for (MachineBlock retBlock : retBlocks.stream().distinct().toList()) {
-                retBlock.addInstrsBeforeLast(restoreList, isInt);
+                retBlock.addInstrsBeforeLast(restoreList, isIntOrFloat);
             }
         } else {
             restoreList.add(new MCLi(PhysicsReg.getPhysicsReg(5), new Immeidiate(alignSize)));
@@ -116,7 +116,7 @@ public class MachineFunction {
             restoreList.add(new MCBinaryInteger(PhysicsReg.getSpReg(), PhysicsReg.getSpReg(), new Immeidiate(20), ADDI));;
 
             for (MachineBlock retBlock : retBlocks.stream().distinct().toList()) {
-                retBlock.addInstrsBeforeLast(restoreList, isInt);
+                retBlock.addInstrsBeforeLast(restoreList, isIntOrFloat);
             }
         }
 
