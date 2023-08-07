@@ -270,27 +270,28 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                                 int totalCount = init.size();
                                 int temp = 1;
                                 int counter = i;
-
-                                arrayPtr.add(new ConstIntValueRef(0));
-                                for (int j = 0; j < elementDimension.size(); j++) {
-                                    totalCount /= elementDimension.get(j);
-                                    arrayPtr.add(new ConstIntValueRef(counter / totalCount));
-                                    counter -= (counter / totalCount) * totalCount;
-                                }
-                                int counter1 = 1;
-                                List<ValueRef> paramList = new ArrayList<ValueRef>();
-                                paramList.add(intZero);
-                                paramList.add(arrayPtr.get(counter1++));
-                                ValueRef elementPtr = IRBuildGEP(builder, constVariable, paramList, 2, "array");
-                                for (int j = 0; j < elementDimension.size() - 1; j++) {
-                                    paramList.clear();
+                                if (!Objects.equals(init.get(i).getText(), "0")) {
+                                    arrayPtr.add(new ConstIntValueRef(0));
+                                    for (int j = 0; j < elementDimension.size(); j++) {
+                                        totalCount /= elementDimension.get(j);
+                                        arrayPtr.add(new ConstIntValueRef(counter / totalCount));
+                                        counter -= (counter / totalCount) * totalCount;
+                                    }
+                                    int counter1 = 1;
+                                    List<ValueRef> paramList = new ArrayList<ValueRef>();
                                     paramList.add(intZero);
                                     paramList.add(arrayPtr.get(counter1++));
-                                    elementPtr = IRBuildGEP(builder, elementPtr, paramList, 2, "array");
-                                }
+                                    ValueRef elementPtr = IRBuildGEP(builder, constVariable, paramList, 2, "array");
+                                    for (int j = 0; j < elementDimension.size() - 1; j++) {
+                                        paramList.clear();
+                                        paramList.add(intZero);
+                                        paramList.add(arrayPtr.get(counter1++));
+                                        elementPtr = IRBuildGEP(builder, elementPtr, paramList, 2, "array");
+                                    }
 
-                                IRBuildStore(builder, init.get(i), elementPtr);
-                                arrayPtr.clear();
+                                    IRBuildStore(builder, init.get(i), elementPtr);
+                                    arrayPtr.clear();
+                                }
                             }
                         }
                     }
@@ -364,28 +365,28 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                                 int totalCount = init.size();
                                 int temp = 1;
                                 int counter = i;
-
-                                arrayPtr.add(new ConstIntValueRef(0));
-                                for (int j = 0; j < elementDimension.size(); j++) {
-                                    totalCount /= elementDimension.get(j);
-                                    arrayPtr.add(new ConstIntValueRef(counter / totalCount));
-                                    counter -= (counter / totalCount) * totalCount;
-                                }
-                                int counter1 = 1;
-                                List<ValueRef> paramList = new ArrayList<ValueRef>();
-                                paramList.add(intZero);
-                                paramList.add(arrayPtr.get(counter1++));
-                                ValueRef elementPtr = IRBuildGEP(builder, variable, paramList, 2, "array");
-                                for (int j = 0; j < elementDimension.size() - 1; j++) {
-                                    paramList.clear();
+                                if(!Objects.equals(init.get(i).getText(), "0")) {
+                                    arrayPtr.add(new ConstIntValueRef(0));
+                                    for (int j = 0; j < elementDimension.size(); j++) {
+                                        totalCount /= elementDimension.get(j);
+                                        arrayPtr.add(new ConstIntValueRef(counter / totalCount));
+                                        counter -= (counter / totalCount) * totalCount;
+                                    }
+                                    int counter1 = 1;
+                                    List<ValueRef> paramList = new ArrayList<ValueRef>();
                                     paramList.add(intZero);
                                     paramList.add(arrayPtr.get(counter1++));
-                                    elementPtr = IRBuildGEP(builder, elementPtr, paramList, 2, "array");
-                                }
+                                    ValueRef elementPtr = IRBuildGEP(builder, variable, paramList, 2, "array");
+                                    for (int j = 0; j < elementDimension.size() - 1; j++) {
+                                        paramList.clear();
+                                        paramList.add(intZero);
+                                        paramList.add(arrayPtr.get(counter1++));
+                                        elementPtr = IRBuildGEP(builder, elementPtr, paramList, 2, "array");
+                                    }
 
-                                IRBuildStore(builder, init.get(i), elementPtr);
-                                arrayPtr.clear();
-//                        }
+                                    IRBuildStore(builder, init.get(i), elementPtr);
+                                    arrayPtr.clear();
+                                }
                             }
                         }
                     }
