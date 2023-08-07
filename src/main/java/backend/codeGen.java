@@ -522,6 +522,7 @@ public class codeGen {
                             MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
                             sd = new MCStore(tmp, t0Reg, SD);
                             block.getMachineCodes().add(li);
+                            block.getMachineCodes().add(add);
                         }
                         setDefUse(tmp, sd);
                         spillIndex++;
