@@ -41,6 +41,7 @@ public class codeGen {
     private static final PhysicsReg s0Reg = PhysicsReg.getS0Reg();
     private static final PhysicsReg raReg = PhysicsReg.getRaReg();
     private static final PhysicsReg a0Reg = PhysicsReg.getA0Reg();
+    private static final PhysicsReg zero = PhysicsReg.getPhysicsReg(0);
     private static final PhysicsReg t0Reg = PhysicsReg.getPhysicsReg(5);
     private static final PhysicsReg t1Reg = PhysicsReg.getPhysicsReg(6);
     public static final FloatPhysicsReg fa0Reg = FloatPhysicsReg.getFa0Reg();
@@ -260,16 +261,53 @@ public class codeGen {
         if (resType.equals(IRInt32Type()) || resType.equals(IRFloatType())) {
             stackCount++;
             offsetMap.put(resName, stackCount * 4);
+            mfunc.setStackCount(stackCount);
+            mfunc.setAlignSize(stackAlign(stackCount) - stackCount * 4);
+            mfunc.setFrameSize(stackAlign(stackCount));
         } else if (resType instanceof ArrayType) {
+            // 计算数组长度
             int arrayLen = (((ArrayType) (instr.getPointedType())).getLength());
             stackCount += arrayLen;
+            mfunc.setStackCount(stackCount);
+            mfunc.setAlignSize(stackAlign(stackCount) - stackCount * 4);
+            mfunc.setFrameSize(stackAlign(stackCount));
             offsetMap.put(resName, stackCount * 4);
+            // 计算数组所占空间大小
+            int arraySize = arrayLen * 4;
+            // 如果不是8的倍数，先分配第一个4字节，使其对齐
+            if (arraySize % 8 != 0) {
+                offsetMap.put(resName, stackCount * 4);
+                arraySize -= 4;
+                stackCount -= 1;
+            }
+            if (arraySize < 10000) {
+                for (; arraySize > 0; arraySize -= 8) {
+                    MCStore store = new MCStore(zero, s0Reg, new Immeidiate(-(stackCount * 4)), SD);
+                    block.getMachineCodes().add(store);
+                    stackCount -= 2;
+                }
+            } else {
+                int overflow = mfunc.getOverflow();
+                mfunc.setOverflow(overflow + arraySize);
+
+                MCLi liT0 = new MCLi(t0Reg, new Immeidiate(-(stackCount * 4)));
+                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                MCLi liT1 = new MCLi(t1Reg, new Immeidiate(0));
+                MCLi liT2 = new MCLi(PhysicsReg.getPhysicsReg(7), new Immeidiate(arraySize));
+                MCCall call = new MCCall(new MachineFunction("bagel_memset"), null);
+                block.getMachineCodes().add(liT0);
+                block.getMachineCodes().add(add);
+                block.getMachineCodes().add(liT1);
+                block.getMachineCodes().add(liT2);
+                block.getMachineCodes().add(call);
+            }
         } else if (resType instanceof PointerType) {
             stackCount += 2;
             offsetMap.put(resName, stackCount * 4);
+            mfunc.setStackCount(stackCount);
+            mfunc.setAlignSize(stackAlign(stackCount) - stackCount * 4);
+            mfunc.setFrameSize(stackAlign(stackCount));
         }
-        mfunc.setStackCount(stackCount);
-        mfunc.setFrameSize(stackAlign(stackCount));
     }
 
     private int stackAlign(int stackCount) {
@@ -693,10 +731,12 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, new Immeidiate(offset - base), ADDI);
+                    MachineOperand offsetReg = addLiOperation(new Immeidiate(-(base - offset)), block);
+                    MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, offsetReg, ADD);
                     offsetMap.put(instr.getOperands().get(0).getText(), base - offset);
                     block.getMachineCodes().add(add);
                     setDefUse(dest, add);
+                    setDefUse(offsetReg, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offset = new BaseRegister("offset", int32Type);
@@ -756,11 +796,13 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, new Immeidiate(offset), ADDI);
+                    MachineOperand offsetReg = addLiOperation(new Immeidiate(offset), block);
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offsetReg, ADD);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
                     setDefUse(base, add);
+                    setDefUse(offsetReg, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offsetReg = new BaseRegister("offsetReg", int32Type);
@@ -812,15 +854,15 @@ public class codeGen {
         MachineFunction mfunc = block.getBlockFunc();
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
         if (null != offsetMap.get(srcName)) {
-            int offset = offsetMap.get(srcName);
             MCLoad load;
             if ((instr.getOperands().get(0)).getType() instanceof PointerType) {
-                load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), LD);
+                load = new MCLoad(src, dest, new Immeidiate(0), LD);
             } else {
-                load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), opcode);
+                load = new MCLoad(src, dest, new Immeidiate(0), opcode);
             }
             block.getMachineCodes().add(load);
             setDefUse(dest, load);
+            setDefUse(src, load);
         } else {
             if (src.isLabel()) {
                 MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
@@ -967,12 +1009,13 @@ public class codeGen {
 
             MCStore store;
             if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
-                store = new MCStore(src, s0Reg, new Immeidiate(-offset), SD);
+                store = new MCStore(src, dest, new Immeidiate(0), SD);
             } else {
-                store = new MCStore(src, s0Reg, new Immeidiate(-offset), opcode);
+                store = new MCStore(src, dest, new Immeidiate(0), opcode);
             }
             block.getMachineCodes().add(store);
             setDefUse(src, store);
+            setDefUse(dest, store);
         } else {
             if (dest.isLabel()) {
                 MCLoad la = new MCLoad(dest, new PhysicsReg("t0"), LA);
@@ -1056,14 +1099,13 @@ public class codeGen {
     public void PrintCodeToFile(String dest) {
         StringBuilder builder = new StringBuilder();
         builder.append(".global main\n");
-        builder.append(".align 1\n" +
-                ".global bagel_memset\n" +
+        builder.append(".global bagel_memset\n" +
                 "bagel_memset:\n" +
                 "    Block0:\n" +
-                "        beq t2,zero,Block1\n" +
-                "        sd t1,0(t0)\n" +
-                "        addi t2,t2,-8\n" +
-                "        addi t0,t0,8\n" +
+                "        beq t2, zero, Block1\n" +
+                "        sd t1, 0(t0)\n" +
+                "        addi t2, t2, -8\n" +
+                "        addi t0, t0, 8\n" +
                 "        j Block0\n" +
                 "    Block1:\n" +
                 "        ret\n");
@@ -1174,33 +1216,13 @@ public class codeGen {
             setDefUse(resOp, fmv);
             setDefUse(regOp, fmv);
             return resOp;
-
         } else {
-            int value = ((Immeidiate) imm).getImmValue();
-            if (value <= 2047 && value >= -2048) {
-                BaseRegister reg = new BaseRegister("li", int32Type);
-                MachineOperand regOp = parseOperand(reg);
-                MCLi li = new MCLi(regOp, imm);
-                block.getMachineCodes().add(li);
-                regOp.setDef(li);
-                imm.addUse(li);
-                return regOp;
-            } else {
-                int lowValue = value & 0x00000fff;
-                int highValue = (value | 0x00000fff) >> 12;
-                BaseRegister regHigh = new BaseRegister("luiHigh", int32Type);
-                BaseRegister regLow = new BaseRegister("luiLow", int32Type);
-                MCLui luiHigh = new MCLui(regHigh, new Immeidiate(highValue));
-                block.getMachineCodes().add(luiHigh);
-                regHigh.setDef(luiHigh);
-                MCLi liLow = new MCLi(regLow, new Immeidiate(lowValue));
-                block.getMachineCodes().add(liLow);
-                regLow.setDef(liLow);
-                MCBinaryInteger add = new MCBinaryInteger(regHigh, regHigh, regLow, ADD);
-                block.getMachineCodes().add(add);
-                regHigh.setDef(add);
-                return regHigh;
-            }
+            BaseRegister reg = new BaseRegister("li", int32Type);
+            MCLi li = new MCLi(reg, imm);
+            block.getMachineCodes().add(li);
+            reg.setDef(li);
+            imm.addUse(li);
+            return reg;
         }
     }
 }

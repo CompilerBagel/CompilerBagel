@@ -122,8 +122,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
     private FunctionBlock addLib(String libName, FunctionType libType){
         FunctionBlock function = new FunctionBlock(libName, libType);
-        Symbol funcSym = new Symbol(libName, libType);
-        module.addGlobalSymbol(libName, funcSym);
+        // Symbol funcSym = new Symbol(libName, libType);
+        // module.addGlobalSymbol(libName, funcSym);
         return function;
     }
 
