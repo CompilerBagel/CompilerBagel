@@ -8,6 +8,8 @@ public interface ValueRef {
     void setUsedByFunction(boolean usedByFunction);
     int getFloatNO();
     int getNoFloatNO();
+    int getSpillIndex();
+    void setSpillIndex(int spillIndex);
     void setFloatNO(int floatNO);
     void setNoFloatNO(int noFloatNO);
     String getText();

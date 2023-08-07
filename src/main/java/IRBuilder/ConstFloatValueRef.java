@@ -9,6 +9,7 @@ public class ConstFloatValueRef implements ValueRef{
     private boolean UsedByFunction = false;
     private int floatNO = -1;
     private int noFloatNO = -1;
+    private int spillIndex = -1;
 
     public ConstFloatValueRef(float value) {
         this.value = value;
@@ -32,6 +33,17 @@ public class ConstFloatValueRef implements ValueRef{
     public int getNoFloatNO() {
         return noFloatNO;
     }
+
+    @Override
+    public int getSpillIndex() {
+        return spillIndex;
+    }
+
+    @Override
+    public void setSpillIndex(int spillIndex) {
+        this.spillIndex = spillIndex;
+    }
+
     @Override
     public void setNoFloatNO(int noFloatNO) {
         this.noFloatNO = noFloatNO;
