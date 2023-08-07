@@ -280,7 +280,7 @@ public class codeGen {
                 arraySize -= 4;
                 stackCount -= 1;
             }
-            if (arraySize < 2048) {
+            if (mfunc.getFrameSize() < 2048) {
                 for (; arraySize > 0; arraySize -= 8) {
                     MCStore store = new MCStore(zero, s0Reg, new Immeidiate(-(stackCount * 4)), SD);
                     block.getMachineCodes().add(store);
