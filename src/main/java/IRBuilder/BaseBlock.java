@@ -70,6 +70,36 @@ public class BaseBlock implements ValueRef{
 
     public List<ValueRef> getSuccList(){return succList;}
 
+    @Override
+    public boolean getUsedByFunction() {
+        return false;
+    }
+
+    @Override
+    public void setUsedByFunction(boolean usedByFunction) {
+
+    }
+
+    @Override
+    public int getFloatNO() {
+        return -1;
+    }
+
+    @Override
+    public int getNoFloatNO() {
+        return -1;
+    }
+
+    @Override
+    public void setFloatNO(int floatNO) {
+
+    }
+
+    @Override
+    public void setNoFloatNO(int noFloatNO) {
+
+    }
+
     public String getText(){
         return "block " + baseBlockId;
     }

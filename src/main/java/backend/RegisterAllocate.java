@@ -236,8 +236,8 @@ public class RegisterAllocate {
                 return reg;
             }
         }
-        // allocate s0-s1
-        for (int i = 8; i <= 9; i++) {
+        // allocate s1
+        for (int i = 9; i <= 9; i++) {
             if (isAvailableReg(i)) {
                 reg = getPhysicsReg(i);
                 allocatedReg.put(operand, reg);

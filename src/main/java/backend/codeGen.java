@@ -335,7 +335,7 @@ public class codeGen {
         List<ValueRef> params = instr.getParams();
         List<MachineOperand> operands = new ArrayList<>();
 
-        // push a0, a1, a2, ...
+        // push a1, a2, ...
         int paramCnt = params.size();
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
@@ -345,6 +345,14 @@ public class codeGen {
             int offset = stackCount * 4;
             offsetMap.put("phyReg_a" + i, offset);
             MCStore store = new MCStore(PhysicsReg.getPhysicsReg(10 + i), s0Reg, new Immeidiate(-offset), SD);
+            block.getMachineCodes().add(store);
+        }
+        // push ft0, ft1
+        for (int i = 0; i < 2; i++) {
+            stackCount += 2;
+            int offset = stackCount * 4;
+            offsetMap.put("floatPhyReg_a" + i, offset);
+            MCStore store = new MCStore(FloatPhysicsReg.getPhysicsReg(i), s0Reg, new Immeidiate(-offset), FSW);
             block.getMachineCodes().add(store);
         }
 
@@ -486,7 +494,11 @@ public class codeGen {
             MCLoad load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(10 + i), new Immeidiate(-offset), LD);
             block.getMachineCodes().add(load);
         }
-
+        for (i = 0; i < 2; i++) {
+            int offset = offsetMap.get("floatPhyReg_a" + i);
+            MCLoad load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(i), new Immeidiate(-offset), FLW);
+            block.getMachineCodes().add(load);
+        }
         if (mv != null) block.getMachineCodes().add(mv);
         if (neg1 != null) block.getMachineCodes().add(neg1);
         if (neg2 != null) block.getMachineCodes().add(neg2);
@@ -781,6 +793,13 @@ public class codeGen {
                 setDefUse(src, lw);
             }
         }
+        ValueRef destVirtualReg = instr.getOperands().get(0);
+
+        /*
+        if (instr.getOperands().get(0).xxx > xxx) {
+            new Store()
+        }
+         */
     }
 
     public void parsePhiInstr(PhiInstruction instr, MachineBlock block) {

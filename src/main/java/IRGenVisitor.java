@@ -496,9 +496,29 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         FunctionType functionType = (FunctionType) globalScope.getType(funcName);
         int argc = functionType.getParamsType().size();
         List<ValueRef> args = new ArrayList<>(argc);
+        int floatNO = 0;
+        int noFloatNO = 0;
         for (int i = 0; i < argc; i++) {
             ValueRef param = ctx.funcRParams().param(i).accept(this);
+            param.setUsedByFunction(true);
             Type paramType = functionBlock.getParam(i).getType();
+            Type baseType = paramType;
+            while(baseType instanceof ArrayType || baseType instanceof PointerType){
+                if(baseType instanceof ArrayType){
+                    baseType = ((ArrayType)baseType).getElementType();
+                }
+                if(baseType instanceof PointerType){
+                    baseType = ((PointerType) baseType).getBaseType();
+                }
+            }
+            if(baseType == floatType){
+                floatNO++;
+                param.setFloatNO(floatNO);
+            }else{
+                noFloatNO++;
+                param.setNoFloatNO(noFloatNO);
+            }
+
 
             if(paramType instanceof PointerType) {
                 if ((!(((PointerType)paramType).getBaseType() instanceof ArrayType))&&param.getType() instanceof PointerType &&((PointerType) param.getType()).getBaseType() instanceof ArrayType) {
