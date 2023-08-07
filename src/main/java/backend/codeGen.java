@@ -855,14 +855,18 @@ public class codeGen {
         Map<String, Integer> offsetMap = mfunc.getOffsetMap();
         if (null != offsetMap.get(srcName)) {
             MCLoad load;
+            int offset = offsetMap.get(srcName);
+            MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+            MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
             if ((instr.getOperands().get(0)).getType() instanceof PointerType) {
-                load = new MCLoad(src, dest, new Immeidiate(0), LD);
+                load = new MCLoad(t0Reg, dest, new Immeidiate(0), LD);
             } else {
-                load = new MCLoad(src, dest, new Immeidiate(0), opcode);
+                load = new MCLoad(t0Reg, dest, new Immeidiate(0), opcode);
             }
+            block.getMachineCodes().add(li);
+            block.getMachineCodes().add(add);
             block.getMachineCodes().add(load);
             setDefUse(dest, load);
-            setDefUse(src, load);
         } else {
             if (src.isLabel()) {
                 MCLoad la = new MCLoad(src, new PhysicsReg("t0"), LA);
@@ -1008,14 +1012,17 @@ public class codeGen {
             }
 
             MCStore store;
+            MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+            MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
             if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
-                store = new MCStore(src, dest, new Immeidiate(0), SD);
+                store = new MCStore(src, t0Reg, new Immeidiate(0), SD);
             } else {
-                store = new MCStore(src, dest, new Immeidiate(0), opcode);
+                store = new MCStore(src, t0Reg, new Immeidiate(0), opcode);
             }
+            block.getMachineCodes().add(li);
+            block.getMachineCodes().add(add);
             block.getMachineCodes().add(store);
             setDefUse(src, store);
-            setDefUse(dest, store);
         } else {
             if (dest.isLabel()) {
                 MCLoad la = new MCLoad(dest, new PhysicsReg("t0"), LA);
@@ -1217,11 +1224,11 @@ public class codeGen {
             setDefUse(regOp, fmv);
             return resOp;
         } else {
-            BaseRegister reg = new BaseRegister("li", int32Type);
+            BaseRegister reg = new BaseRegister("li_" + ((Immeidiate) imm).getImmValue(), int32Type);
             MCLi li = new MCLi(reg, imm);
             block.getMachineCodes().add(li);
-            reg.setDef(li);
-            imm.addUse(li);
+            setDefUse(reg, li);
+            setDefUse(imm, li);
             return reg;
         }
     }
