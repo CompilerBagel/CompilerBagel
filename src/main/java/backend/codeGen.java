@@ -1109,14 +1109,14 @@ public class codeGen {
                 int lowValue = value & 0x00000fff;
                 int highValue = (value | 0x00000fff) >> 12;
                 BaseRegister regHigh = new BaseRegister("luiHigh", int32Type);
-                BaseRegister regLow = new BaseRegister("luiLow", int32Type);
+                // BaseRegister regLow = new BaseRegister("luiLow", int32Type);
                 MCLui luiHigh = new MCLui(regHigh, new Immeidiate(highValue));
                 block.getMachineCodes().add(luiHigh);
                 regHigh.setDef(luiHigh);
-                MCLi liLow = new MCLi(regLow, new Immeidiate(lowValue));
+                MCLi liLow = new MCLi(new PhysicsReg("t0"), new Immeidiate(lowValue));
                 block.getMachineCodes().add(liLow);
-                regLow.setDef(liLow);
-                MCBinaryInteger add = new MCBinaryInteger(regHigh, regHigh, regLow, ADD);
+                // regLow.setDef(liLow);
+                MCBinaryInteger add = new MCBinaryInteger(regHigh, regHigh, new PhysicsReg("t0"), ADD);
                 block.getMachineCodes().add(add);
                 regHigh.setDef(add);
                 return regHigh;
