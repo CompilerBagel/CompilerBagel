@@ -62,7 +62,6 @@ public class FloatPhysicsReg extends PhysicsReg {
         if (floatPhysicsRegs[index] == null) {
             floatPhysicsRegs[index] = new FloatPhysicsReg(index);
         }
-        isAvailable[index] = false;
         return floatPhysicsRegs[index];
     }
 

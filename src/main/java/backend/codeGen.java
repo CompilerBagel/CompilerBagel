@@ -476,6 +476,9 @@ public class codeGen {
                 if (((Immeidiate) op).isFloatImm()) {
                     if (floatRegIndex > 7) {
                         // TODO: check
+                        if (floatRegIndex > 15) {
+                            outOf15 = true;
+                        }
                         stackCount += 2;
                         if (spillIndex == 0) {
                             MCMove move = new MCMove(spReg, t1Reg);
@@ -502,6 +505,9 @@ public class codeGen {
                     floatRegIndex++;
                 } else {
                     if (intRegIndex > 7) {
+                        if (intRegIndex > 15) {
+                            outOf15 = true;
+                        }
                         stackCount += 2;
                         if (spillIndex == 0) {
                             MCMove move = new MCMove(spReg, t1Reg);
@@ -525,7 +531,7 @@ public class codeGen {
                     }
                     intRegIndex++;
                 }
-                operands.add(tmp);
+                if (!outOf15) operands.add(tmp);
             } else {
                 BaseRegister src = new BaseRegister(param.getText(), param.getType());
                 if (src.getType() == floatType) {
@@ -548,6 +554,7 @@ public class codeGen {
                                 MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
                                 fsw = new MCStore(op, t0Reg, FSW);;
                                 block.getMachineCodes().add(li);
+                                block.getMachineCodes().add(add);
                             }
                             setDefUse(op, fsw);
                             spillIndex++;
@@ -589,6 +596,7 @@ public class codeGen {
                                 MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
                                 sd = new MCStore(op, t0Reg, SD);
                                 block.getMachineCodes().add(li);
+                                block.getMachineCodes().add(add);
                             }
                             setDefUse(op, sd);
                             spillIndex++;
