@@ -1,9 +1,9 @@
 package instruction;
 
 import IRBuilder.BaseBlock;
-import IRBuilder.BaseRegister;
 import IRBuilder.ValueRef;
 import Type.PointerType;
+import Type.Type;
 
 import java.util.List;
 
@@ -20,5 +20,8 @@ public class AllocaInstruction extends Instruction{
         return resRegister.getText() + " = " + ALLOCA + " " + ((PointerType)(resRegister.getType())).getText();
     }
 
+    public Type getPointedType() {
+        return ((PointerType)(operands.get(0).getType())).getBaseType();
+    }
 
 }

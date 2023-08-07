@@ -3,7 +3,7 @@ package IRBuilder;
 import Type.Type;
 import backend.reg.Reg;
 
-public class GlobalRegister extends Reg implements ValueRef {
+public class GlobalRegister extends BaseRegister implements ValueRef {
     static int globalCounter = 0;
     private final Type type;
     private final int globalNO;
@@ -11,7 +11,7 @@ public class GlobalRegister extends Reg implements ValueRef {
     int floatNO = -1;
     int noFloatNO = -1;
     public GlobalRegister(String identity, Type type) {
-        super(operandType.virtualReg, identity);
+        super(identity, type);
         this.globalNO = globalCounter++;
         this.type = type;
     }

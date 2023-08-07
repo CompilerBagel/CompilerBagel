@@ -3,7 +3,7 @@ package backend.reg;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FloatPhysicsReg extends Reg {
+public class FloatPhysicsReg extends PhysicsReg {
     private String regName;
     private int index;
     public static int regNum = 32;
@@ -62,8 +62,11 @@ public class FloatPhysicsReg extends Reg {
         if (floatPhysicsRegs[index] == null) {
             floatPhysicsRegs[index] = new FloatPhysicsReg(index);
         }
-        isAvailable[index] = false;
         return floatPhysicsRegs[index];
+    }
+
+    public static FloatPhysicsReg getFa0Reg() {
+        return getFloatPhysicsReg(10);
     }
 
     public FloatPhysicsReg(int index) {
@@ -78,6 +81,7 @@ public class FloatPhysicsReg extends Reg {
         this.regName = regName;
     }
 
+    @Override
     public void giveBack() {
         isAvailable[index] = true;
     }
@@ -86,6 +90,13 @@ public class FloatPhysicsReg extends Reg {
         super(t, identity);
     }
 
+    public static boolean isAvailableReg(int index) {
+        return isAvailable[index];
+    }
+    @Override
+    public void occupy() {
+        isAvailable[index] = false;
+    }
     @Override
     public String toString() {
         return regName;

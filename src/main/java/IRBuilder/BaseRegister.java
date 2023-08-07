@@ -10,6 +10,7 @@ public class BaseRegister extends Reg implements ValueRef  {
     boolean UsedByFunction = false;
     int floatNO = -1;
     int noFloatNO = -1;
+    private int spillIndex = -1;
 
     public BaseRegister(String identity, Type type) {
         super(operandType.virtualReg, identity);
@@ -36,6 +37,17 @@ public class BaseRegister extends Reg implements ValueRef  {
     public int getNoFloatNO() {
         return noFloatNO;
     }
+
+    @Override
+    public int getSpillIndex() {
+        return spillIndex;
+    }
+
+    @Override
+    public void setSpillIndex(int spillIndex) {
+        this.spillIndex = spillIndex;
+    }
+
     @Override
     public void setNoFloatNO(int noFloatNO) {
         this.noFloatNO = noFloatNO;

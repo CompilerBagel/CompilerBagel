@@ -3,16 +3,17 @@ package backend.machineCode.Instruction;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineOperand;
 
-public class MCSet extends MachineCode {
+public class MCFCmp extends MachineCode {
+    private final MachineOperand dest;   // rd
+    private final MachineOperand left;   // rs1
+    private final MachineOperand right;  // rs2
+    private final String fCmpOp;  // FLE, FLT, FEQ
 
-    private MachineOperand dest;
-    private MachineOperand left;
-    private MachineOperand right;
-
-    public MCSet(MachineOperand dest, MachineOperand left, MachineOperand right) {
+    public MCFCmp(MachineOperand dest, MachineOperand left, MachineOperand right, String fCmpOp) {
         this.dest = dest;
         this.left = left;
         this.right = right;
+        this.fCmpOp = fCmpOp;
         this.addDef(dest);
         this.addUse(left);
         this.addUse(right);
@@ -34,12 +35,18 @@ public class MCSet extends MachineCode {
     }
 
     /**
-     * slt rd, rs1, rs2
+     * fle.s rd, rs1, rs2
+     * if rs1 <= rs2 then rd = 1 else rd = 0
+     * <p>
+     * flt.s rd, rs1, rs2
      * if rs1 < rs2 then rd = 1 else rd = 0
-     * @return
+     * <p>
+     * feq.s rd, rs1, rs2
+     * if rs1 == rs2 then rd = 1 else rd = 0
+     * @return int
      */
     @Override
     public String toString() {
-        return "slt " + dest.getRegister() + ", " + left.getRegister() + ", " + right.getRegister();
+        return fCmpOp + " " + dest.getRegister() + ", " + left.getRegister() + ", " + right.getRegister();
     }
 }

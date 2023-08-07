@@ -1,9 +1,12 @@
 package backend;
 
+import IRBuilder.BaseRegister;
+import Type.Type;
 import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineFunction;
 import backend.machineCode.MachineOperand;
+import backend.reg.FloatPhysicsReg;
 import backend.reg.PhysicsReg;
 
 import java.util.HashMap;
@@ -11,7 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static backend.reg.PhysicsReg.*;
-
+import static Type.FloatType.IRFloatType;
 public class RegisterAllocate {
     private static final int K = 14; // number of colors
     private static final int NONE_ALLOCATE = -1;
@@ -20,6 +23,7 @@ public class RegisterAllocate {
     private List<MachineOperand> nodes;
     private final HashMap<MachineOperand, PhysicsReg> allocatedReg = new HashMap<>();
     private final HashMap<MachineOperand, Integer> color = new HashMap<>();
+    private static final Type floatType = IRFloatType();
 
     public RegisterAllocate(List<MachineFunction> functions) {
         this.functions = functions;
@@ -113,6 +117,10 @@ public class RegisterAllocate {
         }
     }
 
+    /**
+     * allocate register for a MachineFunction
+     * @param function the MachineFunction whose operand need to allocate register
+     */
     private void funcEasyAllocate(MachineFunction function) {
         LinkedList<MachineBlock> blocks = function.getMachineBlocks();
         // giveBack a0~a7
@@ -125,7 +133,7 @@ public class RegisterAllocate {
 
                 for (MachineOperand use : uses) {
                     use.removeUse(code);
-                    if(use.isImm()) continue;
+                    if(use.isImm() || use.isLabel()) continue;
                     if (use.getPhysicsReg() != null) {
                         if (use.noUser()) {
                             use.getPhysicsReg().giveBack();
@@ -133,9 +141,9 @@ public class RegisterAllocate {
                         continue;
                     }
                     if (use instanceof PhysicsReg) {
-                        if (use.noUser()){
-                            ((PhysicsReg)use).giveBack();
-                        }
+//                        if (use.noUser()){
+//                            ((PhysicsReg)use).giveBack();
+//                        }
                         continue;
                     }
                     PhysicsReg allocatedReg = getReg(use);
@@ -152,7 +160,8 @@ public class RegisterAllocate {
                 }
 
                 for (MachineOperand def : defs) {
-                    if(def.isImm()) continue;
+                    def.removeUse(code);
+                    if(def.isImm() || def.isLabel()) continue;
                     if (def.getPhysicsReg() != null) {
                         if (def.noUser()) {
                             def.getPhysicsReg().giveBack();
@@ -160,9 +169,9 @@ public class RegisterAllocate {
                         continue;
                     }
                     if (def instanceof PhysicsReg) {
-                        if (def.noUser()){
-                            ((PhysicsReg)def).giveBack();
-                        }
+//                        if (def.noUser()){
+//                            ((PhysicsReg)def).giveBack();
+//                        }
                         continue;
                     }
                     PhysicsReg allocatedReg = getReg(def);
@@ -181,13 +190,62 @@ public class RegisterAllocate {
         }
     }
 
+    /**
+     * find a register matched or available for operand
+     * @param operand the operand need to be allocated a register
+     * @return a PhysicsReg or FloatPhysicsReg for operand
+     */
     private PhysicsReg getReg(MachineOperand operand) {
         PhysicsReg reg = allocatedReg.get(operand);
         if (reg != null) {
             return reg;
         }
-        // allocate a0 ~ a7
-        for (int i = 10; i <= 17; i++) {
+        if (operand instanceof BaseRegister) {
+            if (((BaseRegister) operand).getType() == floatType) {
+                // allocate ft0 ~ ft7
+                for (int i = 0; i <= 7; i++) {
+                    if (FloatPhysicsReg.isAvailableReg(i)) {
+                        reg = FloatPhysicsReg.getFloatPhysicsReg(i);
+                        allocatedReg.put(operand, reg);
+                        return reg;
+                    }
+                }
+                for (int i = 18; i <= 31; i++) {
+                    if (FloatPhysicsReg.isAvailableReg(i)) {
+                        reg = FloatPhysicsReg.getFloatPhysicsReg(i);
+                        allocatedReg.put(operand, reg);
+                        return reg;
+                    }
+                }
+
+            }
+        }
+        // allocate a1 ~ a7
+        for (int i = 11; i <= 17; i++) {
+            if (isAvailableReg(i)) {
+                reg = getPhysicsReg(i);
+                allocatedReg.put(operand, reg);
+                return reg;
+            }
+        }
+        // allocate t3-t6
+        for (int i = 28; i <= 31; i++) {
+            if (isAvailableReg(i)) {
+                reg = getPhysicsReg(i);
+                allocatedReg.put(operand, reg);
+                return reg;
+            }
+        }
+        // allocate s1
+        for (int i = 9; i <= 9; i++) {
+            if (isAvailableReg(i)) {
+                reg = getPhysicsReg(i);
+                allocatedReg.put(operand, reg);
+                return reg;
+            }
+        }
+        // allocate s2-s11
+        for (int i = 18; i <= 27; i++) {
             if (isAvailableReg(i)) {
                 reg = getPhysicsReg(i);
                 allocatedReg.put(operand, reg);

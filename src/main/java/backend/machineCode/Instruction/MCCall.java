@@ -15,9 +15,9 @@ public class MCCall extends MachineCode {
     public MCCall(MachineFunction function, List<MachineOperand> params) {
         this.function = function;
         this.params = params;
-        for (MachineOperand param : params) {
-            this.addUse(param);
-        }
+//        for (MachineOperand param : params) {
+//            this.addUse(param);
+//        }
     }
     
     @Override
@@ -33,5 +33,10 @@ public class MCCall extends MachineCode {
     @Override
     public void replaceUse(final MachineOperand oldOperand, final MachineOperand newOperand) {
     
+    }
+
+    @Override
+    public boolean isUselessCode() {
+        return false;
     }
 }

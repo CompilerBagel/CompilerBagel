@@ -9,6 +9,7 @@ public class ConstIntValueRef implements ValueRef{
     boolean UsedByFunction = false;
     int floatNO = -1;
     int noFloatNO = -1;
+    private int spillIndex = -1;
     public ConstIntValueRef(int value){
         this.value = value;
         this.type = Int32Type.IRInt32Type();
@@ -35,6 +36,17 @@ public class ConstIntValueRef implements ValueRef{
     public int getNoFloatNO() {
         return noFloatNO;
     }
+
+    @Override
+    public int getSpillIndex() {
+        return spillIndex;
+    }
+
+    @Override
+    public void setSpillIndex(int spillIndex) {
+        this.spillIndex = spillIndex;
+    }
+
     @Override
     public void setNoFloatNO(int noFloatNO) {
         this.noFloatNO = noFloatNO;
@@ -56,5 +68,9 @@ public class ConstIntValueRef implements ValueRef{
     @Override
     public Type getType() {
         return type;
+    }
+
+    public int getValue(){
+        return value;
     }
 }

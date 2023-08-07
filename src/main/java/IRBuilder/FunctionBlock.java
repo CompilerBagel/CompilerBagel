@@ -96,6 +96,16 @@ public class FunctionBlock implements ValueRef{
     }
 
     @Override
+    public int getSpillIndex() {
+        return -1;
+    }
+
+    @Override
+    public void setSpillIndex(int spillIndex) {
+
+    }
+
+    @Override
     public void setFloatNO(int floatNO) {
 
     }

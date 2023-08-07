@@ -3,7 +3,7 @@ package backend.machineCode;
 public class Immeidiate extends MachineOperand {
     private int immValue;
     private float immFloatValue;
-    private boolean isImmFloat;
+    private final boolean isImmFloat;
 
     public Immeidiate(int immValue) {
         super(operandType.imm, String.valueOf(immValue));
@@ -17,7 +17,14 @@ public class Immeidiate extends MachineOperand {
         this.immFloatValue = immFloatValue;
     }
 
+    public boolean isFloatImm() {
+        return isImmFloat;
+    }
     public int getImmValue() {
         return immValue;
+    }
+
+    public float getImmFloatValue() {
+        return immFloatValue;
     }
 }

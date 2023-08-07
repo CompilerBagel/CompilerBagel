@@ -1,4 +1,5 @@
 import backend.RegisterAllocate;
+import backend.opt.RmUselessCode;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -17,6 +18,7 @@ public class Main {
         String source = args[0];
         String dest = args[1];
         String mcDest = args[2];
+        // String rawMcDest = args[3];
 
         CharStream input = CharStreams.fromFileName(source);
         // Lexer
@@ -29,11 +31,16 @@ public class Main {
         IRGenVisitor irGenVisitorVisitor = new IRGenVisitor();
         irGenVisitorVisitor.visit(tree);
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
+        codeGen code = new codeGen();
+        code.MachineCodeGen(irGenVisitorVisitor.getModule());
+        // code.PrintCodeToFile(mcDest);
 
-//        codeGen code = new codeGen();
-//        code.MachineCodeGen(irGenVisitorVisitor.getModule());
-//        RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
-//        allocator.easyAllocate();
-//        code.PrintCodeToFile(mcDest);
+        RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
+        allocator.easyAllocate();
+
+        // Remove useless code
+        // RmUselessCode rmUselessCode = new RmUselessCode(code.getMCFunctions());
+        // rmUselessCode.remove();
+        code.PrintCodeToFile(mcDest);
     }
 }

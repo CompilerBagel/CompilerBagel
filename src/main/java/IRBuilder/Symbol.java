@@ -10,7 +10,8 @@ public class Symbol {
     String name;
     Type type;
     List<Float> initValue; // handle both non-array and array
-    boolean isZero = true;
+
+    boolean isZero = false;
     public Symbol(String name, Type type){
         this.name = name;
         this.type = type;
@@ -20,9 +21,11 @@ public class Symbol {
     public void setZero(boolean zero) {
         isZero = zero;
     }
-    public boolean getZero(){
+
+    public boolean isZero() {
         return isZero;
     }
+
     private Instruction def = null;
     private List<Instruction> uses = new ArrayList<>();
 

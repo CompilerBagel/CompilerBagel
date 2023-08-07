@@ -22,6 +22,9 @@ public class TypeTransInstruction extends Instruction{
         this.type = type;
     }
 
+    public int getOptType() {
+        return type;
+    }
     @Override
     public String toString(){
         if(type == FpToSi){

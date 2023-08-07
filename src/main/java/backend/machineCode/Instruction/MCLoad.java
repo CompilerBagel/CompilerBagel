@@ -27,6 +27,8 @@ public class MCLoad extends MachineCode {
         this.dest = dest;
         this.loadOp = loadOp;
         this.offset = new Immeidiate(0);
+        this.addDef(dest);
+        this.addUse(src);
     }
 
     public void setOffset(final MachineOperand offset) {
@@ -72,6 +74,11 @@ public class MCLoad extends MachineCode {
         if (oldOperand.equals(this.offset)) {
             this.offset = newOperand;
         }
+    }
+
+    @Override
+    public boolean isUselessCode() {
+        return false;
     }
 
 
