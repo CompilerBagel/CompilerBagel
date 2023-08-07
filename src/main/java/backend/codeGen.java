@@ -929,15 +929,23 @@ public class codeGen {
         if (null != offsetMap.get(srcName)) {
             MCLoad load;
             int offset = offsetMap.get(srcName);
-            MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
-            MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
-            if ((instr.getOperands().get(0)).getType() instanceof PointerType) {
-                load = new MCLoad(t0Reg, dest, new Immeidiate(0), LD);
+            if (isLegalImm(-offset)) {
+                if ((instr.getOperands().get(0)).getType() instanceof PointerType) {
+                    load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), LD);
+                } else {
+                    load = new MCLoad(s0Reg, dest, new Immeidiate(-offset), opcode);
+                }
             } else {
-                load = new MCLoad(t0Reg, dest, new Immeidiate(0), opcode);
+                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                block.getMachineCodes().add(li);
+                block.getMachineCodes().add(add);
+                if ((instr.getOperands().get(0)).getType() instanceof PointerType) {
+                    load = new MCLoad(t0Reg, dest, new Immeidiate(0), LD);
+                } else {
+                    load = new MCLoad(t0Reg, dest, new Immeidiate(0), opcode);
+                }
             }
-            block.getMachineCodes().add(li);
-            block.getMachineCodes().add(add);
             block.getMachineCodes().add(load);
             setDefUse(dest, load);
         } else {
@@ -1085,15 +1093,24 @@ public class codeGen {
             }
 
             MCStore store;
-            MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
-            MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
-            if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
-                store = new MCStore(src, t0Reg, new Immeidiate(0), SD);
+            if (isLegalImm(-offset)) {
+                if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
+                    store = new MCStore(src, s0Reg, new Immeidiate(-offset), SD);
+                } else {
+                    store = new MCStore(src, s0Reg, new Immeidiate(-offset), opcode);
+                }
             } else {
-                store = new MCStore(src, t0Reg, new Immeidiate(0), opcode);
+                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
+                    store = new MCStore(src, t0Reg, new Immeidiate(0), SD);
+                } else {
+                    store = new MCStore(src, t0Reg, new Immeidiate(0), opcode);
+                }
+                block.getMachineCodes().add(li);
+                block.getMachineCodes().add(add);
             }
-            block.getMachineCodes().add(li);
-            block.getMachineCodes().add(add);
+
             block.getMachineCodes().add(store);
             setDefUse(src, store);
         } else {
