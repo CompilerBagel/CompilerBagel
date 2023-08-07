@@ -269,6 +269,7 @@ public class codeGen {
             stackCount += arrayLen;
             mfunc.setStackCount(stackCount);
             mfunc.setFrameSize(stackAlign(stackCount));
+            offsetMap.put(resName, stackCount * 4);
             // 计算数组所占空间大小
             int arraySize = arrayLen * 4;
             // 如果不是8的倍数，先分配第一个4字节，使其对齐
@@ -940,12 +941,13 @@ public class codeGen {
 
             MCStore store;
             if ((instr.getOperands().get(1)).getType() instanceof PointerType) {
-                store = new MCStore(src, s0Reg, new Immeidiate(-offset), SD);
+                store = new MCStore(src, dest, new Immeidiate(0), SD);
             } else {
-                store = new MCStore(src, s0Reg, new Immeidiate(-offset), opcode);
+                store = new MCStore(src, dest, new Immeidiate(0), opcode);
             }
             block.getMachineCodes().add(store);
             setDefUse(src, store);
+            setDefUse(dest, store);
         } else {
             if (dest.isLabel()) {
                 MCLoad la = new MCLoad(dest, new PhysicsReg("t0"), LA);
