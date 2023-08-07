@@ -1,5 +1,4 @@
-// Generated from ./src/main/java/antlr/SysYParser.g4 by ANTLR 4.12.0
-package antlr;
+package antlr;// Generated from ./src/main/java/antlr/SysYParser.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
