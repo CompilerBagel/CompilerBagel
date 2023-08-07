@@ -234,6 +234,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRAddGlobal(module, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
+                    if(assign.getType()!=type){
+                        if(assign.getType() == floatType){
+                            assign = typeTrans(builder,assign,FpToSi);
+                        }else if(assign.getType() == int32Type){
+                            assign = typeTrans(builder,assign,SiToFp);
+                        }
+                    }
                     if(assign instanceof ConstIntValueRef){
                         ConstIntVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
                     }
@@ -251,6 +258,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRBuildAlloca(builder, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
+                    if(assign.getType()!=type){
+                        if(assign.getType() == floatType){
+                            assign = typeTrans(builder,assign,FpToSi);
+                        }else if(assign.getType() == int32Type){
+                            assign = typeTrans(builder,assign,SiToFp);
+                        }
+                    }
                     ValueRef storeRes = IRBuildStore(builder, assign, constVariable);
                     if(assign instanceof ConstIntValueRef) {
                         ConstIntVarMap.put(constVariable.getText(), Integer.parseInt(((ConstIntValueRef) assign).getText()));
@@ -339,6 +353,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 if (paramCount.size() == 0) {
 
                     if (varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
+                    if(assign.getType()!=type){
+                        if(assign.getType() == floatType){
+                            assign = typeTrans(builder,assign,FpToSi);
+                        }else if(assign.getType() == int32Type){
+                            assign = typeTrans(builder,assign,SiToFp);
+                        }
+                    }
                     IRSetInitializer(module, variable, assign, variableName);
                 } else {
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
@@ -351,6 +372,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
                 if (paramCount.size() == 0) {
                     if (varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
+                    if(assign.getType()!=type){
+                        if(assign.getType() == floatType){
+                            assign = typeTrans(builder,assign,FpToSi);
+                        }else if(assign.getType() == int32Type){
+                            assign = typeTrans(builder,assign,SiToFp);
+                        }
+                    }
                     IRBuildStore(builder, assign, variable);
                 } else {
 
