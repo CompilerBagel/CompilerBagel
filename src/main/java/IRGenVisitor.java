@@ -543,7 +543,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 }
             }
 
-
             args.add(i, param);
         }
         return IRBuildCall(builder, functionBlock, args, argc, funcName);
