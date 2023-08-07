@@ -53,23 +53,65 @@ INTEGER_CONST : (DECIMAL_CONST |
                 HEX_CONST)
                 ;
 
-FLOAT_CONST : (DECIMAL_CONST* ('.' DECIMAL_CONST+)? (EXPONENT | BINARY_EXPONENT)
-            | DECIMAL_CONST+ '.' DECIMAL_CONST* (EXPONENT | BINARY_EXPONENT)?
-            | DECIMAL_CONST+ (EXPONENT | BINARY_EXPONENT)
-            | '.' DECIMAL_CONST+ (EXPONENT | BINARY_EXPONENT)?
-            | HEX_FLOAT_CONST)
-            ;
+FLOAT_CONST : DecimalFloatingConstant | HexadecimalFloatingConstant;
 
-fragment HEX_DIGIT : [0-9a-fA-F];
+DecimalFloatingConstant
+    :   FractionalConstant ExponentPart?
+    |   DigitSequence ExponentPart
+    ;
 
-EXPONENT : [eE] [+-]? DECIMAL_CONST+;
-BINARY_EXPONENT : [pP] [+-]? DECIMAL_CONST+;
+HexadecimalFloatingConstant
+    :   HexadecimalPrefix HexadecimalFractionalConstant BinaryExponentPart
+    |   HexadecimalPrefix HexadecimalDigitSequence BinaryExponentPart
+    ;
 
-HEX_FLOAT_CONST : HEX_PREFIX HEX_MANTISSA HEX_EXPONENT;
-HEX_PREFIX : '0' [xX];
-HEX_MANTISSA : HEX_DIGIT+ '.' HEX_DIGIT* | '.' HEX_DIGIT+;
-HEX_EXPONENT : HEX_FLOAT_EXPONENT_INDICATOR [+-]? HEX_DIGIT+;
-HEX_FLOAT_EXPONENT_INDICATOR : [pP];
+fragment
+FractionalConstant
+    :   DigitSequence? '.' DigitSequence
+    |   DigitSequence '.'
+    ;
+
+fragment
+ExponentPart
+    :   'e' Sign? DigitSequence
+    |   'E' Sign? DigitSequence
+    ;
+
+fragment
+Sign
+    :   '+'
+    |   '-'
+    ;
+
+fragment DigitSequence: DIGIT+;
+
+fragment
+HexadecimalDigit
+    :   [0-9a-fA-F]
+    ;
+
+fragment
+HexadecimalPrefix
+    :   '0x'
+    |   '0X'
+    ;
+
+fragment
+HexadecimalFractionalConstant
+    :   HexadecimalDigitSequence? '.' HexadecimalDigitSequence
+    |   HexadecimalDigitSequence '.'
+    ;
+
+fragment
+HexadecimalDigitSequence
+    :   HexadecimalDigit+
+    ;
+
+fragment
+BinaryExponentPart
+    :   'P' Sign? DigitSequence
+    |   'p' Sign? DigitSequence
+    ;
 
 WS : [ \t\r\n]+ -> skip;
 SL_COMMENT : '//' .*? '\n' -> skip;

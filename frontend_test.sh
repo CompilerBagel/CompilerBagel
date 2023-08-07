@@ -1,5 +1,6 @@
 pass_num=0
 test_num=0
+error_files=()
 
 testcases=$(find ./src/test/resources/functional -name "*.sy" | sort)
 for sysy_filename in ${testcases}
@@ -21,7 +22,7 @@ do
     fi
     echo $? >> answer.txt
 
-    java -Dfile.encoding=UTF-8 -classpath ./target/classes:./lib/antlr4-runtime-4.9.1.jar Main ${sysy_filename} out_without_sylib.ll test.s
+    java -Dfile.encoding=UTF-8 -classpath ./target/classes:./lib/antlr-4.12.0-complete.jar Main ${sysy_filename} out_without_sylib.ll test.s
     clang out_without_sylib.ll ./src/test/resources/sylib.c -w -o out
     if [ -f $input_file ]; then
         timeout 60s ./out < $input_file > output.txt
@@ -36,6 +37,7 @@ do
         echo -e "\e[32mPass"
     else
         echo "Wrong return value in $sysy_filename"
+        error_files+=($sysy_filename)
     fi
     if [[ "$1" == "d" ]]; then
         read
@@ -44,4 +46,10 @@ do
 done
 
 echo "Pass cases ($pass_num/$test_num)"
+
+for failed_file in "${error_files[@]}"
+do
+    echo $failed_file
+done
+
 rm ans out answer.txt output.txt out_without_sylib.ll sample.c

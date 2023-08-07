@@ -14,9 +14,13 @@ public final class MachineConstants {
     public static final String SUBIW = "subiw";
     public static final String MULW = "mulw";
     public static final String DIVW = "divw";
+    public static final String XOR = "xor";
+    public static final String XORI = "xori";
     public static final String SW = "sw";
     public static final String SD = "sd";
-
+    public static final String LW = "lw";
+    public static final String LA = "la";
+    public static final String LD = "ld";
     public static final String J = "j";
     public static final String BNE = "bne";
 

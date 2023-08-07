@@ -1,6 +1,0 @@
-{
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "/home/cardigan/23-Spring/Compilers/antlr4-runtime-4.9.1.jar"
-    ]
-}

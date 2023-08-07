@@ -4,26 +4,31 @@ import backend.machineCode.Immeidiate;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineOperand;
 
+import static backend.machineCode.MachineConstants.LA;
+
 public class MCLoad extends MachineCode {
     private MachineOperand src;
     private MachineOperand dest;
     private MachineOperand offset;
+    private final String loadOp;
 
-    public MCLoad(MachineOperand src, MachineOperand dest, MachineOperand offset) {
+    public MCLoad(MachineOperand src, MachineOperand dest, MachineOperand offset, String loadOp) {
         this.src = src;
         this.dest = dest;
         this.offset = offset;
+        this.loadOp = loadOp;
         this.addDef(dest);
         this.addUse(src);
         this.addUse(offset);
     }
 
-    public MCLoad(MachineOperand src, MachineOperand dest){
+    public MCLoad(MachineOperand src, MachineOperand dest, String loadOp) {
         this.src = src;
         this.dest = dest;
+        this.loadOp = loadOp;
         this.offset = new Immeidiate(0);
     }
-    
+
     public void setOffset(final MachineOperand offset) {
         this.offset = offset;
     }
@@ -36,7 +41,10 @@ public class MCLoad extends MachineCode {
      */
     @Override
     public String toString() {
-        return "lw " + dest.getRegister() + ", " + offset.getRegister() + "(" + src.getRegister() + ")";
+        if (loadOp.equals(LA)) {
+            return loadOp + " " + dest.getRegister() + ", " + src.getRegister();
+        }
+        return loadOp + " " + dest.getRegister() + ", " + offset.getRegister() + "(" + src.getRegister() + ")";
     }
     
     @Override
