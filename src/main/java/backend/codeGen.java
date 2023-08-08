@@ -456,7 +456,7 @@ public class codeGen {
             block.getMachineCodes().add(store);
         }
         // push ft0, ft1
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 4; i++) {
             stackCount += 2;
             int offset = stackCount * 4;
             MCStore store;
@@ -702,7 +702,7 @@ public class codeGen {
             }
             block.getMachineCodes().add(load);
         }
-        for (i = 0; i < 2; i++) {
+        for (i = 0; i < 4; i++) {
             int offset = offsetMap.get("floatPhyReg_a" + i);
             MCLoad load;
             if (isLegalImm(-offset)) {
