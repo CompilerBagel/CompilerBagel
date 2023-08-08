@@ -6,7 +6,7 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
-import antlr.*;
+//import antlr.*;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -234,13 +234,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRAddGlobal(module, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
-/*                    if(assign.getType()!=type){
+                    if(assign.getType()!=type){
                         if(assign.getType() == floatType){
-                            assign = typeTrans(builder,assign,FpToSi);
+                            assign = new ConstIntValueRef(Integer.parseInt(assign.getText()));
                         }else if(assign.getType() == int32Type){
-                            assign = typeTrans(builder,assign,SiToFp);
+                            //assign = typeTrans(builder,assign,SiToFp);
+                            assign = new ConstFloatValueRef(Float.parseFloat(assign.getText()));
                         }
-                    }*/
+                    }
                     if(assign instanceof ConstIntValueRef){
                         ConstIntVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
                     }
@@ -547,6 +548,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     param.setSpillIndex(spillIndex);
                     spillIndex++;
                 }
+
                 floatNO++;
             }else{
                 param.setNoFloatNO(noFloatNO);
