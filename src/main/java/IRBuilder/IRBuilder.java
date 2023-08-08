@@ -97,10 +97,10 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildNeg(IRBuilder builder, ValueRef valueRef, String name) {
-        // appendInstruction in sub
+        /*// appendInstruction in sub
         if(valueRef.getType() == floatType){
             return IRBuildCalc(builder, new ConstFloatValueRef(0), valueRef, name, FSUB);
-        }
+        }*/
         return IRBuildCalc(builder, new ConstIntValueRef(0), valueRef, name, SUB);
     }
 
