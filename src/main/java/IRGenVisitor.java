@@ -718,6 +718,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitAssignStmt(SysYParser.AssignStmtContext ctx) {
         ValueRef lValPointer = this.visitLVal(ctx.lVal());
         ValueRef exp = this.visit(ctx.exp());
+        Type lValType = lValPointer.getType() instanceof PointerType ? ((PointerType) lValPointer.getType()).getBaseType() : lValPointer.getType();
+        if (!(lValType.equals(exp.getType()))) {
+            if (lValType.equals(int32Type)) {
+                exp = typeTrans(builder, exp, FpToSi);
+            } else if (lValType.equals(floatType)) {
+                exp = typeTrans(builder, exp, SiToFp);
+            }
+        }
         return IRBuildStore(builder, exp, lValPointer);
     }
     boolean isaddr = false;
