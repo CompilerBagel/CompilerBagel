@@ -153,7 +153,7 @@ public class IRBuilder {
             valueRef = typeTrans(builder, valueRef, SiToFp);
             pointerType = new PointerType(valueRef.getType());
         } else if (valueRef.getType() == floatType && ((PointerType) pointer.getType()).getBaseType() == int32Type) {
-//            valueRef = typeTrans(builder, valueRef, FpToSi);
+            valueRef = typeTrans(builder, valueRef, FpToSi);
             pointerType = new PointerType(valueRef.getType());
         } else {
             pointerType = new PointerType(valueRef.getType());
