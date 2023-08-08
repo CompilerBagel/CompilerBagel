@@ -557,7 +557,7 @@ public class codeGen {
                 if (src.getType() == floatType) {
                     if (floatRegIndex > 7) {
                         stackCount += 2;
-                        if (floatRegIndex < 15) {
+                        if (floatRegIndex > 15) {
                             outOf15 = true;
                             spillIndex++;
                         } else {

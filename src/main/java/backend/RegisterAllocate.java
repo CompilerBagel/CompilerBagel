@@ -217,7 +217,7 @@ public class RegisterAllocate {
                         return reg;
                     }
                 }
-
+            return null;
             }
         }
         // allocate a1 ~ a7
