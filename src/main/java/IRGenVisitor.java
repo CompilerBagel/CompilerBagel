@@ -70,7 +70,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         List<Type> getFArrayTypeParams = new ArrayList<>();
         getFArrayTypeParams.add(new PointerType(floatType));
-        FunctionType getFArrayType = new FunctionType(getFArrayTypeParams, floatType);
+        FunctionType getFArrayType = new FunctionType(getFArrayTypeParams, int32Type);
         globalScope.define("getfarray", addLib("getfarray", getFArrayType), getFArrayType);
 
         List<Type> putIntTypeParams = new ArrayList<>();
