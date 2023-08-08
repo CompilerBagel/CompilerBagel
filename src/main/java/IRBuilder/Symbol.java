@@ -10,12 +10,13 @@ public class Symbol {
     String name;
     Type type;
     List<Float> initValue; // handle both non-array and array
-
+    List<Integer> IntinitValue;
     boolean isZero = false;
     public Symbol(String name, Type type){
         this.name = name;
         this.type = type;
         this.initValue = new ArrayList<>();
+        this.IntinitValue = new ArrayList<>();
     }
 
     public void setZero(boolean zero) {
@@ -47,6 +48,17 @@ public class Symbol {
 
     public void setInitValue(float value){
         initValue.add(value);
+    }
+
+    public List<Integer> getIntinitValue() {
+        return IntinitValue;
+    }
+
+    public void setIntInitValue(int value){
+        IntinitValue.add(value);
+    }
+    public void setIntinitValue(List<Integer> intinitValue) {
+        IntinitValue = intinitValue;
     }
 
     public void setInitValue(List<Float> value){

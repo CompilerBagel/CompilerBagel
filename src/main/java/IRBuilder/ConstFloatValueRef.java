@@ -15,6 +15,11 @@ public class ConstFloatValueRef implements ValueRef{
         this.value = value;
         this.type = FloatType.IRFloatType();
     }
+
+    public float getValue() {
+        return value;
+    }
+
     @Override
     public void setUsedByFunction(boolean usedByFunction) {
         UsedByFunction = usedByFunction;
