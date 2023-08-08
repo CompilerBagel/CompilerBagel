@@ -572,6 +572,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 }
             }
 
+            if (!paramType.equals(param.getType())) {
+                if (paramType.equals(int32Type)) {
+                    param = typeTrans(builder, param, FpToSi);
+                } else if (paramType.equals(floatType)) {
+                    param = typeTrans(builder, param, SiToFp);
+                }
+            }
             args.add(i, param);
         }
         return IRBuildCall(builder, functionBlock, args, argc, funcName);
