@@ -97,11 +97,25 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildNeg(IRBuilder builder, ValueRef valueRef, String name) {
-/*        // appendInstruction in sub
-        if(valueRef.getType() == floatType){
+        // appendInstruction in sub
+        if(valueRef instanceof ConstIntValueRef){
+            return new ConstIntValueRef(- Integer.parseInt(valueRef.getText()));
+        }
+        if(valueRef instanceof ConstFloatValueRef){
+            return new ConstFloatValueRef(- Float.parseFloat(valueRef.getText()));
+        }
+        if(valueRef instanceof BaseRegister){
+            if(valueRef.getType() == floatType){
+                return IRBuildCalc(builder, new ConstFloatValueRef(0), valueRef, name, FSUB);
+            }else{
+                return IRBuildCalc(builder, new ConstIntValueRef(0), valueRef, name, SUB);
+            }
+        }
+        /*if(valueRef.getType() == floatType){
             return IRBuildCalc(builder, new ConstFloatValueRef(0), valueRef, name, FSUB);
-        }*/
-        return IRBuildCalc(builder, new ConstIntValueRef(0), valueRef, name, SUB);
+        }
+        return IRBuildCalc(builder, new ConstIntValueRef(0), valueRef, name, SUB);*/
+        return null;
     }
 
     public static ValueRef IRBuildSRem(IRBuilder builder, ValueRef lhsValRef, ValueRef rhsValRef, String name) {
@@ -153,7 +167,7 @@ public class IRBuilder {
             valueRef = typeTrans(builder, valueRef, SiToFp);
             pointerType = new PointerType(valueRef.getType());
         } else if (valueRef.getType() == floatType && ((PointerType) pointer.getType()).getBaseType() == int32Type) {
-            valueRef = typeTrans(builder, valueRef, FpToSi);
+            // valueRef = typeTrans(builder, valueRef, FpToSi);
             pointerType = new PointerType(valueRef.getType());
         } else {
             pointerType = new PointerType(valueRef.getType());
