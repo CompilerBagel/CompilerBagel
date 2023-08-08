@@ -20,7 +20,7 @@ public class Main {
         String dest = args[1];
         String mcDest = args[2];
         // String rawMcDest = args[3];
-        boolean irOpt = args[4] != null;
+        boolean opt = args[4] != null;
 
         CharStream input = CharStreams.fromFileName(source);
         // Lexer
@@ -34,14 +34,18 @@ public class Main {
         irGenVisitorVisitor.visit(tree);
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
 
-        if(irOpt) {
-            DeadCodeScan deadCodeScan = new DeadCodeScan();
-            deadCodeScan.deadCodeScan(irGenVisitorVisitor.getModule());
+        if(opt) {
+
         }
 
         codeGen code = new codeGen();
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
         // code.PrintCodeToFile(mcDest);
+
+        if(opt) {
+            DeadCodeScan deadCodeScan = new DeadCodeScan();
+            deadCodeScan.deadCodeScan(code);
+        }
 
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
