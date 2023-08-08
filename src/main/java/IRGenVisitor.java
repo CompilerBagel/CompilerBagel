@@ -234,7 +234,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRAddGlobal(module, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
-                    /*if(assign.getType()!=type){
+/*                    if(assign.getType()!=type){
                         if(assign.getType() == floatType){
                             assign = typeTrans(builder,assign,FpToSi);
                         }else if(assign.getType() == int32Type){
