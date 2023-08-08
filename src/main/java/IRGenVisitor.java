@@ -6,7 +6,7 @@ import Type.ArrayType;
 import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
-import antlr.*;
+//import antlr.*;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -109,14 +109,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         globalScope.define("after_main", addLib("after_main", afterMainType), afterMainType);
 
         List<Type> startTimeTypeParams = new ArrayList<>();
-        startTimeTypeParams.add(int32Type);
+        //startTimeTypeParams.add(int32Type);
         FunctionType startTimeType = new FunctionType(startTimeTypeParams, voidType);
-        globalScope.define("start_time", addLib("start_time", startTimeType), startTimeType);
+        globalScope.define("starttime", addLib("starttime", startTimeType), startTimeType);
 
         List<Type> endTimeTypeParams = new ArrayList<>();
-        endTimeTypeParams.add(int32Type);
+        //endTimeTypeParams.add(int32Type);
         FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
-        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
+        globalScope.define("stoptime", addLib("stoptime", endTimeType), endTimeType);
 
     }
 
