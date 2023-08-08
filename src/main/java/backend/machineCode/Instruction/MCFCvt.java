@@ -3,6 +3,8 @@ package backend.machineCode.Instruction;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineOperand;
 
+import static backend.machineCode.MachineConstants.FCVT_W_S;
+
 public class MCFCvt extends MachineCode {
     private final MachineOperand src;
     private final MachineOperand dest;
@@ -32,6 +34,10 @@ public class MCFCvt extends MachineCode {
 
     @Override
     public String toString() {
-        return fCvtOp + " " + dest.getRegister() + ", " + src.getRegister();
+        String code = fCvtOp + " " + dest.getRegister() + ", " + src.getRegister();
+        if (fCvtOp.equals(FCVT_W_S)) {
+            code += ", rtz";
+        }
+        return code;
     }
 }
