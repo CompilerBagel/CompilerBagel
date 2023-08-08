@@ -8,7 +8,7 @@ public class FloatTools {
      * @return int
      */
     public static int getHigh20(float num) {
-        return (Float.floatToIntBits(num) & 0xfffff000) >> 12;
+        return (Float.floatToIntBits(num) & 0xfffff000) >>> 12;
     }
 
     /**

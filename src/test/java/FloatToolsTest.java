@@ -13,8 +13,16 @@ public class FloatToolsTest {
         float a = (float) 2.0e10;
         int high = FloatTools.getHigh20(a);
         int low = FloatTools.getLow12(a);
-        assertEquals(high, 330064);
-        assertEquals(low, 761);
+        assertEquals(330064, high);
+        assertEquals(761, low);
+    }
 
+    @Test
+    public void floatToolsTest2() {
+        float a = (float) -33000.0;
+        int high = FloatTools.getHigh20(a);
+        int low = FloatTools.getLow12(a);
+        assertEquals(815118, high);
+        assertEquals(2048, low);
     }
 }
