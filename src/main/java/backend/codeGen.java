@@ -150,7 +150,6 @@ public class codeGen {
         globalSb = new StringBuilder();
         for (Map.Entry<String, Symbol> entry : map.entrySet()) {
             globalSb.append("    ").append(entry.getKey()).append(":").append("\n");
-            List<Float> values = entry.getValue().getInitValue();
             boolean isInt = false;
             if (entry.getValue().isZero()) {
                 int len = ((ArrayType) entry.getValue().getType()).getLength() * 4;
@@ -166,14 +165,16 @@ public class codeGen {
                     if (tmp.equals(IRInt32Type()))
                         isInt = true;
                 }
-                for (Float value : values) {
-                    if (isInt) {
+                if (isInt) {
+                    List<Integer> values = entry.getValue().getIntinitValue();
+                    for (Integer value: values)
                         globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
-                    } else {
+                } else {
+                    List<Float> values = entry.getValue().getInitValue();
+                    for (Float value : values) {
                         String hexNumber = "0x" + Integer.toHexString(Float.floatToIntBits(value));
                         globalSb.append("        " + ".word ").append(hexNumber).append("\n");
                     }
-
                 }
             }
         }
