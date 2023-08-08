@@ -16,6 +16,7 @@ public class Symbol {
         this.name = name;
         this.type = type;
         this.initValue = new ArrayList<>();
+        this.IntinitValue = new ArrayList<>();
     }
 
     public void setZero(boolean zero) {
