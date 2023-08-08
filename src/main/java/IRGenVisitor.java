@@ -236,10 +236,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
                     if(assign.getType()!=type){
                         if(assign.getType() == floatType){
-                            assign = new ConstFloatValueRef(Float.parseFloat(assign.getText()));
+                            assign = new ConstIntValueRef((int)(Float.parseFloat(assign.getText())));
                         }else if(assign.getType() == int32Type){
-                            //assign = typeTrans(builder,assign,SiToFp);
-                            assign = new ConstIntValueRef(Integer.parseInt(assign.getText()));
+                            assign = new ConstFloatValueRef(Float.parseFloat(assign.getText()));
                         }
                     }
                     if(assign instanceof ConstIntValueRef){
