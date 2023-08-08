@@ -275,6 +275,16 @@ public class IRBuilder {
                 module.getGlobalSymbol(globalVarName).setIntinitValue(initValue);
                 module.getGlobalSymbol(globalVarName).setZero(flag);
             }
+        }else{
+            List<Float> initValue = new ArrayList<>();
+            for (int i = 0; i < constValueRefList.size(); i++) {
+                if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
+                    flag = false;
+                    initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
+                }
+            }
+            module.getGlobalSymbol(globalVarName).setInitValue(initValue);
+            module.getGlobalSymbol(globalVarName).setZero(flag);
         }
         if (flag) {
             module.emit("zeroinitializer");
@@ -355,6 +365,12 @@ public class IRBuilder {
                 }
                 module.getGlobalSymbol(((GlobalRegister) valueRef).getIdentity()).setIntinitValue(initValues);
             }
+        }else{
+            List<Float> initValues = new ArrayList<>();
+            for (ValueRef constFloat : constValueRefList) {
+                initValues.add(((ConstFloatValueRef) constFloat).getValue());
+            }
+            module.getGlobalSymbol(((GlobalRegister) valueRef).getIdentity()).setInitValue(initValues);
         }
         module.emit(emitStr.toString());
     }
