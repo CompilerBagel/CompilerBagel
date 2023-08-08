@@ -590,6 +590,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         if (ctx.exp() != null) {
             result = visit(ctx.exp());
         }
+        Type retType = currentFunction.getRetType();
+        if (null != result && !retType.equals(result.getType())) {
+            if (retType.equals(int32Type)) {
+                result = typeTrans(builder, result, FpToSi);
+            } else if (retType.equals(floatType)) {
+                result = typeTrans(builder, result, SiToFp);
+            }
+        }
         IRBuildRet(builder, result);
         return result;
     }
