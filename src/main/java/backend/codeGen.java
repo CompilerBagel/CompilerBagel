@@ -423,7 +423,7 @@ public class codeGen {
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
-        for (int i = 1; i < Integer.max(paramCnt + 2, 8) && i < 8; i++) {
+        for (int i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
             stackCount += 2;
             int offset = stackCount * 4;
             MCStore store;
@@ -440,22 +440,25 @@ public class codeGen {
             block.getMachineCodes().add(store);
         }
         // TODO: add if, push t3, t4, t5, t6
-        for (int i = 1; i <= 4; i++) {
-            stackCount += 2;
-            int offset = stackCount * 4;
-            MCStore store;
-            if (isLegalImm(-offset)) {
-                store = new MCStore(PhysicsReg.getPhysicsReg(27 + i), s0Reg, new Immeidiate(-offset), SD);
-            } else {
-                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
-                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
-                store = new MCStore(PhysicsReg.getPhysicsReg(27 + i), t0Reg, SD);
-                block.getMachineCodes().add(li);
-                block.getMachineCodes().add(add);
+        if (paramCnt > 7) {
+            for (int i = 1; i <= 4; i++) {
+                stackCount += 2;
+                int offset = stackCount * 4;
+                MCStore store;
+                if (isLegalImm(-offset)) {
+                    store = new MCStore(PhysicsReg.getPhysicsReg(27 + i), s0Reg, new Immeidiate(-offset), SD);
+                } else {
+                    MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                    MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                    store = new MCStore(PhysicsReg.getPhysicsReg(27 + i), t0Reg, SD);
+                    block.getMachineCodes().add(li);
+                    block.getMachineCodes().add(add);
+                }
+                offsetMap.put("phyReg_t" + (i + 2), offset);
+                block.getMachineCodes().add(store);
             }
-            offsetMap.put("phyReg_t" + (i + 2), offset);
-            block.getMachineCodes().add(store);
         }
+
         // push ft0, ft1
         for (int i = 0; i < 4; i++) {
             stackCount += 2;
@@ -473,7 +476,39 @@ public class codeGen {
             offsetMap.put("floatPhyReg_a" + i, offset);
             block.getMachineCodes().add(store);
         }
-
+        // TODO: notice
+//        for (int i = 28; i < 32; i++) {
+//            stackCount += 2;
+//            int offset = stackCount * 4;
+//            MCStore store;
+//            if (isLegalImm(-offset)) {
+//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), s0Reg, new Immeidiate(-offset), FSW);
+//            } else {
+//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), t0Reg, FSW);
+//                block.getMachineCodes().add(li);
+//                block.getMachineCodes().add(add);
+//            }
+//            offsetMap.put("floatPhyReg_a" + i, offset);
+//            block.getMachineCodes().add(store);
+//        }
+//        for (int i = 10; i < 18; i++) {
+//            stackCount += 2;
+//            int offset = stackCount * 4;
+//            MCStore store;
+//            if (isLegalImm(-offset)) {
+//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), s0Reg, new Immeidiate(-offset), FSW);
+//            } else {
+//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), t0Reg, FSW);
+//                block.getMachineCodes().add(li);
+//                block.getMachineCodes().add(add);
+//            }
+//            offsetMap.put("floatPhyReg_a" + i, offset);
+//            block.getMachineCodes().add(store);
+//        }
         mcFunc.setStackCount(stackCount);
         mcFunc.setFrameSize(stackAlign(stackCount));
         int i = 0;
@@ -674,7 +709,7 @@ public class codeGen {
         }
         block.getMachineCodes().add(call);
 
-        for (i = 1; i < Integer.max(paramCnt + 2, 8) && i < 8; i++) {
+        for (i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
             int offset = offsetMap.get("phyReg_a" + i);
             MCLoad load;
             if (isLegalImm(-offset)) {
@@ -689,20 +724,23 @@ public class codeGen {
             block.getMachineCodes().add(load);
         }
         // TODO: add if pop t3, t4, t5, t6
-        for (i = 1; i <= 4; i++) {
-            int offset = offsetMap.get("phyReg_t" + (i + 2));
-            MCLoad load;
-            if (isLegalImm(-offset)) {
-                load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(27 + i), new Immeidiate(-offset), LD);
-            } else {
-                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
-                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
-                load = new MCLoad(t0Reg, PhysicsReg.getPhysicsReg(27 + i), LD);
-                block.getMachineCodes().add(li);
-                block.getMachineCodes().add(add);
+        if (paramCnt > 7) {
+            for (i = 1; i <= 4; i++) {
+                int offset = offsetMap.get("phyReg_t" + (i + 2));
+                MCLoad load;
+                if (isLegalImm(-offset)) {
+                    load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(27 + i), new Immeidiate(-offset), LD);
+                } else {
+                    MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                    MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                    load = new MCLoad(t0Reg, PhysicsReg.getPhysicsReg(27 + i), LD);
+                    block.getMachineCodes().add(li);
+                    block.getMachineCodes().add(add);
+                }
+                block.getMachineCodes().add(load);
             }
-            block.getMachineCodes().add(load);
         }
+
         for (i = 0; i < 4; i++) {
             int offset = offsetMap.get("floatPhyReg_a" + i);
             MCLoad load;
@@ -717,6 +755,34 @@ public class codeGen {
             }
             block.getMachineCodes().add(load);
         }
+//        for (i = 28; i < 32; i++) {
+//            int offset = offsetMap.get("floatPhyReg_a" + i);
+//            MCLoad load;
+//            if (isLegalImm(-offset)) {
+//                load = new MCLoad(s0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), new Immeidiate(-offset), FLW);
+//            } else {
+//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+//                load = new MCLoad(t0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), FLW);
+//                block.getMachineCodes().add(li);
+//                block.getMachineCodes().add(add);
+//            }
+//            block.getMachineCodes().add(load);
+//        }
+//        for (i = 10; i < 18; i++) {
+//            int offset = offsetMap.get("floatPhyReg_a" + i);
+//            MCLoad load;
+//            if (isLegalImm(-offset)) {
+//                load = new MCLoad(s0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), new Immeidiate(-offset), FLW);
+//            } else {
+//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+//                load = new MCLoad(t0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), FLW);
+//                block.getMachineCodes().add(li);
+//                block.getMachineCodes().add(add);
+//            }
+//            block.getMachineCodes().add(load);
+//        }
         if (mv != null) block.getMachineCodes().add(mv);
         if (neg1 != null) block.getMachineCodes().add(neg1);
         if (neg2 != null) block.getMachineCodes().add(neg2);
