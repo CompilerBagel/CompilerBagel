@@ -1035,16 +1035,20 @@ public class codeGen {
                         }
 
                         int otherDimLen = ((ArrayType) baseType).getOtherDimensionLength(dims, 1) * 4;
-                        MCLi li = new MCLi(t0Reg, new Immeidiate(otherDimLen));
-                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, t0Reg, MULW);
-                        block.getMachineCodes().add(li);
+                        MCBinaryInteger mul;
+                        if (IntTools.logPowerOf2(otherDimLen) == -1) {
+                            MCLi li = new MCLi(t0Reg, new Immeidiate(otherDimLen));
+                            mul = new MCBinaryInteger(offset, indexOp, t0Reg, MULW);
+                            block.getMachineCodes().add(li);
+                        } else {
+                            int llNum = IntTools.logPowerOf2(otherDimLen);
+                            mul = new MCBinaryInteger(offset, indexOp, new Immeidiate(llNum), SLLW);
+                        }
                         block.getMachineCodes().add(mul);
                         setDefUse(offset, mul);
                         setDefUse(indexOp, mul);
                     } else { // 1 layer
-                        MCLi li = new MCLi(t0Reg, new Immeidiate(4));
-                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, t0Reg, MULW);
-                        block.getMachineCodes().add(li);
+                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, new Immeidiate(2), SLLW);
                         block.getMachineCodes().add(mul);
                         setDefUse(offset, mul);
                         setDefUse(indexOp, mul);
@@ -1109,9 +1113,14 @@ public class codeGen {
                         offset = 4;
                     }
 
-                    MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
-                    MCBinaryInteger mul = new MCBinaryInteger(offsetReg, indexOp, t0Reg, MUL);
-                    block.getMachineCodes().add(li);
+                    MCBinaryInteger mul;
+                    if (IntTools.logPowerOf2(offset) == -1) {
+                        MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                        mul = new MCBinaryInteger(offsetReg, indexOp, t0Reg, MUL);
+                        block.getMachineCodes().add(li);
+                    } else {
+                        mul = new MCBinaryInteger(offsetReg, indexOp, new Immeidiate(IntTools.logPowerOf2(offset)), SLLW);
+                    }
                     block.getMachineCodes().add(mul);
                     setDefUse(offsetReg, mul);
                     setDefUse(indexOp, mul);
