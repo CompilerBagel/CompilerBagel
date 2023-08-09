@@ -21,6 +21,7 @@ import Type.PointerType;
 import Type.ArrayType;
 import Type.FunctionType;
 import utils.FloatTools;
+import utils.IntTools;
 
 import static IRBuilder.IRConstants.FpToSi;
 import static IRBuilder.IRConstants.MUL;
@@ -150,7 +151,6 @@ public class codeGen {
         globalSb = new StringBuilder();
         for (Map.Entry<String, Symbol> entry : map.entrySet()) {
             globalSb.append("    ").append(entry.getKey()).append(":").append("\n");
-            List<Float> values = entry.getValue().getInitValue();
             boolean isInt = false;
             if (entry.getValue().isZero()) {
                 int len = ((ArrayType) entry.getValue().getType()).getLength() * 4;
@@ -166,14 +166,16 @@ public class codeGen {
                     if (tmp.equals(IRInt32Type()))
                         isInt = true;
                 }
-                for (Float value : values) {
-                    if (isInt) {
+                if (isInt) {
+                    List<Integer> values = entry.getValue().getIntinitValue();
+                    for (Integer value : values)
                         globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
-                    } else {
+                } else {
+                    List<Float> values = entry.getValue().getInitValue();
+                    for (Float value : values) {
                         String hexNumber = "0x" + Integer.toHexString(Float.floatToIntBits(value));
                         globalSb.append("        " + ".word ").append(hexNumber).append("\n");
                     }
-
                 }
             }
         }
@@ -344,30 +346,72 @@ public class codeGen {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
         MachineOperand left = parseOperand(instr.getOperands().get(1));
         MachineOperand right = parseOperand(instr.getOperands().get(2));
-
+        String instructionType = instr.getType();
         if (left.isImm()) {
             left = addLiOperation(left, block);
         }
-        if (right.isImm()) {
-            right = addLiOperation(right, block);
-        }
+        if (right.isImm() && !((Immeidiate) right).isFloatImm()
+                && ((Immeidiate) right).getImmValue() <= 2047
+                && ((Immeidiate) right).getImmValue() >= -2047
+                && (instructionType.equals(IRConstants.ADD)
+                || instructionType.equals(IRConstants.SUB))) {
 
-        String machineOp;
-        Type varType = ((BaseRegister) left).getType();
-        if (varType == int32Type || varType == int1Type) {
-            machineOp = intOperatorMap.get(instr.getType());
+            if (instructionType.equals(IRConstants.ADD)) {
+                MCBinaryInteger addi = new MCBinaryInteger(dest, left, right, ADDI);
+                block.getMachineCodes().add(addi);
+                setDefUse(dest, addi);
+                setDefUse(left, addi);
+            } else {
+                int val = ((Immeidiate) right).getImmValue();
+                MCBinaryInteger subi = new MCBinaryInteger(dest, left, new Immeidiate(-val), ADDI);
+                block.getMachineCodes().add(subi);
+                setDefUse(dest, subi);
+                setDefUse(left, subi);
+            }
+        } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
+                && IntTools.logPowerOf2(((Immeidiate) right).getImmValue()) != -1
+                && instructionType.equals(IRConstants.MUL)) {
+            // Optimize multiplication into bitwise operations
+            int llNum = IntTools.logPowerOf2(((Immeidiate) right).getImmValue());
+            MCBinaryInteger slli = new MCBinaryInteger(dest, left, new Immeidiate(llNum), SLLIW);
+            block.getMachineCodes().add(slli);
+            setDefUse(dest, slli);
+            setDefUse(left, slli);
+        } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
+                && IntTools.remToAnd(((Immeidiate) right).getImmValue()) != -1
+                && instructionType.equals(IRConstants.SREM)) {
+            int andNum = IntTools.remToAnd(((Immeidiate) right).getImmValue());
+            MCBinaryInteger rem = new MCBinaryInteger(dest, left, new Immeidiate(andNum), ANDI);
+            block.getMachineCodes().add(rem);
+            setDefUse(dest, rem);
+            setDefUse(left, rem);
         } else {
-            machineOp = floatOperatorMap.get(instr.getType());
+            if (right.isImm()) {
+                right = addLiOperation(right, block);
+            }
+            String machineOp;
+            Type varType = ((BaseRegister) left).getType();
+            if (varType instanceof PointerType) {
+                while (varType instanceof PointerType) {
+                    varType = ((PointerType) varType).getBaseType();
+                }
+            }
+            if (varType == int32Type || varType == int1Type) {
+                machineOp = intOperatorMap.get(instr.getType());
+            } else {
+                machineOp = floatOperatorMap.get(instr.getType());
+            }
+
+            if (machineOp != null) {
+                MachineCode code = new MCBinaryInteger(dest, left, right, machineOp);
+                setDefUse(dest, code);
+                setDefUse(left, code);
+                setDefUse(right, code);
+                block.getMachineCodes().add(code);
+            }
         }
 
-        if (machineOp != null) {
-            MachineCode code = new MCBinaryInteger(dest, left, right, machineOp);
-            setDefUse(dest, code);
-            setDefUse(left, code);
-            setDefUse(right, code);
-            block.getMachineCodes().add(code);
-        }
-
+        // dest is function's param
         ValueRef destVirtualReg = instr.getOperands().get(0);
         int spillIndex = destVirtualReg.getSpillIndex();
         Type type = destVirtualReg.getType();
@@ -422,7 +466,7 @@ public class codeGen {
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
-        for (int i = 1; i < Integer.max(paramCnt + 2, 8) && i < 8; i++) {
+        for (int i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
             stackCount += 2;
             int offset = stackCount * 4;
             MCStore store;
@@ -439,24 +483,27 @@ public class codeGen {
             block.getMachineCodes().add(store);
         }
         // TODO: add if, push t3, t4, t5, t6
-        for (int i = 1; i <= 4; i++) {
-            stackCount += 2;
-            int offset = stackCount * 4;
-            MCStore store;
-            if (isLegalImm(-offset)) {
-                store = new MCStore(PhysicsReg.getPhysicsReg(27 + i), s0Reg, new Immeidiate(-offset), SD);
-            } else {
-                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
-                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
-                store = new MCStore(PhysicsReg.getPhysicsReg(27 + i), t0Reg, SD);
-                block.getMachineCodes().add(li);
-                block.getMachineCodes().add(add);
+        if (paramCnt > 7) {
+            for (int i = 1; i <= 4; i++) {
+                stackCount += 2;
+                int offset = stackCount * 4;
+                MCStore store;
+                if (isLegalImm(-offset)) {
+                    store = new MCStore(PhysicsReg.getPhysicsReg(27 + i), s0Reg, new Immeidiate(-offset), SD);
+                } else {
+                    MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                    MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                    store = new MCStore(PhysicsReg.getPhysicsReg(27 + i), t0Reg, SD);
+                    block.getMachineCodes().add(li);
+                    block.getMachineCodes().add(add);
+                }
+                offsetMap.put("phyReg_t" + (i + 2), offset);
+                block.getMachineCodes().add(store);
             }
-            offsetMap.put("phyReg_t" + (i + 2), offset);
-            block.getMachineCodes().add(store);
         }
+
         // push ft0, ft1
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 4; i++) {
             stackCount += 2;
             int offset = stackCount * 4;
             MCStore store;
@@ -472,7 +519,39 @@ public class codeGen {
             offsetMap.put("floatPhyReg_a" + i, offset);
             block.getMachineCodes().add(store);
         }
-
+        // TODO: notice
+//        for (int i = 28; i < 32; i++) {
+//            stackCount += 2;
+//            int offset = stackCount * 4;
+//            MCStore store;
+//            if (isLegalImm(-offset)) {
+//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), s0Reg, new Immeidiate(-offset), FSW);
+//            } else {
+//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), t0Reg, FSW);
+//                block.getMachineCodes().add(li);
+//                block.getMachineCodes().add(add);
+//            }
+//            offsetMap.put("floatPhyReg_a" + i, offset);
+//            block.getMachineCodes().add(store);
+//        }
+//        for (int i = 10; i < 18; i++) {
+//            stackCount += 2;
+//            int offset = stackCount * 4;
+//            MCStore store;
+//            if (isLegalImm(-offset)) {
+//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), s0Reg, new Immeidiate(-offset), FSW);
+//            } else {
+//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), t0Reg, FSW);
+//                block.getMachineCodes().add(li);
+//                block.getMachineCodes().add(add);
+//            }
+//            offsetMap.put("floatPhyReg_a" + i, offset);
+//            block.getMachineCodes().add(store);
+//        }
         mcFunc.setStackCount(stackCount);
         mcFunc.setFrameSize(stackAlign(stackCount));
         int i = 0;
@@ -481,10 +560,10 @@ public class codeGen {
         int spillIndex = 0;
 
         /**
-          @params_pass
-         * 0-7: use a0-a7 or fa0-fa7
-         * 8-15: use ld/flw instruction to save in stack
-         * >15: already save in stack
+         @params_pass
+          * 0-7: use a0-a7 or fa0-fa7
+          * 8-15: use ld/flw instruction to save in stack
+          * >15: already save in stack
          */
         for (ValueRef param : params) {
             boolean outOf15 = false;
@@ -557,7 +636,7 @@ public class codeGen {
                 if (src.getType() == floatType) {
                     if (floatRegIndex > 7) {
                         stackCount += 2;
-                        if (floatRegIndex < 15) {
+                        if (floatRegIndex > 15) {
                             outOf15 = true;
                             spillIndex++;
                         } else {
@@ -568,11 +647,13 @@ public class codeGen {
                             int offset = spillIndex * 8;
                             MCStore fsw;
                             if (isLegalImm(offset)) {
-                                fsw = new MCStore(op, t1Reg, new Immeidiate(offset), FSW);;
+                                fsw = new MCStore(op, t1Reg, new Immeidiate(offset), FSW);
+                                ;
                             } else {
                                 MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
                                 MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
-                                fsw = new MCStore(op, t0Reg, FSW);;
+                                fsw = new MCStore(op, t0Reg, FSW);
+                                ;
                                 block.getMachineCodes().add(li);
                                 block.getMachineCodes().add(add);
                             }
@@ -640,10 +721,14 @@ public class codeGen {
         }
         MachineFunction mcFunction = funcMap.get(instr.getFunction());
         MCCall call;
+        String funcName = instr.getFunction().getFunctionName();
+        if (funcName.equals("starttime") || funcName.equals("stoptime")) {
+            funcName = "_sysy_" + funcName;
+        }
         if (mcFunction != null) {
             call = new MCCall(funcMap.get(instr.getFunction()), operands);
         } else {
-            MachineFunction outFunc = new MachineFunction(instr.getFunction().getFunctionName());
+            MachineFunction outFunc = new MachineFunction(funcName);
             call = new MCCall(outFunc, operands);
         }
         for (MachineOperand operand : operands) {
@@ -673,7 +758,7 @@ public class codeGen {
         }
         block.getMachineCodes().add(call);
 
-        for (i = 1; i < Integer.max(paramCnt + 2, 8) && i < 8; i++) {
+        for (i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
             int offset = offsetMap.get("phyReg_a" + i);
             MCLoad load;
             if (isLegalImm(-offset)) {
@@ -688,21 +773,24 @@ public class codeGen {
             block.getMachineCodes().add(load);
         }
         // TODO: add if pop t3, t4, t5, t6
-        for (i = 1; i <= 4; i++) {
-            int offset = offsetMap.get("phyReg_t" + (i + 2));
-            MCLoad load;
-            if (isLegalImm(-offset)) {
-                load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(27 + i), new Immeidiate(-offset), LD);
-            } else {
-                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
-                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
-                load = new MCLoad(t0Reg, PhysicsReg.getPhysicsReg(27 + i), LD);
-                block.getMachineCodes().add(li);
-                block.getMachineCodes().add(add);
+        if (paramCnt > 7) {
+            for (i = 1; i <= 4; i++) {
+                int offset = offsetMap.get("phyReg_t" + (i + 2));
+                MCLoad load;
+                if (isLegalImm(-offset)) {
+                    load = new MCLoad(s0Reg, PhysicsReg.getPhysicsReg(27 + i), new Immeidiate(-offset), LD);
+                } else {
+                    MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+                    MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+                    load = new MCLoad(t0Reg, PhysicsReg.getPhysicsReg(27 + i), LD);
+                    block.getMachineCodes().add(li);
+                    block.getMachineCodes().add(add);
+                }
+                block.getMachineCodes().add(load);
             }
-            block.getMachineCodes().add(load);
         }
-        for (i = 0; i < 2; i++) {
+
+        for (i = 0; i < 4; i++) {
             int offset = offsetMap.get("floatPhyReg_a" + i);
             MCLoad load;
             if (isLegalImm(-offset)) {
@@ -716,6 +804,34 @@ public class codeGen {
             }
             block.getMachineCodes().add(load);
         }
+//        for (i = 28; i < 32; i++) {
+//            int offset = offsetMap.get("floatPhyReg_a" + i);
+//            MCLoad load;
+//            if (isLegalImm(-offset)) {
+//                load = new MCLoad(s0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), new Immeidiate(-offset), FLW);
+//            } else {
+//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+//                load = new MCLoad(t0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), FLW);
+//                block.getMachineCodes().add(li);
+//                block.getMachineCodes().add(add);
+//            }
+//            block.getMachineCodes().add(load);
+//        }
+//        for (i = 10; i < 18; i++) {
+//            int offset = offsetMap.get("floatPhyReg_a" + i);
+//            MCLoad load;
+//            if (isLegalImm(-offset)) {
+//                load = new MCLoad(s0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), new Immeidiate(-offset), FLW);
+//            } else {
+//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
+//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
+//                load = new MCLoad(t0Reg, FloatPhysicsReg.getFloatPhysicsReg(i), FLW);
+//                block.getMachineCodes().add(li);
+//                block.getMachineCodes().add(add);
+//            }
+//            block.getMachineCodes().add(load);
+//        }
         if (mv != null) block.getMachineCodes().add(mv);
         if (neg1 != null) block.getMachineCodes().add(neg1);
         if (neg2 != null) block.getMachineCodes().add(neg2);
@@ -911,12 +1027,12 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MachineOperand offsetReg = addLiOperation(new Immeidiate(-(base - offset)), block);
-                    MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, offsetReg, ADD);
+                    MCLi li = new MCLi(t0Reg, new Immeidiate(-(base - offset)));
+                    MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, t0Reg, ADD);
                     offsetMap.put(instr.getOperands().get(0).getText(), base - offset);
+                    block.getMachineCodes().add(li);
                     block.getMachineCodes().add(add);
                     setDefUse(dest, add);
-                    setDefUse(offsetReg, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offset = new BaseRegister("offset", int32Type);
@@ -930,22 +1046,28 @@ public class codeGen {
                         }
 
                         int otherDimLen = ((ArrayType) baseType).getOtherDimensionLength(dims, 1) * 4;
-                        MachineOperand tmpNum = addLiOperation(new Immeidiate(otherDimLen), block);
-                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmpNum, MULW);
+                        MCBinaryInteger mul;
+                        if (IntTools.logPowerOf2(otherDimLen) == -1) {
+                            MCLi li = new MCLi(t0Reg, new Immeidiate(otherDimLen));
+                            mul = new MCBinaryInteger(offset, indexOp, t0Reg, MULW);
+                            block.getMachineCodes().add(li);
+                        } else {
+                            int llNum = IntTools.logPowerOf2(otherDimLen);
+                            mul = new MCBinaryInteger(offset, indexOp, new Immeidiate(llNum), SLLW);
+                        }
                         block.getMachineCodes().add(mul);
                         setDefUse(offset, mul);
                         setDefUse(indexOp, mul);
                     } else { // 1 layer
-                        MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
-                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
+                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, new Immeidiate(2), SLLW);
                         block.getMachineCodes().add(mul);
                         setDefUse(offset, mul);
                         setDefUse(indexOp, mul);
                     }
 
-
-                    MachineOperand baseTmp = addLiOperation(new Immeidiate(base), block);
-                    MCBinaryInteger addOffset = new MCBinaryInteger(offset, baseTmp, offset, SUB);
+                    MCLi li1 = new MCLi(t0Reg, new Immeidiate(base));
+                    MCBinaryInteger addOffset = new MCBinaryInteger(offset, t0Reg, offset, SUB);
+                    block.getMachineCodes().add(li1);
                     block.getMachineCodes().add(addOffset);
                     setDefUse(offset, addOffset);
 
@@ -978,13 +1100,13 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MachineOperand offsetReg = addLiOperation(new Immeidiate(offset), block);
-                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offsetReg, ADD);
+                    MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, t0Reg, ADD);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
+                    block.getMachineCodes().add(li);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
                     setDefUse(base, add);
-                    setDefUse(offsetReg, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offsetReg = new BaseRegister("offsetReg", int32Type);
@@ -1002,12 +1124,17 @@ public class codeGen {
                         offset = 4;
                     }
 
-                    MachineOperand tmp = addLiOperation(new Immeidiate(offset), block);
-                    MCBinaryInteger mul = new MCBinaryInteger(offsetReg, indexOp, tmp, MUL);
+                    MCBinaryInteger mul;
+                    if (IntTools.logPowerOf2(offset) == -1) {
+                        MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                        mul = new MCBinaryInteger(offsetReg, indexOp, t0Reg, MUL);
+                        block.getMachineCodes().add(li);
+                    } else {
+                        mul = new MCBinaryInteger(offsetReg, indexOp, new Immeidiate(IntTools.logPowerOf2(offset)), SLLW);
+                    }
                     block.getMachineCodes().add(mul);
                     setDefUse(offsetReg, mul);
                     setDefUse(indexOp, mul);
-                    setDefUse(tmp, mul);
 
                     MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offsetReg, ADD);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);

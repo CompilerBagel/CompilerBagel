@@ -15,6 +15,8 @@ public final class IRConstants {
     public static final String FDIV = "fdiv";
     public static final String SDIV = "sdiv";
     public static final String SREM = "srem";
+    public static final String SHL = "shl";
+    public static final String SHR = "ashr";
     public static final String XOR = "xor";
     public static final String ZEXT = "zext";
     public static final String ALLOCA = "alloca";

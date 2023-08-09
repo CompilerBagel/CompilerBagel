@@ -109,14 +109,24 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         globalScope.define("after_main", addLib("after_main", afterMainType), afterMainType);
 
         List<Type> startTimeTypeParams = new ArrayList<>();
-        startTimeTypeParams.add(int32Type);
+        //startTimeTypeParams.add(int32Type);
         FunctionType startTimeType = new FunctionType(startTimeTypeParams, voidType);
-        globalScope.define("start_time", addLib("start_time", startTimeType), startTimeType);
+        globalScope.define("starttime", addLib("starttime", startTimeType), startTimeType);
 
         List<Type> endTimeTypeParams = new ArrayList<>();
-        endTimeTypeParams.add(int32Type);
+        //endTimeTypeParams.add(int32Type);
         FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
-        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
+        globalScope.define("stoptime", addLib("stoptime", endTimeType), endTimeType);
+
+        List<Type> sysyStartTimeParams = new ArrayList<>();
+        sysyStartTimeParams.add(int32Type);
+        FunctionType sysyStartTime = new FunctionType(sysyStartTimeParams, voidType);
+        globalScope.define("_sysy_starttime", addLib("_sysy_starttime", sysyStartTime), sysyStartTime);
+
+        List<Type> sysyEndTimeParams = new ArrayList<>();
+        sysyEndTimeParams.add(int32Type);
+        FunctionType sysyEndTime = new FunctionType(sysyEndTimeParams, voidType);
+        globalScope.define("_sysy_stoptime", addLib("_sysy_stoptime", sysyEndTime), sysyEndTime);
 
     }
 

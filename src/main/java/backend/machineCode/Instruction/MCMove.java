@@ -25,6 +25,9 @@ public class MCMove extends MachineCode {
     @Override
     public String toString() {
         // TODO: mv conditions
+        if (isUselessCode()) {
+            return "";
+        }
         return "mv " + dest.getRegister() + ", " + src.getRegister();
     }
     
