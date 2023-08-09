@@ -351,7 +351,8 @@ public class codeGen {
             left = addLiOperation(left, block);
         }
         if (right.isImm() && !((Immeidiate) right).isFloatImm()
-                && isLegalImm(((Immeidiate) right).getImmValue())
+                && ((Immeidiate) right).getImmValue() <= 2047
+                && ((Immeidiate) right).getImmValue() >= -2047
                 && (instructionType.equals(IRConstants.ADD)
                 || instructionType.equals(IRConstants.SUB))) {
 
@@ -361,7 +362,8 @@ public class codeGen {
                 setDefUse(dest, addi);
                 setDefUse(left, addi);
             } else {
-                MCBinaryInteger subi = new MCBinaryInteger(dest, left, right, SUBI);
+                int val = ((Immeidiate) right).getImmValue();
+                MCBinaryInteger subi = new MCBinaryInteger(dest, left, new Immeidiate(-val), ADDI);
                 block.getMachineCodes().add(subi);
                 setDefUse(dest, subi);
                 setDefUse(left, subi);
