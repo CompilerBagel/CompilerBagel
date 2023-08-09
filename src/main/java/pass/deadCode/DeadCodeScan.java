@@ -20,13 +20,16 @@ public class DeadCodeScan {
     
     public void deadCodeScan(codeGen mcCode) {
         this.mcCode = mcCode;
+        unreachableCode(mcCode);
+        deadVariable(mcCode);
     }
 
     /**
      * 不可达代码
      */
     public void unreachableCode(codeGen mcCode) {
-
+        controlFlowUnreachable(mcCode);
+        branchUnreachable(mcCode);
     }
 
     /**
