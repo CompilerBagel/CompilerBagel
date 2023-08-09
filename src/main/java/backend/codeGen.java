@@ -369,11 +369,20 @@ public class codeGen {
         } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
                 && IntTools.logPowerOf2(((Immeidiate) right).getImmValue()) != -1
                 && instructionType.equals(IRConstants.MUL)) {
+            // Optimize multiplication into bitwise operations
             int llNum = IntTools.logPowerOf2(((Immeidiate) right).getImmValue());
             MCBinaryInteger slli = new MCBinaryInteger(dest, left, new Immeidiate(llNum), SLLIW);
             block.getMachineCodes().add(slli);
             setDefUse(dest, slli);
             setDefUse(left, slli);
+        } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
+                && IntTools.remToAnd(((Immeidiate) right).getImmValue()) != -1
+                && instructionType.equals(IRConstants.SREM)) {
+            int andNum = IntTools.remToAnd(((Immeidiate) right).getImmValue());
+            MCBinaryInteger rem = new MCBinaryInteger(dest, left, new Immeidiate(andNum), ANDI);
+            block.getMachineCodes().add(rem);
+            setDefUse(dest, rem);
+            setDefUse(left, rem);
         } else {
             if (right.isImm()) {
                 right = addLiOperation(right, block);
