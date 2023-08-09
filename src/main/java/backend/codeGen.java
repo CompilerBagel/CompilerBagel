@@ -978,12 +978,12 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MachineOperand offsetReg = addLiOperation(new Immeidiate(-(base - offset)), block);
-                    MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, offsetReg, ADD);
+                    MCLi li = new MCLi(t0Reg, new Immeidiate(-(base - offset)));
+                    MCBinaryInteger add = new MCBinaryInteger(dest, s0Reg, t0Reg, ADD);
                     offsetMap.put(instr.getOperands().get(0).getText(), base - offset);
+                    block.getMachineCodes().add(li);
                     block.getMachineCodes().add(add);
                     setDefUse(dest, add);
-                    setDefUse(offsetReg, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offset = new BaseRegister("offset", int32Type);
@@ -997,22 +997,24 @@ public class codeGen {
                         }
 
                         int otherDimLen = ((ArrayType) baseType).getOtherDimensionLength(dims, 1) * 4;
-                        MachineOperand tmpNum = addLiOperation(new Immeidiate(otherDimLen), block);
-                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmpNum, MULW);
+                        MCLi li = new MCLi(t0Reg, new Immeidiate(otherDimLen));
+                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, t0Reg, MULW);
+                        block.getMachineCodes().add(li);
                         block.getMachineCodes().add(mul);
                         setDefUse(offset, mul);
                         setDefUse(indexOp, mul);
                     } else { // 1 layer
-                        MachineOperand tmp4 = addLiOperation(new Immeidiate(4), block);
-                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, tmp4, MULW);
+                        MCLi li = new MCLi(t0Reg, new Immeidiate(4));
+                        MCBinaryInteger mul = new MCBinaryInteger(offset, indexOp, t0Reg, MULW);
+                        block.getMachineCodes().add(li);
                         block.getMachineCodes().add(mul);
                         setDefUse(offset, mul);
                         setDefUse(indexOp, mul);
                     }
 
-
-                    MachineOperand baseTmp = addLiOperation(new Immeidiate(base), block);
-                    MCBinaryInteger addOffset = new MCBinaryInteger(offset, baseTmp, offset, SUB);
+                    MCLi li1 = new MCLi(t0Reg, new Immeidiate(base));
+                    MCBinaryInteger addOffset = new MCBinaryInteger(offset, t0Reg, offset, SUB);
+                    block.getMachineCodes().add(li1);
                     block.getMachineCodes().add(addOffset);
                     setDefUse(offset, addOffset);
 
@@ -1045,13 +1047,13 @@ public class codeGen {
                         offset = index * 4;
                     }
 
-                    MachineOperand offsetReg = addLiOperation(new Immeidiate(offset), block);
-                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offsetReg, ADD);
+                    MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                    MCBinaryInteger add = new MCBinaryInteger(baseReg, base, t0Reg, ADD);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
+                    block.getMachineCodes().add(li);
                     block.getMachineCodes().add(add);
                     setDefUse(baseReg, add);
                     setDefUse(base, add);
-                    setDefUse(offsetReg, add);
                 } else if (indexReg instanceof BaseRegister) {
                     MachineOperand indexOp = parseOperand(indexReg);
                     BaseRegister offsetReg = new BaseRegister("offsetReg", int32Type);
@@ -1069,12 +1071,12 @@ public class codeGen {
                         offset = 4;
                     }
 
-                    MachineOperand tmp = addLiOperation(new Immeidiate(offset), block);
-                    MCBinaryInteger mul = new MCBinaryInteger(offsetReg, indexOp, tmp, MUL);
+                    MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
+                    MCBinaryInteger mul = new MCBinaryInteger(offsetReg, indexOp, t0Reg, MUL);
+                    block.getMachineCodes().add(li);
                     block.getMachineCodes().add(mul);
                     setDefUse(offsetReg, mul);
                     setDefUse(indexOp, mul);
-                    setDefUse(tmp, mul);
 
                     MCBinaryInteger add = new MCBinaryInteger(baseReg, base, offsetReg, ADD);
                     operandMap.put(instr.getOperands().get(0).getText(), baseReg);
