@@ -70,8 +70,8 @@ public class Main {
         allocator.easyAllocate();
 
         // Remove useless code
-        // RmUselessCode rmUselessCode = new RmUselessCode(code.getMCFunctions());
-        // rmUselessCode.remove();
+         RmUselessCode rmUselessCode = new RmUselessCode(code.getMCFunctions());
+         rmUselessCode.remove();
         code.PrintCodeToFile(mcDest);
     }
 }

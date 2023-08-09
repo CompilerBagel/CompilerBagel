@@ -167,7 +167,7 @@ public class codeGen {
                 }
                 if (isInt) {
                     List<Integer> values = entry.getValue().getIntinitValue();
-                    for (Integer value: values)
+                    for (Integer value : values)
                         globalSb.append("        " + ".word ").append(value.intValue()).append("\n");
                 } else {
                     List<Float> values = entry.getValue().getInitValue();
@@ -345,49 +345,53 @@ public class codeGen {
         MachineOperand dest = parseOperand(instr.getOperands().get(0));
         MachineOperand left = parseOperand(instr.getOperands().get(1));
         MachineOperand right = parseOperand(instr.getOperands().get(2));
-
+        String instructionType = instr.getType();
         if (left.isImm()) {
             left = addLiOperation(left, block);
         }
-        if (right.isImm()) {
-            if (instr.getType().equals(IRConstants.ADD)) {
+        if (right.isImm() && !((Immeidiate) right).isFloatImm()
+                && isLegalImm(((Immeidiate) right).getImmValue())
+                && (instructionType.equals(IRConstants.ADD)
+                || instructionType.equals(IRConstants.SUB))) {
+
+            if (instructionType.equals(IRConstants.ADD)) {
                 MCBinaryInteger addi = new MCBinaryInteger(dest, left, right, ADDI);
                 block.getMachineCodes().add(addi);
                 setDefUse(dest, addi);
                 setDefUse(left, addi);
-                return;
-            } else if (instr.getType().equals(IRConstants.SUB)) {
+            } else {
                 MCBinaryInteger subi = new MCBinaryInteger(dest, left, right, SUBI);
                 block.getMachineCodes().add(subi);
                 setDefUse(dest, subi);
                 setDefUse(left, subi);
-                return;
-            } else {
+            }
+        } else {
+            if (right.isImm()) {
                 right = addLiOperation(right, block);
             }
-        }
+            String machineOp;
+            Type varType = ((BaseRegister) left).getType();
+            if (varType instanceof PointerType) {
+                while (varType instanceof PointerType) {
+                    varType = ((PointerType) varType).getBaseType();
+                }
+            }
+            if (varType == int32Type || varType == int1Type) {
+                machineOp = intOperatorMap.get(instr.getType());
+            } else {
+                machineOp = floatOperatorMap.get(instr.getType());
+            }
 
-        String machineOp;
-        Type varType = ((BaseRegister) left).getType();
-        if (varType instanceof PointerType) {
-            while (varType instanceof PointerType) {
-                varType = ((PointerType) varType).getBaseType();
+            if (machineOp != null) {
+                MachineCode code = new MCBinaryInteger(dest, left, right, machineOp);
+                setDefUse(dest, code);
+                setDefUse(left, code);
+                setDefUse(right, code);
+                block.getMachineCodes().add(code);
             }
         }
-        if (varType == int32Type || varType == int1Type) {
-            machineOp = intOperatorMap.get(instr.getType());
-        } else {
-            machineOp = floatOperatorMap.get(instr.getType());
-        }
 
-        if (machineOp != null) {
-            MachineCode code = new MCBinaryInteger(dest, left, right, machineOp);
-            setDefUse(dest, code);
-            setDefUse(left, code);
-            setDefUse(right, code);
-            block.getMachineCodes().add(code);
-        }
-
+        // dest is function's param
         ValueRef destVirtualReg = instr.getOperands().get(0);
         int spillIndex = destVirtualReg.getSpillIndex();
         Type type = destVirtualReg.getType();
@@ -536,10 +540,10 @@ public class codeGen {
         int spillIndex = 0;
 
         /**
-          @params_pass
-         * 0-7: use a0-a7 or fa0-fa7
-         * 8-15: use ld/flw instruction to save in stack
-         * >15: already save in stack
+         @params_pass
+          * 0-7: use a0-a7 or fa0-fa7
+          * 8-15: use ld/flw instruction to save in stack
+          * >15: already save in stack
          */
         for (ValueRef param : params) {
             boolean outOf15 = false;
@@ -623,11 +627,13 @@ public class codeGen {
                             int offset = spillIndex * 8;
                             MCStore fsw;
                             if (isLegalImm(offset)) {
-                                fsw = new MCStore(op, t1Reg, new Immeidiate(offset), FSW);;
+                                fsw = new MCStore(op, t1Reg, new Immeidiate(offset), FSW);
+                                ;
                             } else {
                                 MCLi li = new MCLi(t0Reg, new Immeidiate(offset));
                                 MCBinaryInteger add = new MCBinaryInteger(t0Reg, t1Reg, t0Reg, ADD);
-                                fsw = new MCStore(op, t0Reg, FSW);;
+                                fsw = new MCStore(op, t0Reg, FSW);
+                                ;
                                 block.getMachineCodes().add(li);
                                 block.getMachineCodes().add(add);
                             }
