@@ -12,7 +12,7 @@ public class MCBinaryInteger extends MachineCode {
     private MachineOperand dest;
     private MachineOperand left;
     private MachineOperand right;
-    private String binaryOp;
+    private final String binaryOp;
     
     public MCBinaryInteger(MachineOperand dest, MachineOperand left, MachineOperand right, String binaryOp) {
         this.dest = dest;

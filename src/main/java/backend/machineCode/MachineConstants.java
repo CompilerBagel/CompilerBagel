@@ -25,6 +25,12 @@ public final class MachineConstants {
     public static final String XORI = "xori";
     public static final String REM = "rem";
     public static final String REMU = "remu";
+    public static final String SLLW = "sllw";
+    public static final String SLLIW = "slliw";
+    public static final String SRL = "srl";
+    public static final String SRAW = "sraw";
+    public static final String ANDI = "andi";
+    public static final String AND = "and";
     public static final String SW = "sw";
     public static final String SD = "sd";
     public static final String LW = "lw";
@@ -69,6 +75,8 @@ public final class MachineConstants {
             { IRConstants.SDIV, DIVW },
             { IRConstants.XOR, XOR },
             { IRConstants.SREM, REM },
+            { IRConstants.AND, AND},
+            { IRConstants.SHL, SLLW},
     }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
     public static Map<String, String> floatOperatorMap = Stream.of(new String[][] {
