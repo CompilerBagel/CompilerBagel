@@ -253,7 +253,29 @@ public class IRBuilder {
 
     public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList, String globalVarName) {
         boolean flag = true;
-        if(constValueRefList.get(0).getType() == floatType) {
+        if(constValueRefList.size()>0) {
+            if (constValueRefList.get(0).getType() == floatType) {
+                List<Float> initValue = new ArrayList<>();
+                for (int i = 0; i < constValueRefList.size(); i++) {
+                    if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
+                        flag = false;
+                        initValue.add(Float.valueOf(constValueRefList.get(i).getText()));
+                    }
+                }
+                module.getGlobalSymbol(globalVarName).setInitValue(initValue);
+                module.getGlobalSymbol(globalVarName).setZero(flag);
+            } else if (constValueRefList.get(0).getType() == int32Type) {
+                List<Integer> initValue = new ArrayList<>();
+                for (int i = 0; i < constValueRefList.size(); i++) {
+                    if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
+                        flag = false;
+                        initValue.add(Integer.valueOf(constValueRefList.get(i).getText()));
+                    }
+                }
+                module.getGlobalSymbol(globalVarName).setIntinitValue(initValue);
+                module.getGlobalSymbol(globalVarName).setZero(flag);
+            }
+        }else{
             List<Float> initValue = new ArrayList<>();
             for (int i = 0; i < constValueRefList.size(); i++) {
                 if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
@@ -262,16 +284,6 @@ public class IRBuilder {
                 }
             }
             module.getGlobalSymbol(globalVarName).setInitValue(initValue);
-            module.getGlobalSymbol(globalVarName).setZero(flag);
-        }else if(constValueRefList.get(0).getType() == int32Type){
-            List<Integer> initValue = new ArrayList<>();
-            for (int i = 0; i < constValueRefList.size(); i++) {
-                if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
-                    flag = false;
-                    initValue.add(Integer.valueOf(constValueRefList.get(i).getText()));
-                }
-            }
-            module.getGlobalSymbol(globalVarName).setIntinitValue(initValue);
             module.getGlobalSymbol(globalVarName).setZero(flag);
         }
         if (flag) {
@@ -339,18 +351,26 @@ public class IRBuilder {
         for(int i = 0;i<paramList.size()-1;i++){
             emitStr.append("]");
         }
-        if(constValueRefList.get(0).getType() == floatType) {
+        if(constValueRefList.size()>0) {
+            if (constValueRefList.get(0).getType() == floatType) {
+                List<Float> initValues = new ArrayList<>();
+                for (ValueRef constFloat : constValueRefList) {
+                    initValues.add(((ConstFloatValueRef) constFloat).getValue());
+                }
+                module.getGlobalSymbol(((GlobalRegister) valueRef).getIdentity()).setInitValue(initValues);
+            } else if (constValueRefList.get(0).getType() == int32Type) {
+                List<Integer> initValues = new ArrayList<>();
+                for (ValueRef constInt : constValueRefList) {
+                    initValues.add(((ConstIntValueRef) constInt).getValue());
+                }
+                module.getGlobalSymbol(((GlobalRegister) valueRef).getIdentity()).setIntinitValue(initValues);
+            }
+        }else{
             List<Float> initValues = new ArrayList<>();
             for (ValueRef constFloat : constValueRefList) {
                 initValues.add(((ConstFloatValueRef) constFloat).getValue());
             }
             module.getGlobalSymbol(((GlobalRegister) valueRef).getIdentity()).setInitValue(initValues);
-        }else if(constValueRefList.get(0).getType() == int32Type){
-            List<Integer> initValues = new ArrayList<>();
-            for (ValueRef constInt : constValueRefList) {
-                initValues.add(((ConstIntValueRef) constInt).getValue());
-            }
-            module.getGlobalSymbol(((GlobalRegister) valueRef).getIdentity()).setIntinitValue(initValues);
         }
         module.emit(emitStr.toString());
     }
