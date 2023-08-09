@@ -355,13 +355,14 @@ public class codeGen {
                 block.getMachineCodes().add(addi);
                 setDefUse(dest, addi);
                 setDefUse(left, addi);
+                return;
             } else {
                 MCBinaryInteger subi = new MCBinaryInteger(dest, left, right, SUBI);
                 block.getMachineCodes().add(subi);
                 setDefUse(dest, subi);
                 setDefUse(left, subi);
+                return;
             }
-            return;
         }
 
         String machineOp;
