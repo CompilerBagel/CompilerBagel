@@ -356,7 +356,7 @@ public class codeGen {
                 setDefUse(dest, addi);
                 setDefUse(left, addi);
                 return;
-            } else {
+            } else if (instr.getType().equals(IRConstants.SUB)) {
                 MCBinaryInteger subi = new MCBinaryInteger(dest, left, right, SUBI);
                 block.getMachineCodes().add(subi);
                 setDefUse(dest, subi);
