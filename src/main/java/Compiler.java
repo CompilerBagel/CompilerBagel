@@ -5,9 +5,10 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.*;
-import antlr.*;
+//import antlr.*;
 import static IRBuilder.IRModule.PrintModuleToFile;
 import backend.codeGen;
+import pass.deadCode.DeadCodeScan;
 
 public class Compiler {
     public static void main(String[] args) throws IOException {
@@ -16,6 +17,7 @@ public class Compiler {
 
         String source = args[3];
         String mcDest = args[2];
+        boolean opt = args[4] != null;
 
         // hanlde the starttime and stoptime function
         File file = new File(source);
@@ -59,8 +61,19 @@ public class Compiler {
         IRGenVisitor irGenVisitorVisitor = new IRGenVisitor();
         irGenVisitorVisitor.visit(tree);
 
+        if(opt) {
+
+        }
+
+
         codeGen code = new codeGen();
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
+
+        if(opt) {
+            DeadCodeScan deadCodeScan = new DeadCodeScan();
+            deadCodeScan.deadCodeScan(code);
+        }
+
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
         code.PrintCodeToFile(mcDest);

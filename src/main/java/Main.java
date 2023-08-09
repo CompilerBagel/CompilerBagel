@@ -4,11 +4,13 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import java.io.IOException;
+
+import java.io.*;
 //import antlr.*;
 import static IRBuilder.IRModule.PrintModuleToFile;
 import backend.codeGen;
 import pass.deadCode.DeadCodeScan;
+import pass.deadCode.IRDeadCodeScan;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -65,7 +67,8 @@ public class Main {
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
 
         if(opt) {
-
+            IRDeadCodeScan irDead = new IRDeadCodeScan();
+            irDead.deadCodeScan(irGenVisitorVisitor.getModule());
         }
 
         codeGen code = new codeGen();

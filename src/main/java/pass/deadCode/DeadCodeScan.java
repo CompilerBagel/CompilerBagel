@@ -10,6 +10,7 @@ import backend.machineCode.MachineOperand;
 import instruction.AllocaInstruction;
 import instruction.Instruction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -53,20 +54,26 @@ public class DeadCodeScan {
      * 无用变量
      */
     public void deadVariable(codeGen mcCode) {
-        for(FunctionBlock functionBlock: mcCode.getModule().getFunctionBlocks()){
+/*        for(FunctionBlock functionBlock: mcCode.getModule().getFunctionBlocks()){
             for(BaseBlock baseBlock: functionBlock.getBaseBlocks()){
                 MachineBlock mcBlock = mcCode.getBlockMap().get(baseBlock);
+                List<MachineCode> updateCode = mcBlock.getMachineCodes();
+                List<MachineCode> removeCode = new ArrayList<>();
                 for(MachineCode code: mcBlock.getMachineCodes()){
                     List<MachineOperand> defs = code.getDef();
                     List<MachineOperand> uses = code.getUse();
                     for(MachineOperand def: defs) {
                         if (def.noUser()) {
-                            mcBlock.getMachineCodes().remove(code);
+                            removeCode.add(code);
                         }
                     }
                 }
+                for(MachineCode code: removeCode){
+                    updateCode.remove(code);
+                }
+                mcBlock.setMachineCodes(updateCode);
             }
-        }
+        }*/
     }
 
 
