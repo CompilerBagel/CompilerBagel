@@ -350,7 +350,18 @@ public class codeGen {
             left = addLiOperation(left, block);
         }
         if (right.isImm()) {
-            right = addLiOperation(right, block);
+            if (instr.getType().equals(IRConstants.ADD)) {
+                MCBinaryInteger addi = new MCBinaryInteger(dest, left, right, ADDI);
+                block.getMachineCodes().add(addi);
+                setDefUse(dest, addi);
+                setDefUse(left, addi);
+            } else {
+                MCBinaryInteger subi = new MCBinaryInteger(dest, left, right, SUBI);
+                block.getMachineCodes().add(subi);
+                setDefUse(dest, subi);
+                setDefUse(left, subi);
+            }
+            return;
         }
 
         String machineOp;
