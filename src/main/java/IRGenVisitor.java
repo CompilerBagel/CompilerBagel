@@ -857,7 +857,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx) {
         ValueRef conditionVal = this.visit(ctx.cond());
-         ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+//         ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+        ValueRef cmpResult = conditionVal;
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
@@ -894,7 +895,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             cmpResult = IRBuildICmp(builder, IRIntSGT, lVal, rVal, "icmp_GT");
         }
 
-        return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
+//        return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
+        return cmpResult;
     }
 
     @Override
@@ -907,13 +909,15 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.NEQ() != null) {
             cmpResult = IRBuildICmp(builder, IRIntNE, lVal, rVal, "icmp_NE");
         }
-        return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
+//        return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
+        return cmpResult;
     }
 
     @Override
     public ValueRef visitAndCond(SysYParser.AndCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
-        ValueRef cmp  = IRBuildICmp(builder, IRIntEQ , intZero, lVal, "icmp_EQ");
+//        ValueRef cmp  = IRBuildICmp(builder, IRIntEQ , intZero, lVal, "icmp_EQ");
+        ValueRef cmp = lVal;
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "true_");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "false_");
         BaseBlock after = IRAppendBasicBlock(currentFunction, "after_");
@@ -931,14 +935,15 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder,after);
         res = IRBuildLoad(builder, res , "load_");
-        return IRBuildZExt(builder,res,int32Type,"tmp_");
-
+//        return IRBuildZExt(builder,res,int32Type,"tmp_");
+        return res;
     }
 
     @Override
     public ValueRef visitOrCond(SysYParser.OrCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
-        ValueRef cmp  = IRBuildICmp(builder, IRIntNE , intZero, lVal, "icmp_NE");
+//        ValueRef cmp  = IRBuildICmp(builder, IRIntNE , intZero, lVal, "icmp_NE");
+        ValueRef cmp = lVal;
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "true_");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "false_");
         BaseBlock after = IRAppendBasicBlock(currentFunction, "after_");
@@ -956,8 +961,10 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder,after);
         res = IRBuildLoad(builder, res , "load_");
-        return IRBuildZExt(builder,res,int32Type,"tmp_");
+//        return IRBuildZExt(builder,res,int32Type,"tmp_");
+        return res;
     }
+
 
     @Override
     public ValueRef visitWhileStmt(SysYParser.WhileStmtContext ctx) {
@@ -969,7 +976,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder, condBlock);
         ValueRef conditionVal = this.visit(ctx.cond());
-         ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
+//         ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
+        ValueRef cmpResult = conditionVal;
          IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
 //        IRBuildCondBr(builder, conditionVal, bodyBlock, afterBlock);
 
