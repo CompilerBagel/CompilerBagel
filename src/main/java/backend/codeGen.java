@@ -362,6 +362,8 @@ public class codeGen {
                 setDefUse(dest, subi);
                 setDefUse(left, subi);
                 return;
+            } else {
+                right = addLiOperation(right, block);
             }
         }
 
