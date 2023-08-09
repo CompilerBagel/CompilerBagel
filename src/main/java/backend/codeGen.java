@@ -21,6 +21,7 @@ import Type.PointerType;
 import Type.ArrayType;
 import Type.FunctionType;
 import utils.FloatTools;
+import utils.IntTools;
 
 import static IRBuilder.IRConstants.FpToSi;
 import static IRBuilder.IRConstants.MUL;
@@ -365,6 +366,14 @@ public class codeGen {
                 setDefUse(dest, subi);
                 setDefUse(left, subi);
             }
+        } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
+                && IntTools.logPowerOf2(((Immeidiate) right).getImmValue()) != -1
+                && instructionType.equals(IRConstants.MUL)) {
+            int llNum = IntTools.logPowerOf2(((Immeidiate) right).getImmValue());
+            MCBinaryInteger slli = new MCBinaryInteger(dest, left, new Immeidiate(llNum), SLLIW);
+            block.getMachineCodes().add(slli);
+            setDefUse(dest, slli);
+            setDefUse(left, slli);
         } else {
             if (right.isImm()) {
                 right = addLiOperation(right, block);
