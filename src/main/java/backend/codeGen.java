@@ -355,6 +355,11 @@ public class codeGen {
 
         String machineOp;
         Type varType = ((BaseRegister) left).getType();
+        if (varType instanceof PointerType) {
+            while (varType instanceof PointerType) {
+                varType = ((PointerType) varType).getBaseType();
+            }
+        }
         if (varType == int32Type || varType == int1Type) {
             machineOp = intOperatorMap.get(instr.getType());
         } else {
@@ -676,10 +681,14 @@ public class codeGen {
         }
         MachineFunction mcFunction = funcMap.get(instr.getFunction());
         MCCall call;
+        String funcName = instr.getFunction().getFunctionName();
+        if (funcName.equals("starttime") || funcName.equals("stoptime")) {
+            funcName = "_sysy_" + funcName;
+        }
         if (mcFunction != null) {
             call = new MCCall(funcMap.get(instr.getFunction()), operands);
         } else {
-            MachineFunction outFunc = new MachineFunction(instr.getFunction().getFunctionName());
+            MachineFunction outFunc = new MachineFunction(funcName);
             call = new MCCall(outFunc, operands);
         }
         for (MachineOperand operand : operands) {

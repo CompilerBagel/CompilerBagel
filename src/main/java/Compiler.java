@@ -17,37 +17,6 @@ public class Compiler {
         String source = args[3];
         String mcDest = args[2];
 
-        // hanlde the starttime and stoptime function
-        File file = new File(source);
-        String searchWord;
-        String replaceWord;
-        try{
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            StringBuilder content = new StringBuilder();
-            String line;
-            while((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
-            }
-            reader.close();
-
-            // execute the replace
-            searchWord = "starttime\\(\\)";
-            replaceWord = "_sysy_starttime(0)";
-            String updateContent = content.toString().replaceAll(searchWord, replaceWord);
-
-            searchWord = "stoptime\\(\\)";
-            replaceWord = "_sysy_stoptime(0)";
-            updateContent = updateContent.replaceAll(searchWord, replaceWord);
-
-            // write the update content to the file
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            writer.write(updateContent);
-            writer.close();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-
-
         CharStream input = CharStreams.fromFileName(source);
         // Lexer
         SysYLexer sysYLexer = new SysYLexer(input);
