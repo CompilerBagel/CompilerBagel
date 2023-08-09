@@ -376,9 +376,10 @@ public class codeGen {
             setDefUse(dest, slli);
             setDefUse(left, slli);
         } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
-                && ((Immeidiate) right).getImmValue() == 2
+                && IntTools.remToAnd(((Immeidiate) right).getImmValue()) != -1
                 && instructionType.equals(IRConstants.SREM)) {
-            MCBinaryInteger rem = new MCBinaryInteger(dest, left, new Immeidiate(1), ANDI);
+            int andNum = IntTools.remToAnd(((Immeidiate) right).getImmValue());
+            MCBinaryInteger rem = new MCBinaryInteger(dest, left, new Immeidiate(andNum), ANDI);
             block.getMachineCodes().add(rem);
             setDefUse(dest, rem);
             setDefUse(left, rem);
