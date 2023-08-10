@@ -479,6 +479,9 @@ public class codeGen {
         if (floatParamCnt == 5 && intParamCnt == 0) {
             saveIntCnt = 2;
         }
+        if (floatParamCnt == 1 && intParamCnt == 0) {
+            saveIntCnt = 2;
+        }
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
