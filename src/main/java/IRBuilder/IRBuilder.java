@@ -39,9 +39,9 @@ public class IRBuilder {
     public static void IRBuildRet(IRBuilder builder, ValueRef valueRef) {
         builder.currentBaseBlock.appendInstr(new RetInstruction(generateList(valueRef), builder.currentBaseBlock));
         builder.currentBaseBlock.getFunctionBlock().addRetBlock(builder.currentBaseBlock);
-        if(valueRef == null){
+        if (valueRef == null) {
             builder.emit(RET + " " + "void");
-        }else {
+        } else {
             builder.emit(RET + " " + valueRef.getTypeText() + " " + valueRef.getText());
         }
     }
@@ -98,16 +98,16 @@ public class IRBuilder {
 
     public static ValueRef IRBuildNeg(IRBuilder builder, ValueRef valueRef, String name) {
         // appendInstruction in sub
-        if(valueRef instanceof ConstIntValueRef){
-            return new ConstIntValueRef(- Integer.parseInt(valueRef.getText()));
+        if (valueRef instanceof ConstIntValueRef) {
+            return new ConstIntValueRef(-Integer.parseInt(valueRef.getText()));
         }
-        if(valueRef instanceof ConstFloatValueRef){
-            return new ConstFloatValueRef(- Float.parseFloat(valueRef.getText()));
+        if (valueRef instanceof ConstFloatValueRef) {
+            return new ConstFloatValueRef(-Float.parseFloat(valueRef.getText()));
         }
-        if(valueRef instanceof BaseRegister){
-            if(valueRef.getType() == floatType){
+        if (valueRef instanceof BaseRegister) {
+            if (valueRef.getType() == floatType) {
                 return IRBuildCalc(builder, new ConstFloatValueRef(0), valueRef, name, FSUB);
-            }else{
+            } else {
                 return IRBuildCalc(builder, new ConstIntValueRef(0), valueRef, name, SUB);
             }
         }
@@ -129,7 +129,7 @@ public class IRBuilder {
     }
 
     public static ValueRef IRBuildZExt(IRBuilder builder, ValueRef valueRef, Type type, String name) {
-        if(valueRef.getType() == type){
+        if (valueRef.getType() == type) {
             return valueRef;
         }
         if (valueRef instanceof ConstIntValueRef) {
@@ -194,6 +194,12 @@ public class IRBuilder {
                     + origin.getText() + " to float");
             builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock,
                     SiToFp));
+        } else if (type == SiToFp && origin.getType() == int1Type) {
+            resRegister = new BaseRegister("conv", floatType);
+            builder.emit(resRegister.getText() + " = sitofp i1 "
+                    + origin.getText() + " to float");
+            builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock,
+                    SiToFp));
         } else {
             System.err.println("typeTrans wrong!");
         }
@@ -229,7 +235,7 @@ public class IRBuilder {
         return resRegister;
     }
 
-    public static ValueRef IRAddLocal(IRModule module, Type type, String localVarName){
+    public static ValueRef IRAddLocal(IRModule module, Type type, String localVarName) {
         Type baseType = new PointerType(type);
         ValueRef resRegister = new GlobalRegister(localVarName, baseType);
         //symbol
@@ -238,11 +244,11 @@ public class IRBuilder {
     }
 
     public static void IRSetInitializer(IRModule module, ValueRef globalVar, ValueRef constRef, String globalName) {
-        if(constRef instanceof ConstIntValueRef) {
+        if (constRef instanceof ConstIntValueRef) {
             int initValue = Integer.valueOf(constRef.getText());
             module.getGlobalSymbol(globalName).setIntInitValue(initValue);
         }
-        if(constRef instanceof ConstFloatValueRef){
+        if (constRef instanceof ConstFloatValueRef) {
             Float initValue = Float.valueOf(constRef.getText());
             module.getGlobalSymbol(globalName).setInitValue(initValue);
         }
@@ -250,10 +256,9 @@ public class IRBuilder {
     }
 
 
-
     public static void IRSetInitializer(IRModule module, ValueRef valueRef, List<ValueRef> constValueRefList, String globalVarName) {
         boolean flag = true;
-        if(constValueRefList.size()>0) {
+        if (constValueRefList.size() > 0) {
             if (constValueRefList.get(0).getType() == floatType) {
                 List<Float> initValue = new ArrayList<>();
                 for (int i = 0; i < constValueRefList.size(); i++) {
@@ -275,7 +280,7 @@ public class IRBuilder {
                 module.getGlobalSymbol(globalVarName).setIntinitValue(initValue);
                 module.getGlobalSymbol(globalVarName).setZero(flag);
             }
-        }else{
+        } else {
             List<Float> initValue = new ArrayList<>();
             for (int i = 0; i < constValueRefList.size(); i++) {
                 if (!Objects.equals(constValueRefList.get(i).getText(), "0")) {
@@ -310,25 +315,25 @@ public class IRBuilder {
         int temp = constValueRefList.size() / lastLength;
         int counter = 0;
         int counter1 = 0;
-        for(int i = 0;i<paramList.size()-1;i++){
+        for (int i = 0; i < paramList.size() - 1; i++) {
             emitStr.append("[");
         }
         for (int i = 0; i < temp; i++) {
-            if(paramList.size()!=1){
+            if (paramList.size() != 1) {
                 emitStr.append(elementType.getText());
             }
 
             boolean flg = true;
-            for(int j = 0; j < lastLength; j++){
-                if(!constValueRefList.get(counter1++).getText().equals("0")){
+            for (int j = 0; j < lastLength; j++) {
+                if (!constValueRefList.get(counter1++).getText().equals("0")) {
                     flg = false;
                     break;
                 }
             }
-            if (flg){
+            if (flg) {
                 emitStr.append(" zeroinitializer,");
-                counter =counter1;
-            }else {
+                counter = counter1;
+            } else {
                 emitStr.append(" [");
                 for (int j = 0; j < lastLength; j++) {
 
@@ -340,18 +345,18 @@ public class IRBuilder {
                     emitStr.append(typeStr + " " + constValueRefList.get(counter++).getText() + ", ");
                 }
                 counter1 = counter;
-                if(i==temp-1){
+                if (i == temp - 1) {
                     emitStr.append("]");
-                }else{
+                } else {
                     emitStr.append("], ");
                 }
 
             }
         }
-        for(int i = 0;i<paramList.size()-1;i++){
+        for (int i = 0; i < paramList.size() - 1; i++) {
             emitStr.append("]");
         }
-        if(constValueRefList.size()>0) {
+        if (constValueRefList.size() > 0) {
             if (constValueRefList.get(0).getType() == floatType) {
                 List<Float> initValues = new ArrayList<>();
                 for (ValueRef constFloat : constValueRefList) {
@@ -365,7 +370,7 @@ public class IRBuilder {
                 }
                 module.getGlobalSymbol(((GlobalRegister) valueRef).getIdentity()).setIntinitValue(initValues);
             }
-        }else{
+        } else {
             List<Float> initValues = new ArrayList<>();
             for (ValueRef constFloat : constValueRefList) {
                 initValues.add(((ConstFloatValueRef) constFloat).getValue());
@@ -391,9 +396,9 @@ public class IRBuilder {
         if (lhs.getType() == floatType || rhs.getType() == floatType) {
             resType = floatType;
         }
-        if (lhs.getType() == int32Type && rhs.getType() == floatType) {
+        if ((lhs.getType() == int32Type || lhs.getType() == int1Type) && rhs.getType() == floatType) {
             lhs = typeTrans(builder, lhs, SiToFp);
-        } else if (lhs.getType() == floatType && rhs.getType() == int32Type) {
+        } else if (lhs.getType() == floatType && (rhs.getType() == int32Type || rhs.getType() == int1Type)) {
             rhs = typeTrans(builder, rhs, SiToFp);
         }
         ValueRef resRegister = new BaseRegister(text, int1Type);
@@ -403,14 +408,14 @@ public class IRBuilder {
         return resRegister;
     }
 
-    public static ValueRef IRBuildAnd(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text){
+    public static ValueRef IRBuildAnd(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text) {
         ValueRef resRegister = new BaseRegister(text, lhs.getType());
-        builder.emit(resRegister.getText() + " = " + AND + " " + lhs.getTypeText()+ " " + lhs.getText() + ", " + rhs.getText());
+        builder.emit(resRegister.getText() + " = " + AND + " " + lhs.getTypeText() + " " + lhs.getText() + ", " + rhs.getText());
         return resRegister;
 
     }
 
-    public static ValueRef IRBuildOr(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text){
+    public static ValueRef IRBuildOr(IRBuilder builder, ValueRef lhs, ValueRef rhs, String text) {
         ValueRef resRegister = new BaseRegister(text, lhs.getType());
         builder.emit(resRegister.getText() + " = " + OR + " " + lhs.getTypeText() + " " + lhs.getText() + ", " + rhs.getText());
         return resRegister;
@@ -457,7 +462,7 @@ public class IRBuilder {
 
     public static ValueRef IRBuildCall(IRBuilder builder, FunctionBlock function, List<ValueRef> args, int argc, String varName) {
         Type retType = ((FunctionType) function.getType()).getRetType();
-        ValueRef resRegister = new BaseRegister(varName+"_call", retType);
+        ValueRef resRegister = new BaseRegister(varName + "_call", retType);
         StringBuilder stringBuilder = new StringBuilder();
         List<ValueRef> operands = new ArrayList<>();
         operands.add(resRegister);
