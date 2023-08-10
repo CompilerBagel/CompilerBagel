@@ -24,7 +24,7 @@ import static Type.VoidType.IRVoidType;
 public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRModule module = IRModuleCreateWithName("module");
     IRBuilder builder = IRCreateBuilder();
-    private final Map<String,Integer> ConstIntVarMap = new LinkedHashMap<>();
+    private final Map<String, Integer> ConstIntVarMap = new LinkedHashMap<>();
     private final Map<String, Float> ConstFloatVarMap = new LinkedHashMap<>();
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
@@ -41,6 +41,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private ValueRef floatZero = new ConstFloatValueRef(0);
     private boolean arrayAddr = false;
     private boolean tempBool = false;
+
     public IRModule getModule() {
         return module;
     }
@@ -53,7 +54,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         return super.visitProgram(ctx);
     }
 
-    private void addLibs(GlobalScope globalScope){
+    private void addLibs(GlobalScope globalScope) {
         FunctionType getIntType = new FunctionType(new ArrayList<>(), int32Type);
         globalScope.define("getint", addLib("getint", getIntType), getIntType);
 
@@ -130,7 +131,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
     }
 
-    private FunctionBlock addLib(String libName, FunctionType libType){
+    private FunctionBlock addLib(String libName, FunctionType libType) {
         FunctionBlock function = new FunctionBlock(libName, libType);
         // Symbol funcSym = new Symbol(libName, libType);
         // module.addGlobalSymbol(libName, funcSym);
@@ -156,18 +157,18 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         for (int i = 0; i < paramsCount; i++) {
             String paramTypeName = ctx.funcFParams().funcFParam(i).bType().getText();
             if (ctx.funcFParams().funcFParam(i).L_BRACKT(0) != null) {
-                if(ctx.funcFParams().funcFParam(i).L_BRACKT().size()>1){
+                if (ctx.funcFParams().funcFParam(i).L_BRACKT().size() > 1) {
                     Type baseType = defineType(paramTypeName);
-                    for(int j = 1;j<ctx.funcFParams().funcFParam(i).L_BRACKT().size();j++){
-                        ValueRef tempValue= ctx.funcFParams().funcFParam(i).exp(j-1).accept(this);
-                        if(tempValue instanceof ConstIntValueRef){
+                    for (int j = 1; j < ctx.funcFParams().funcFParam(i).L_BRACKT().size(); j++) {
+                        ValueRef tempValue = ctx.funcFParams().funcFParam(i).exp(j - 1).accept(this);
+                        if (tempValue instanceof ConstIntValueRef) {
                             baseType = new ArrayType(baseType, Integer.parseInt(((ConstIntValueRef) tempValue).getText()));
-                        }else{
-                            baseType = new ArrayType(baseType,Integer.parseInt(ctx.funcFParams().funcFParam(i).exp(j-1).getText()));
+                        } else {
+                            baseType = new ArrayType(baseType, Integer.parseInt(ctx.funcFParams().funcFParam(i).exp(j - 1).getText()));
                         }
                     }
                     paramsType.add(new PointerType(baseType));
-                }else {
+                } else {
                     paramsType.add(new PointerType(defineType(paramTypeName)));
                 }
             } else {
@@ -223,8 +224,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type type = defineType(typeName);
             ValueRef constVariable;
             String constName = constDefContext.IDENT().getText();
-            if(constName.length()>20){
-                constName = constName.substring(0,20);
+            if (constName.length() > 20) {
+                constName = constName.substring(0, 20);
             }
             // 初始化assign的值
             if (typeName.equals("int")) assign = intZero;
@@ -244,43 +245,43 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 constVariable = IRAddGlobal(module, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
-                    if(assign.getType()!=type){
-                        if(assign.getType() == floatType){
-                            assign = new ConstIntValueRef((int)(Float.parseFloat(assign.getText())));
-                        }else if(assign.getType() == int32Type){
+                    if (assign.getType() != type) {
+                        if (assign.getType() == floatType) {
+                            assign = new ConstIntValueRef((int) (Float.parseFloat(assign.getText())));
+                        } else if (assign.getType() == int32Type) {
                             assign = new ConstFloatValueRef(Float.parseFloat(assign.getText()));
                         }
                     }
-                    if(assign instanceof ConstIntValueRef){
-                        ConstIntVarMap.put(constVariable.getText(),Integer.parseInt(((ConstIntValueRef)assign).getText()));
+                    if (assign instanceof ConstIntValueRef) {
+                        ConstIntVarMap.put(constVariable.getText(), Integer.parseInt(((ConstIntValueRef) assign).getText()));
                     }
                     if (assign instanceof ConstFloatValueRef) {
-                        ConstFloatVarMap.put(constVariable.getText(),Float.parseFloat(((ConstFloatValueRef)assign).getText()));
+                        ConstFloatVarMap.put(constVariable.getText(), Float.parseFloat(((ConstFloatValueRef) assign).getText()));
                     }
 
 
                     IRSetInitializer(module, constVariable, assign, constName);
                 } else {
-                    if(constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
-                    IRSetInitializer(module, constVariable, init,constName);
+                    if (constDefContext.ASSIGN() != null) visitConstInitVal(constDefContext.constInitVal());
+                    IRSetInitializer(module, constVariable, init, constName);
                 }
             } else {
                 constVariable = IRBuildAlloca(builder, type, constName);
                 if (paramCount.size() == 0) {
                     if (constDefContext.ASSIGN() != null) assign = constDefContext.constInitVal().accept(this);
-                    if(assign.getType()!=type){
-                        if(assign.getType() == floatType){
-                            assign = typeTrans(builder,assign,FpToSi);
-                        }else if(assign.getType() == int32Type){
-                            assign = typeTrans(builder,assign,SiToFp);
+                    if (assign.getType() != type) {
+                        if (assign.getType() == floatType) {
+                            assign = typeTrans(builder, assign, FpToSi);
+                        } else if (assign.getType() == int32Type) {
+                            assign = typeTrans(builder, assign, SiToFp);
                         }
                     }
                     ValueRef storeRes = IRBuildStore(builder, assign, constVariable);
-                    if(assign instanceof ConstIntValueRef) {
+                    if (assign instanceof ConstIntValueRef) {
                         ConstIntVarMap.put(constVariable.getText(), Integer.parseInt(((ConstIntValueRef) assign).getText()));
                     }
                     if (assign instanceof ConstFloatValueRef) {
-                        ConstFloatVarMap.put(constVariable.getText(),Float.parseFloat(((ConstFloatValueRef)assign).getText()));
+                        ConstFloatVarMap.put(constVariable.getText(), Float.parseFloat(((ConstFloatValueRef) assign).getText()));
                     }
                 } else {
                     //TODO: 正确性验证
@@ -339,8 +340,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type type = defineType(typeName);
             ValueRef variable;
             String variableName = varDefContext.IDENT().getText();
-            if(variableName.length()>20){
-                variableName = variableName.substring(0,20);
+            if (variableName.length() > 20) {
+                variableName = variableName.substring(0, 20);
             }
             // 初始化assign的值
             if (typeName.equals("int")) assign = intZero;
@@ -363,18 +364,18 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 if (paramCount.size() == 0) {
 
                     if (varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
-                    if(assign.getType()!=type){
-                        if(assign.getType() == floatType){
-                            assign = typeTrans(builder,assign,FpToSi);
-                        }else if(assign.getType() == int32Type){
-                            assign = typeTrans(builder,assign,SiToFp);
+                    if (assign.getType() != type) {
+                        if (assign.getType() == floatType) {
+                            assign = typeTrans(builder, assign, FpToSi);
+                        } else if (assign.getType() == int32Type) {
+                            assign = typeTrans(builder, assign, SiToFp);
                         }
                     }
                     IRSetInitializer(module, variable, assign, variableName);
                 } else {
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
 //                    for (int i = 0; i < init.size(); i++) System.err.println(init.get(i).getText());
-                    IRSetInitializer(module, variable, init,variableName);
+                    IRSetInitializer(module, variable, init, variableName);
                 }
             } else {
                 variable = IRBuildAlloca(builder, type, variableName);
@@ -382,11 +383,11 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
                 if (paramCount.size() == 0) {
                     if (varDefContext.ASSIGN() != null) assign = varDefContext.initVal().accept(this);
-                    if(assign.getType()!=type){
-                        if(assign.getType() == floatType){
-                            assign = typeTrans(builder,assign,FpToSi);
-                        }else if(assign.getType() == int32Type){
-                            assign = typeTrans(builder,assign,SiToFp);
+                    if (assign.getType() != type) {
+                        if (assign.getType() == floatType) {
+                            assign = typeTrans(builder, assign, FpToSi);
+                        } else if (assign.getType() == int32Type) {
+                            assign = typeTrans(builder, assign, SiToFp);
                         }
                     }
                     IRBuildStore(builder, assign, variable);
@@ -403,7 +404,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                                 int totalCount = init.size();
                                 int temp = 1;
                                 int counter = i;
-                                if(!Objects.equals(init.get(i).getText(), "0")) {
+                                if (!Objects.equals(init.get(i).getText(), "0")) {
                                     arrayPtr.add(new ConstIntValueRef(0));
                                     for (int j = 0; j < elementDimension.size(); j++) {
                                         totalCount /= elementDimension.get(j);
@@ -551,7 +552,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 //                    baseType = ((PointerType) baseType).getBaseType();
 //                }
 //            }
-            if(baseType == floatType){
+            if (baseType == floatType) {
                 param.setFloatNO(floatNO);
                 if (floatNO > 7) {
                     param.setSpillIndex(spillIndex);
@@ -559,7 +560,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 }
 
                 floatNO++;
-            }else{
+            } else {
                 param.setNoFloatNO(noFloatNO);
                 if (noFloatNO > 7) {
                     param.setSpillIndex(spillIndex);
@@ -568,13 +569,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 noFloatNO++;
             }
 
-            if(paramType instanceof PointerType) {
-                if ((!(((PointerType)paramType).getBaseType() instanceof ArrayType))&& param.getType() instanceof PointerType &&((PointerType) param.getType()).getBaseType() instanceof ArrayType) {
+            if (paramType instanceof PointerType) {
+                if ((!(((PointerType) paramType).getBaseType() instanceof ArrayType)) && param.getType() instanceof PointerType && ((PointerType) param.getType()).getBaseType() instanceof ArrayType) {
                     List<ValueRef> indexes = new ArrayList<>();
                     indexes.add(intZero);
                     indexes.add(intZero);
                     param = IRBuildGEP(builder, param, indexes, indexes.size(), "new_ptr");
-                }else if(!Objects.equals(paramType.getText(), param.getType().getText())){
+                } else if (!Objects.equals(paramType.getText(), param.getType().getText())) {
                     List<ValueRef> indexes = new ArrayList<>();
                     indexes.add(intZero);
                     indexes.add(intZero);
@@ -649,28 +650,28 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitMulExp(SysYParser.MulExpContext ctx) {
         ValueRef left = visit(ctx.exp(0));
         ValueRef right = visit(ctx.exp(1));
-        if(ConstIntVarMap.get(left.getText())!=null){
+        if (ConstIntVarMap.get(left.getText()) != null) {
             left = new ConstIntValueRef(ConstIntVarMap.get(left.getText()));
         }
-        if (ConstFloatVarMap.get(left.getText())!=null) {
+        if (ConstFloatVarMap.get(left.getText()) != null) {
             left = new ConstFloatValueRef(ConstFloatVarMap.get(left.getText()));
         }
-        if(ConstIntVarMap.get(right.getText())!=null){
+        if (ConstIntVarMap.get(right.getText()) != null) {
             right = new ConstIntValueRef(ConstIntVarMap.get(right.getText()));
         }
-        if (ConstFloatVarMap.get(right.getText())!=null) {
+        if (ConstFloatVarMap.get(right.getText()) != null) {
             right = new ConstFloatValueRef(ConstFloatVarMap.get(right.getText()));
         }
         if (ctx.MUL() != null) {
-            if(left.getType() == int32Type && right.getType() == int32Type) {
+            if (left.getType() == int32Type && right.getType() == int32Type) {
                 return IRBuildCalc(builder, left, right, "mul_", MUL);
-            }else{
+            } else {
                 return IRBuildCalc(builder, left, right, "fmul_", FMUL);
             }
         } else if (ctx.DIV() != null) {
-            if(left.getType() == int32Type && right.getType() == int32Type) {
+            if (left.getType() == int32Type && right.getType() == int32Type) {
                 return IRBuildCalc(builder, left, right, "sdiv_", SDIV);
-            }else{
+            } else {
                 return IRBuildCalc(builder, left, right, "fdiv_", FDIV);
             }
         } else if (ctx.MOD() != null) {
@@ -684,28 +685,28 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     public ValueRef visitPlusExp(SysYParser.PlusExpContext ctx) {
         ValueRef left = visit(ctx.exp(0));
         ValueRef right = visit(ctx.exp(1));
-        if(ConstIntVarMap.get(left.getText())!=null){
+        if (ConstIntVarMap.get(left.getText()) != null) {
             left = new ConstIntValueRef(ConstIntVarMap.get(left.getText()));
         }
-        if (ConstFloatVarMap.get(left.getText())!=null) {
+        if (ConstFloatVarMap.get(left.getText()) != null) {
             left = new ConstFloatValueRef(ConstFloatVarMap.get(left.getText()));
         }
-        if(ConstIntVarMap.get(right.getText())!=null){
+        if (ConstIntVarMap.get(right.getText()) != null) {
             right = new ConstIntValueRef(ConstIntVarMap.get(right.getText()));
         }
-        if (ConstFloatVarMap.get(right.getText())!=null) {
+        if (ConstFloatVarMap.get(right.getText()) != null) {
             right = new ConstFloatValueRef(ConstFloatVarMap.get(right.getText()));
         }
         if (ctx.PLUS() != null) {
-            if(left.getType() == int32Type && right.getType() == int32Type) {
+            if (left.getType() == int32Type && right.getType() == int32Type) {
                 return IRBuildCalc(builder, left, right, "add_", ADD);
-            }else{
+            } else {
                 return IRBuildCalc(builder, left, right, "fadd_", FADD);
             }
         } else if (ctx.MINUS() != null) {
-            if(left.getType() == int32Type && right.getType() == int32Type) {
+            if (left.getType() == int32Type && right.getType() == int32Type) {
                 return IRBuildCalc(builder, left, right, "sub_", SUB);
-            }else{
+            } else {
                 return IRBuildCalc(builder, left, right, "fsub_", FSUB);
             }
         }
@@ -724,8 +725,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 return IRBuildNeg(builder, operand, "neg_");
             case "!":
                 operand = IRBuildICmp(builder, 1, new ConstIntValueRef(0), operand, "icmp_");
-                 operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
-                 operand = IRBuildZExt(builder, operand, int32Type, "zext_");
+                operand = IRBuildXor(builder, operand, new ConstIntValueRef(1, int1Type), "xor_");
+                operand = IRBuildZExt(builder, operand, int32Type, "zext_");
                 return operand;
             default:
                 break;
@@ -753,35 +754,37 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         }
         return IRBuildStore(builder, exp, lValPointer);
     }
+
     boolean isaddr = false;
+
     @Override
     public ValueRef visitLvalExp(SysYParser.LvalExpContext ctx) {
         String variableName = ctx.lVal().IDENT().getText();
-        if(variableName.length()>20){
-            variableName = variableName.substring(0,20);
+        if (variableName.length() > 20) {
+            variableName = variableName.substring(0, 20);
         }
         ValueRef variable = currentScope.getValueRef(variableName);
         Type varType = currentScope.getType(variableName);
-        if(ConstIntVarMap.get(variable.getText())!=null){
+        if (ConstIntVarMap.get(variable.getText()) != null) {
             return new ConstIntValueRef(ConstIntVarMap.get(variable.getText()));
         }
-        if(ConstFloatVarMap.get(variable.getText())!=null){
+        if (ConstFloatVarMap.get(variable.getText()) != null) {
             return new ConstFloatValueRef(ConstFloatVarMap.get(variable.getText()));
         }
         ValueRef lValPointer = visitLVal(ctx.lVal());
-        if(arrayAddr){
+        if (arrayAddr) {
             arrayAddr = false;
             isaddr = true;
             return lValPointer;
         }
-        return IRBuildLoad(builder,lValPointer,variableName);
+        return IRBuildLoad(builder, lValPointer, variableName);
     }
 
     @Override
     public ValueRef visitLVal(SysYParser.LValContext ctx) {
         String lValName = ctx.IDENT().getText();
-        if(lValName.length()>20){
-            lValName = lValName.substring(0,20);
+        if (lValName.length() > 20) {
+            lValName = lValName.substring(0, 20);
         }
         ValueRef lValPointer = currentScope.getValueRef(lValName);
         Type lvalType = currentScope.getType(lValName);
@@ -803,14 +806,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 //        if(lvalType.getText().equals(new PointerType(int32Type).getText())){
 //            lValPointer = IRBuildLoad(builder,lValPointer,lValName);
 //        }
-        if(lvalType == int32Type || lvalType == floatType){
+        if (lvalType == int32Type || lvalType == floatType) {
             return lValPointer;
         }
-        if(lvalType.getText().equals(new PointerType(int32Type).getText()) || lvalType.getText().equals(new PointerType(floatType).getText())){
-            if(ctx.exp().isEmpty()){
+        if (lvalType.getText().equals(new PointerType(int32Type).getText()) || lvalType.getText().equals(new PointerType(floatType).getText())) {
+            if (ctx.exp().isEmpty()) {
                 return lValPointer;
-            }else{
-                if(ctx.exp().size() == 1) {
+            } else {
+                if (ctx.exp().size() == 1) {
                     List<ValueRef> indexes = new ArrayList<>();
                     ValueRef index = ctx.exp(0).accept(this);
                     indexes.add(index);
@@ -818,16 +821,16 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     lValPointer = IRBuildGEP(builder, pointer, indexes, indexes.size(), lValName);
                 }
             }
-        }else if(lvalType instanceof PointerType &&( ((PointerType)lvalType).getBaseType() instanceof ArrayType || ((PointerType)lvalType).getBaseType() instanceof PointerType ) ){
-            if(ctx.exp().isEmpty()){
+        } else if (lvalType instanceof PointerType && (((PointerType) lvalType).getBaseType() instanceof ArrayType || ((PointerType) lvalType).getBaseType() instanceof PointerType)) {
+            if (ctx.exp().isEmpty()) {
                 return lValPointer;
-            }else{
+            } else {
                 List<ValueRef> indexes = new ArrayList<>();
                 ValueRef index = ctx.exp(0).accept(this);
                 indexes.add(index);
                 ValueRef pointer = IRBuildLoad(builder, lValPointer, lValName);
                 lValPointer = IRBuildGEP(builder, pointer, indexes, indexes.size(), lValName);
-                for (int i = 1;i<ctx.exp().size();i++) {
+                for (int i = 1; i < ctx.exp().size(); i++) {
                     List<ValueRef> interIndexes = new ArrayList<>();
                     ValueRef interIndex = ctx.exp(i).accept(this);
                     interIndexes.add(intZero);
@@ -835,9 +838,8 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                     lValPointer = IRBuildGEP(builder, lValPointer, interIndexes, interIndexes.size(), lValName);
                 }
             }
-        }
-        else{
-            if(ctx.exp().size()==0){
+        } else {
+            if (ctx.exp().size() == 0) {
                 List<ValueRef> indexes = new ArrayList<>();
                 indexes.add(intZero);
                 indexes.add(intZero);
@@ -857,7 +859,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 lValPointer = IRBuildGEP(builder, lValPointer, indexes, indexes.size(), lValName);
             }
         }
-        if(lValPointer.getType() instanceof ArrayType ||  (lValPointer.getType() instanceof PointerType) && (((PointerType)lValPointer.getType()).getBaseType() instanceof ArrayType)){
+        if (lValPointer.getType() instanceof ArrayType || (lValPointer.getType() instanceof PointerType) && (((PointerType) lValPointer.getType()).getBaseType() instanceof ArrayType)) {
             arrayAddr = true;
         }
 
@@ -867,13 +869,24 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx) {
         ValueRef conditionVal = this.visit(ctx.cond());
+
         //ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
         ValueRef cmpResult = conditionVal;
+        if (conditionVal instanceof ConstFloatValueRef) {
+            if (((ConstFloatValueRef) conditionVal).getValue() != 0) {
+                cmpResult = new ConstIntValueRef(1);
+            } else {
+                cmpResult = new ConstIntValueRef(0);
+            }
+        } else if (conditionVal instanceof BaseRegister && conditionVal.getType() == floatType) {
+            cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+        }
+
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
 
-         IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
+        IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
 
         IRPositionBuilderAtEnd(builder, trueBlock);
         this.visit(ctx.stmt(0));
@@ -926,24 +939,24 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitAndCond(SysYParser.AndCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
-        ValueRef cmp  = IRBuildICmp(builder, IRIntEQ , intZero, lVal, "icmp_EQ");
+        ValueRef cmp = IRBuildICmp(builder, IRIntEQ, intZero, lVal, "icmp_EQ");
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "true_");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "false_");
         BaseBlock after = IRAppendBasicBlock(currentFunction, "after_");
-        ValueRef res = IRBuildAlloca(builder,int32Type,"and_");
-        IRBuildStore(builder,lVal,res);
+        ValueRef res = IRBuildAlloca(builder, int32Type, "and_");
+        IRBuildStore(builder, lVal, res);
 
-        IRBuildCondBr(builder,cmp,falseBlock,trueBlock);
-        IRPositionBuilderAtEnd(builder,falseBlock);
+        IRBuildCondBr(builder, cmp, falseBlock, trueBlock);
+        IRPositionBuilderAtEnd(builder, falseBlock);
         IRBuildBr(builder, after);
 
-        IRPositionBuilderAtEnd(builder,trueBlock);
+        IRPositionBuilderAtEnd(builder, trueBlock);
         ValueRef rVal = this.visit(ctx.cond(1));
-        IRBuildStore(builder,rVal,res);
-        IRBuildBr(builder,after);
+        IRBuildStore(builder, rVal, res);
+        IRBuildBr(builder, after);
 
-        IRPositionBuilderAtEnd(builder,after);
-        res = IRBuildLoad(builder, res , "load_");
+        IRPositionBuilderAtEnd(builder, after);
+        res = IRBuildLoad(builder, res, "load_");
         // return IRBuildZExt(builder,res,int32Type,"tmp_");
         return res;
 
@@ -952,24 +965,24 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitOrCond(SysYParser.OrCondContext ctx) {
         ValueRef lVal = this.visit(ctx.cond(0));
-        ValueRef cmp  = IRBuildICmp(builder, IRIntNE , intZero, lVal, "icmp_NE");
+        ValueRef cmp = IRBuildICmp(builder, IRIntNE, intZero, lVal, "icmp_NE");
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "true_");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "false_");
         BaseBlock after = IRAppendBasicBlock(currentFunction, "after_");
-        ValueRef res = IRBuildAlloca(builder,int32Type,"or_");
-        IRBuildStore(builder,lVal,res);
+        ValueRef res = IRBuildAlloca(builder, int32Type, "or_");
+        IRBuildStore(builder, lVal, res);
 
-        IRBuildCondBr(builder,cmp,trueBlock,falseBlock);
-        IRPositionBuilderAtEnd(builder,trueBlock);
+        IRBuildCondBr(builder, cmp, trueBlock, falseBlock);
+        IRPositionBuilderAtEnd(builder, trueBlock);
         IRBuildBr(builder, after);
 
-        IRPositionBuilderAtEnd(builder,falseBlock);
+        IRPositionBuilderAtEnd(builder, falseBlock);
         ValueRef rVal = this.visit(ctx.cond(1));
-        IRBuildStore(builder,rVal,res);
-        IRBuildBr(builder,after);
+        IRBuildStore(builder, rVal, res);
+        IRBuildBr(builder, after);
 
-        IRPositionBuilderAtEnd(builder,after);
-        res = IRBuildLoad(builder, res , "load_");
+        IRPositionBuilderAtEnd(builder, after);
+        res = IRBuildLoad(builder, res, "load_");
         // return IRBuildZExt(builder,res,int32Type,"tmp_");
         return res;
     }
@@ -980,13 +993,24 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         BaseBlock bodyBlock = IRAppendBasicBlock(currentFunction, "bodyBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
 
-        IRBuildBr(builder,condBlock);
+        IRBuildBr(builder, condBlock);
 
         IRPositionBuilderAtEnd(builder, condBlock);
         ValueRef conditionVal = this.visit(ctx.cond());
-         //ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
+        //ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
         ValueRef cmpResult = conditionVal;
-         IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
+
+        if (conditionVal instanceof ConstFloatValueRef) {
+            if (((ConstFloatValueRef) conditionVal).getValue() != 0) {
+                cmpResult = new ConstIntValueRef(1);
+            } else {
+                cmpResult = new ConstIntValueRef(0);
+            }
+        } else if (conditionVal instanceof BaseRegister && conditionVal.getType() == floatType) {
+            cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+        }
+
+        IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
 //        IRBuildCondBr(builder, conditionVal, bodyBlock, afterBlock);
 
         IRPositionBuilderAtEnd(builder, bodyBlock);
