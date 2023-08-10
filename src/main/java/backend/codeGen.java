@@ -463,6 +463,12 @@ public class codeGen {
 
         // push a1, a2, ...
         int paramCnt = params.size();
+        int intParamCnt = 0;
+        for (ValueRef par : params) {
+            if (par.getType() != floatType) {
+                intParamCnt++;
+            }
+        }
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
@@ -900,26 +906,30 @@ public class codeGen {
         switch (instr.getIcmpType()) {
             case IRConstants.IRIntSLT, IRConstants.IRIntULT -> {
                 MachineCode set;
-                if (varType == int32Type) {
-                    set = new MCSet(dest, left, right);
-                } else {
+                if (varType == floatType) {
                     set = new MCFCmp(dest, left, right, FLT);
+                } else {
+                    set = new MCSet(dest, left, right);
                 }
                 block.getMachineCodes().add(set);
                 setDefUseThreeOp(dest, left, right, set);
             }
             case IRConstants.IRIntSGT, IRConstants.IRIntUGT -> {
                 MachineCode set;
-                if (varType == int32Type) {
-                    set = new MCSet(dest, right, left);
-                } else {
+                if (varType == floatType) {
                     set = new MCFCmp(dest, right, left, FLT);
+                } else {
+                    set = new MCSet(dest, right, left);
                 }
                 block.getMachineCodes().add(set);
                 setDefUseThreeOp(dest, left, right, set);
             }
             case IRConstants.IRIntEQ -> {
-                if (varType == int32Type) {
+                if (varType == floatType) {
+                    MachineCode feq = new MCFCmp(dest, left, right, FEQ);
+                    block.getMachineCodes().add(feq);
+                    setDefUseThreeOp(dest, left, right, feq);
+                } else {
                     MachineOperand res = new BaseRegister("tmp", int32Type);
                     MCBinaryInteger sub = new MCBinaryInteger(res, left, right, SUBW);
                     MCSetz setz = new MCSetz(dest, res, IRConstants.IRIntEQ);
@@ -928,23 +938,11 @@ public class codeGen {
                     setDefUse(dest, setz);
                     setDefUse(res, setz);
                     setDefUseThreeOp(res, left, right, sub);
-                } else {
-                    MachineCode feq = new MCFCmp(dest, left, right, FEQ);
-                    block.getMachineCodes().add(feq);
-                    setDefUseThreeOp(dest, left, right, feq);
                 }
             }
             case IRConstants.IRIntNE -> {
                 MachineOperand res = new BaseRegister("tmp", int32Type);
-                if (varType == int32Type) {
-                    MCBinaryInteger sub = new MCBinaryInteger(res, left, right, SUBW);
-                    MCSetz setz = new MCSetz(dest, res, IRConstants.IRIntNE);
-                    block.getMachineCodes().add(sub);
-                    block.getMachineCodes().add(setz);
-                    setDefUse(dest, setz);
-                    setDefUse(res, setz);
-                    setDefUseThreeOp(res, left, right, sub);
-                } else {
+                if (varType == floatType) {
                     MachineCode feq = new MCFCmp(res, left, right, FEQ);
                     MCBinaryInteger xor = new MCBinaryInteger(dest, res, new Immeidiate(1), XORI);
                     block.getMachineCodes().add(feq);
@@ -952,10 +950,22 @@ public class codeGen {
                     setDefUseThreeOp(res, left, right, feq);
                     setDefUse(dest, xor);
                     setDefUse(res, xor);
+                } else {
+                    MCBinaryInteger sub = new MCBinaryInteger(res, left, right, SUBW);
+                    MCSetz setz = new MCSetz(dest, res, IRConstants.IRIntNE);
+                    block.getMachineCodes().add(sub);
+                    block.getMachineCodes().add(setz);
+                    setDefUse(dest, setz);
+                    setDefUse(res, setz);
+                    setDefUseThreeOp(res, left, right, sub);
                 }
             }
             case IRConstants.IRIntSGE, IRConstants.IRIntUGE -> {
-                if (varType == int32Type) {
+                if (varType == floatType) {
+                    MachineCode set = new MCFCmp(dest, right, left, FLE);
+                    block.getMachineCodes().add(set);
+                    setDefUseThreeOp(dest, left, right, set);
+                } else {
                     MachineOperand res = new BaseRegister("tmp", int32Type);
                     MCSet set = new MCSet(res, left, right);
                     MCBinaryInteger xor = new MCBinaryInteger(dest, res, new Immeidiate(1), XORI);
@@ -964,15 +974,14 @@ public class codeGen {
                     setDefUse(dest, xor);
                     setDefUse(res, xor);
                     setDefUseThreeOp(res, left, right, set);
-                } else {
-                    MachineCode set = new MCFCmp(dest, right, left, FLE);
-                    block.getMachineCodes().add(set);
-                    setDefUseThreeOp(dest, left, right, set);
                 }
-
             }
             case IRConstants.IRIntSLE, IRConstants.IRIntULE -> {
-                if (varType == int32Type) {
+                if (varType == floatType) {
+                    MachineCode set = new MCFCmp(dest, left, right, FLE);
+                    block.getMachineCodes().add(set);
+                    setDefUseThreeOp(dest, left, right, set);
+                } else {
                     MachineOperand res = new BaseRegister("tmp", int32Type);
                     MCSet set = new MCSet(res, right, left);
                     MCBinaryInteger xor = new MCBinaryInteger(dest, res, new Immeidiate(1), XORI);
@@ -981,10 +990,6 @@ public class codeGen {
                     setDefUse(dest, xor);
                     setDefUse(res, xor);
                     setDefUseThreeOp(res, left, right, set);
-                } else {
-                    MachineCode set = new MCFCmp(dest, left, right, FLE);
-                    block.getMachineCodes().add(set);
-                    setDefUseThreeOp(dest, left, right, set);
                 }
             }
         }
