@@ -1348,7 +1348,7 @@ public class codeGen {
         }
 
         Type type = ((BaseRegister) src).getType();
-        String opcode = type == int32Type ? SW : FSW;
+        String opcode = type == floatType ? FSW : SW;
 
         String destName = dest.toString();
         if (null != offsetMap.get(destName)) {
