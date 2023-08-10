@@ -464,9 +464,12 @@ public class codeGen {
         // push a1, a2, ...
         int paramCnt = params.size();
         int intParamCnt = 0;
+        int floatParamCnt = 0;
         for (ValueRef par : params) {
             if (par.getType() != floatType) {
                 intParamCnt++;
+            } else {
+                floatParamCnt++;
             }
         }
         MachineFunction mcFunc = block.getBlockFunc();
@@ -509,7 +512,7 @@ public class codeGen {
         }
 
         // push ft0, ft1
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < Integer.min(floatParamCnt + 1, 4); i++) {
             stackCount += 2;
             int offset = stackCount * 4;
             MCStore store;
@@ -764,7 +767,7 @@ public class codeGen {
         }
         block.getMachineCodes().add(call);
 
-        for (i = 1; i < Integer.max(intParamCnt + 2, 4) && i < 8; i++) {
+        for (i = 1; i < Integer.max(intParamCnt + 1, 4) && i < 8; i++) {
             int offset = offsetMap.get("phyReg_a" + i);
             MCLoad load;
             if (isLegalImm(-offset)) {
@@ -796,7 +799,7 @@ public class codeGen {
             }
         }
 
-        for (i = 0; i < 4; i++) {
+        for (i = 0; i < Integer.min(floatParamCnt + 1, 4); i++) {
             int offset = offsetMap.get("floatPhyReg_a" + i);
             MCLoad load;
             if (isLegalImm(-offset)) {
