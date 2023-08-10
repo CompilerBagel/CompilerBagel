@@ -532,38 +532,6 @@ public class codeGen {
             block.getMachineCodes().add(store);
         }
         // TODO: notice
-//        for (int i = 28; i < 32; i++) {
-//            stackCount += 2;
-//            int offset = stackCount * 4;
-//            MCStore store;
-//            if (isLegalImm(-offset)) {
-//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), s0Reg, new Immeidiate(-offset), FSW);
-//            } else {
-//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
-//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
-//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), t0Reg, FSW);
-//                block.getMachineCodes().add(li);
-//                block.getMachineCodes().add(add);
-//            }
-//            offsetMap.put("floatPhyReg_a" + i, offset);
-//            block.getMachineCodes().add(store);
-//        }
-//        for (int i = 10; i < 18; i++) {
-//            stackCount += 2;
-//            int offset = stackCount * 4;
-//            MCStore store;
-//            if (isLegalImm(-offset)) {
-//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), s0Reg, new Immeidiate(-offset), FSW);
-//            } else {
-//                MCLi li = new MCLi(t0Reg, new Immeidiate(-offset));
-//                MCBinaryInteger add = new MCBinaryInteger(t0Reg, s0Reg, t0Reg, ADD);
-//                store = new MCStore(FloatPhysicsReg.getFloatPhysicsReg(i), t0Reg, FSW);
-//                block.getMachineCodes().add(li);
-//                block.getMachineCodes().add(add);
-//            }
-//            offsetMap.put("floatPhyReg_a" + i, offset);
-//            block.getMachineCodes().add(store);
-//        }
         mcFunc.setStackCount(stackCount);
         mcFunc.setFrameSize(stackAlign(stackCount));
         int i = 0;
@@ -677,16 +645,10 @@ public class codeGen {
                     } else {
                         // Float number use twice fneg to move params to fa0, fa1, ...
                         src.setPhysicsReg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex));
-                        BaseRegister negParam = new BaseRegister("negParam", floatType);
-                        MCFNeg neg1 = new MCFNeg(negParam, op);
-                        MCFNeg neg2 = new MCFNeg(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex), negParam);
+                        MCFMv fmv = new MCFMv(FloatPhysicsReg.getFloatPhysicsReg(10 + floatRegIndex), op, FMV_S);
                         floatRegIndex++;
-                        setDefUse(op, neg1);
-                        setDefUse(negParam, neg1);
-                        setDefUse(negParam, neg2);
-                        // setDefUse(src, neg2);
-                        block.getMachineCodes().add(neg1);
-                        block.getMachineCodes().add(neg2);
+                        setDefUse(op, fmv);
+                        block.getMachineCodes().add(fmv);
                     }
 
                 } else {  // intType or pointerType
@@ -752,16 +714,12 @@ public class codeGen {
         MCMove mv = null;
         MCFNeg neg1 = null;
         MCFNeg neg2 = null;
+        MCFMv fmv = null;
         if (ret.getType() == floatType) {
-            BaseRegister negRet = new BaseRegister("negRet", floatType);
-            neg1 = new MCFNeg(negRet, ret);
-            neg2 = new MCFNeg(dest, negRet);
-            negRet.setPhysicsReg(fa0Reg);
+            fmv = new MCFMv(dest, ret, FMV_S);
             ret.setPhysicsReg(fa0Reg);
-            setDefUse(ret, neg1);
-            setDefUse(negRet, neg1);
-            setDefUse(negRet, neg2);
-            setDefUse(dest, neg2);
+            setDefUse(ret, fmv);
+            setDefUse(dest, fmv);
         } else {
             mv = new MCMove(ret, dest);
             ret.setPhysicsReg(a0Reg);
@@ -847,6 +805,7 @@ public class codeGen {
         if (mv != null) block.getMachineCodes().add(mv);
         if (neg1 != null) block.getMachineCodes().add(neg1);
         if (neg2 != null) block.getMachineCodes().add(neg2);
+        if (fmv != null) block.getMachineCodes().add(fmv);
         mcFunc.setStackCount(stackCount);
         mcFunc.setFrameSize(stackAlign(stackCount));
 
@@ -1328,18 +1287,12 @@ public class codeGen {
                     setDefUse(src, addw);
                     setDefUse(a0Reg, addw);
                 } else {
-                    BaseRegister negRet = new BaseRegister("negRet", floatType);
                     BaseRegister ret = new BaseRegister("ret", floatType);
-                    MCFNeg neg1 = new MCFNeg(negRet, src);
-                    MCFNeg neg2 = new MCFNeg(ret, negRet);
-                    negRet.setPhysicsReg(fa0Reg);
+                    MCFMv fmv = new MCFMv(ret, src, FMV_S);
                     ret.setPhysicsReg(fa0Reg);
-                    setDefUse(src, neg1);
-                    setDefUse(negRet, neg1);
-                    setDefUse(negRet, neg2);
-                    setDefUse(ret, neg2);
-                    block.getMachineCodes().add(neg1);
-                    block.getMachineCodes().add(neg2);
+                    setDefUse(src, fmv);
+                    setDefUse(ret, fmv);
+                    block.getMachineCodes().add(fmv);
                 }
             }
         }
