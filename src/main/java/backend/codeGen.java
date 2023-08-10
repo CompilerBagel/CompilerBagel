@@ -472,7 +472,7 @@ public class codeGen {
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
-        for (int i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
+        for (int i = 1; i < Integer.max(intParamCnt + 2, 4) && i < 8; i++) {
             stackCount += 2;
             int offset = stackCount * 4;
             MCStore store;
@@ -764,7 +764,7 @@ public class codeGen {
         }
         block.getMachineCodes().add(call);
 
-        for (i = 1; i < Integer.max(paramCnt + 2, 4) && i < 8; i++) {
+        for (i = 1; i < Integer.max(intParamCnt + 2, 4) && i < 8; i++) {
             int offset = offsetMap.get("phyReg_a" + i);
             MCLoad load;
             if (isLegalImm(-offset)) {
