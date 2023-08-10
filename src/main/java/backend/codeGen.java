@@ -472,6 +472,9 @@ public class codeGen {
                 floatParamCnt++;
             }
         }
+//        if (floatParamCnt == 0) {
+//            floatParamCnt = -2;
+//        }
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
