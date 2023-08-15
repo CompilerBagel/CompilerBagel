@@ -1,4 +1,4 @@
-package backend;
+package backend.post.reg;
 
 import IRBuilder.BaseRegister;
 import Type.Type;
@@ -6,14 +6,14 @@ import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineFunction;
 import backend.machineCode.MachineOperand;
-import backend.reg.FloatPhysicsReg;
-import backend.reg.PhysicsReg;
+import backend.post.reg.FloatPhysicsReg;
+import backend.post.reg.PhysicsReg;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import static backend.reg.PhysicsReg.*;
+import static backend.post.reg.PhysicsReg.*;
 import static Type.FloatType.IRFloatType;
 public class RegisterAllocate {
     private static final int K = 14; // number of colors

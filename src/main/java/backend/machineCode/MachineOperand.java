@@ -1,6 +1,6 @@
 package backend.machineCode;
 
-import backend.reg.PhysicsReg;
+import backend.post.reg.PhysicsReg;
 
 import java.util.ArrayList;
 import java.util.List;

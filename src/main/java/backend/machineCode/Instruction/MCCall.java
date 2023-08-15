@@ -3,9 +3,7 @@ package backend.machineCode.Instruction;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineFunction;
 import backend.machineCode.MachineOperand;
-import backend.reg.PhysicsReg;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MCCall extends MachineCode {

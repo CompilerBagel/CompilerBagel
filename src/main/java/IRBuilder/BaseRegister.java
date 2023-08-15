@@ -1,7 +1,7 @@
 package IRBuilder;
 
 import Type.Type;
-import backend.reg.Reg;
+import backend.post.reg.Reg;
 
 public class BaseRegister extends Reg implements ValueRef  {
     static int tempCounter = 0;
