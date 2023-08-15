@@ -476,12 +476,14 @@ public class codeGen {
 //            floatParamCnt = -2;
 //        }
         int saveIntCnt = Integer.max(intParamCnt + 2, 4);
+        int saveFloatCnt = Integer.min(floatParamCnt + 2, 4);
         if (floatParamCnt == 5 && intParamCnt == 0) {
             saveIntCnt = 2;
         }
         if (floatParamCnt == 1 && intParamCnt == 0) {
             saveIntCnt = 2;
         }
+
         MachineFunction mcFunc = block.getBlockFunc();
         int stackCount = mcFunc.getStackCount();
         Map<String, Integer> offsetMap = mcFunc.getOffsetMap();
@@ -810,8 +812,6 @@ public class codeGen {
 //            block.getMachineCodes().add(load);
 //        }
         if (mv != null) block.getMachineCodes().add(mv);
-        if (neg1 != null) block.getMachineCodes().add(neg1);
-        if (neg2 != null) block.getMachineCodes().add(neg2);
         if (fmv != null) block.getMachineCodes().add(fmv);
         mcFunc.setStackCount(stackCount);
         mcFunc.setFrameSize(stackAlign(stackCount));
