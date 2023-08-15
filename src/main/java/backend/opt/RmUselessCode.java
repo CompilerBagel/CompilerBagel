@@ -5,6 +5,7 @@ import backend.machineCode.MachineBlock;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineFunction;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,16 +33,18 @@ public class RmUselessCode {
             codes.removeIf(MachineCode::isUselessCode);
 
             // Code after ret is useless
+            List<MachineCode> removeList = new ArrayList<>();
             Iterator<MachineCode> iterator = codes.iterator();
             MachineCode lastCode = null;
             while(iterator.hasNext()) {
                 MachineCode code = iterator.next();
                 if(lastCode instanceof MCReturn){
-                    iterator.remove();
+                    removeList.add(code);
                     continue;
                 }
                 lastCode = code;
             }
+            codes.removeAll(removeList);
         }
 
     }

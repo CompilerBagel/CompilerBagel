@@ -18,7 +18,7 @@ import static Type.FloatType.IRFloatType;
 public class RegisterAllocate {
     private static final int K = 14; // number of colors
     private static final int NONE_ALLOCATE = -1;
-    private List<MachineFunction> functions;
+    private final List<MachineFunction> functions;
     private HashMap<MachineOperand, List<MachineOperand>> edges;
     private List<MachineOperand> nodes;
     private final HashMap<MachineOperand, PhysicsReg> allocatedReg = new HashMap<>();
@@ -141,10 +141,7 @@ public class RegisterAllocate {
                         continue;
                     }
                     if (use instanceof PhysicsReg) {
-//                        if (use.noUser()){
-//                            ((PhysicsReg)use).giveBack();
-//                        }
-                        continue;
+                        continue;  // def is the specified register
                     }
                     PhysicsReg allocatedReg = getReg(use);
                     if (allocatedReg != null) {
@@ -169,10 +166,7 @@ public class RegisterAllocate {
                         continue;
                     }
                     if (def instanceof PhysicsReg) {
-//                        if (def.noUser()){
-//                            ((PhysicsReg)def).giveBack();
-//                        }
-                        continue;
+                        continue; // def is the specified register
                     }
                     PhysicsReg allocatedReg = getReg(def);
                     if (allocatedReg != null) {   // have register

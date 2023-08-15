@@ -69,9 +69,12 @@ public class Main {
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
 
+        code.PrintCodeToFile(mcDest);
+
         // Remove useless code
-//         RmUselessCode rmUselessCode = new RmUselessCode(code.getMCFunctions());
-//         rmUselessCode.remove();
+        RmUselessCode rmUselessCode = new RmUselessCode(code.getMCFunctions());
+        rmUselessCode.remove();
+
         code.PrintCodeToFile(mcDest);
     }
 }
