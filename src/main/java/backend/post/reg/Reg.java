@@ -1,4 +1,4 @@
-package backend.reg;
+package backend.post.reg;
 
 import backend.machineCode.MachineOperand;
 

@@ -5,12 +5,10 @@ import Type.Type;
 import backend.machineCode.*;
 import backend.machineCode.Instruction.*;
 import backend.machineCode.Label;
-import backend.reg.FloatPhysicsReg;
-import backend.reg.PhysicsReg;
-import backend.reg.Reg;
+import backend.post.reg.FloatPhysicsReg;
+import backend.post.reg.PhysicsReg;
 import instruction.*;
 
-import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;

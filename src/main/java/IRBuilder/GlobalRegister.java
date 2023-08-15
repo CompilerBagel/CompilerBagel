@@ -1,7 +1,6 @@
 package IRBuilder;
 
 import Type.Type;
-import backend.reg.Reg;
 
 public class GlobalRegister extends BaseRegister implements ValueRef {
     static int globalCounter = 0;

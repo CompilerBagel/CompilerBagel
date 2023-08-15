@@ -1,4 +1,4 @@
-package backend.reg;
+package backend.post.reg;
 
 import java.util.HashMap;
 import java.util.Map;

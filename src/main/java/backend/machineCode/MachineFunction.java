@@ -1,15 +1,12 @@
 package backend.machineCode;
 
-import IRBuilder.BaseBlock;
 import backend.machineCode.Instruction.MCBinaryInteger;
 import backend.machineCode.Instruction.MCLi;
 import backend.machineCode.Instruction.MCLoad;
 import backend.machineCode.Instruction.MCStore;
-import backend.reg.PhysicsReg;
-import instruction.Instruction;
+import backend.post.reg.PhysicsReg;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static backend.machineCode.MachineConstants.*;
 

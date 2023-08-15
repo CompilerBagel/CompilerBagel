@@ -1,5 +1,4 @@
-import backend.RegisterAllocate;
-import backend.opt.RmUselessCode;
+import backend.post.reg.RegisterAllocate;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
