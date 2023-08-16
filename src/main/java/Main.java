@@ -1,3 +1,4 @@
+import backend.opt.RmUselessCode;
 import backend.post.reg.RegisterAllocate;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -20,7 +21,7 @@ public class Main {
         String mcDest = args[2];
         // String rawMcDest = args[3];
 
-        // hanlde the starttime and stoptime function
+        // handle the starttime and stoptime function
         File file = new File(source);
         String searchWord;
         String replaceWord;

@@ -1,9 +1,10 @@
 package backend.opt;
 
+import backend.machineCode.*;
+import backend.machineCode.Instruction.MCLoad;
 import backend.machineCode.Instruction.MCReturn;
-import backend.machineCode.MachineBlock;
-import backend.machineCode.MachineCode;
-import backend.machineCode.MachineFunction;
+import backend.machineCode.Instruction.MCStore;
+import backend.post.reg.PhysicsReg;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,8 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class RmUselessCode {
-    private List<MachineFunction> functions;
-
+    private final List<MachineFunction> functions;
     public RmUselessCode(List<MachineFunction> functions) {
         this.functions = functions;
     }
@@ -39,12 +39,40 @@ public class RmUselessCode {
                 if(lastCode instanceof MCReturn){
                     removeList.add(code);
                     continue;
+                } else if (isRedundancyLS(lastCode, code)){
+                    // 1. LD r0, a  2. ST a, R0
+                    removeList.add(code);
+                    continue;
                 }
                 lastCode = code;
             }
             codes.removeAll(removeList);
         }
 
+    }
+
+    private boolean isRedundancyLS(MachineCode loadCode, MachineCode storeCode) {
+        if (!(loadCode instanceof MCLoad) || !(storeCode instanceof MCStore)) {
+            return false;
+        }
+        PhysicsReg loadReg = getReg(((MCLoad) loadCode).getDest());
+        PhysicsReg storeReg = getReg(((MCStore) storeCode).getSrc());
+
+        PhysicsReg loadBaseReg = getReg(((MCLoad) loadCode).getSrc());
+        PhysicsReg storeBaseReg = getReg(((MCStore) storeCode).getDest());
+
+        Immeidiate loadImm = (Immeidiate) ((MCLoad) loadCode).getOffset();
+        Immeidiate storeImm = (Immeidiate) ((MCStore) storeCode).getOffset();
+
+        return loadReg == storeReg && loadBaseReg == storeBaseReg
+                && loadImm.getImmValue() == storeImm.getImmValue();
+    }
+
+    private PhysicsReg getReg(MachineOperand op) {
+        if (op instanceof PhysicsReg) {
+            return (PhysicsReg) op;
+        }
+        return op.getPhysicsReg();
     }
 
 }

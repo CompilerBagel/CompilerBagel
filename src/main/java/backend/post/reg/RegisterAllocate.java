@@ -9,6 +9,7 @@ import backend.machineCode.MachineOperand;
 import backend.post.reg.FloatPhysicsReg;
 import backend.post.reg.PhysicsReg;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class RegisterAllocate {
     private HashMap<MachineOperand, List<MachineOperand>> edges;
     private List<MachineOperand> nodes;
     private final HashMap<MachineOperand, PhysicsReg> allocatedReg = new HashMap<>();
+    private final HashMap<MachineFunction, List<PhysicsReg>> usedRegs = new HashMap<>();
     private final HashMap<MachineOperand, Integer> color = new HashMap<>();
     private static final Type floatType = IRFloatType();
 
@@ -123,6 +125,7 @@ public class RegisterAllocate {
      */
     private void funcEasyAllocate(MachineFunction function) {
         LinkedList<MachineBlock> blocks = function.getMachineBlocks();
+        List<PhysicsReg> usedRegList = new ArrayList<>();
         // giveBack a0~a7
         giveBackRegA();
         for (MachineBlock block : blocks) {
