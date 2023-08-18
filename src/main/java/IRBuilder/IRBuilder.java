@@ -31,14 +31,27 @@ public class IRBuilder {
         block.addPredBaseBlock(builder.currentBaseBlock);
         builder.currentBaseBlock = block;
     }
-
+    public static BaseBlock IRBuildBaseBlock(IRBuilder builder,FunctionBlock functionBlock, BaseBlock baseBlock){
+        FunctionBlock currrentFunction = IRGenVisitor.getCurrentFunction();
+        builder.currentBaseBlock = baseBlock;
+        currrentFunction.addBaseBlock(baseBlock);
+        return baseBlock;
+    }
     public static IRBuilder IRCreateBuilder() {
         return new IRBuilder();
     }
 
     public static void IRBuildRet(IRBuilder builder, ValueRef valueRef) {
-        builder.currentBaseBlock.appendInstr(new RetInstruction(generateList(valueRef), builder.currentBaseBlock));
-        builder.currentBaseBlock.getFunctionBlock().addRetBlock(builder.currentBaseBlock);
+//        builder.currentBaseBlock.appendInstr(new RetInstruction(generateList(valueRef), builder.currentBaseBlock));
+//        builder.currentBaseBlock.getFunctionBlock().addRetBlock(builder.currentBaseBlock);
+//        if(valueRef == null){
+//            builder.emit(RET + " " + "void");
+//        }else {
+//            builder.emit(RET + " " + valueRef.getTypeText() + " " + valueRef.getText());
+//        }
+        FunctionBlock currentFunction = IRGenVisitor.getCurrentFunction();
+        currentFunction.getRetBlock().appendInstr(new RetInstruction(generateList(valueRef), builder.currentBaseBlock));
+        currentFunction.addRetBlock(currentFunction.getRetBlock());
         if(valueRef == null){
             builder.emit(RET + " " + "void");
         }else {

@@ -1,5 +1,5 @@
+import IRBuilder.IRGenVisitor;
 import backend.RegisterAllocate;
-import backend.opt.RmUselessCode;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
