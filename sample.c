@@ -1,10 +1,8 @@
 #include "./src/test/resources/sylib.c"
-//test the priority of add and mul
+//test div
 int main(){
-    int a, b, c, d;
+    int a, b;
     a = 10;
-    b = 4;
-    c = 2;
-    d = 2;
-    return c + a * b - d; 
+    b = 5;
+    return a / b;
 }

@@ -10,6 +10,7 @@ import Type.PointerType;
 import Type.Type;
 import antlr.*;
 
+import javax.swing.*;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -553,9 +554,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         int floatNO = 0;
         int noFloatNO = 0;
         int spillIndex = 0;
+        List<ValueRef> occupyList = new ArrayList<ValueRef>();
         for (int i = 0; i < argc; i++) {
             ValueRef param = ctx.funcRParams().param(i).accept(this);
             param.setUsedByFunction(true);
+            if (param instanceof ConstIntValueRef) {
+                ValueRef occ = IRBuildOccupy(builder);
+                occupyList.add(occ);
+            }
             Type paramType = functionBlock.getParam(i).getType();
             Type baseType = paramType;
 //            while(baseType instanceof ArrayType || baseType instanceof PointerType){
@@ -606,7 +612,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
             args.add(i, param);
         }
-        return IRBuildCall(builder, functionBlock, args, argc, funcName);
+        return IRBuildCall(builder, functionBlock, args, argc, funcName, occupyList);
     }
 
     @Override

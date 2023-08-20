@@ -5,6 +5,7 @@ import Type.FunctionType;
 import Type.PointerType;
 import Type.Type;
 import instruction.*;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -164,6 +165,11 @@ public class IRBuilder {
         return resRegister;
     }
 
+    public static ValueRef IRBuildOccupy(IRBuilder builder) {
+        ValueRef resRegister = new BaseRegister("occ", int32Type);
+        builder.appendInstr(new OccupyInstruction(generateList(resRegister),builder.currentBaseBlock));
+        return resRegister;
+    }
     public static ValueRef IRBuildAlloca(IRBuilder builder, Type type, String name) {
         ValueRef resRegister;
         PointerType pointerType = new PointerType(type);
@@ -468,7 +474,7 @@ public class IRBuilder {
         return resRegister;
     }
 
-    public static ValueRef IRBuildCall(IRBuilder builder, FunctionBlock function, List<ValueRef> args, int argc, String varName) {
+    public static ValueRef IRBuildCall(IRBuilder builder, FunctionBlock function, List<ValueRef> args, int argc, String varName, List<ValueRef> occupyList) {
         Type retType = ((FunctionType) function.getType()).getRetType();
         ValueRef resRegister = new BaseRegister(varName+"_call", retType);
         StringBuilder stringBuilder = new StringBuilder();
@@ -490,7 +496,9 @@ public class IRBuilder {
                     .append(args.get(i).getTypeText())
                     .append(" ").append(args.get(i).getText());
         }
-        builder.appendInstr(new CallInstruction(operands, builder.currentBaseBlock));
+        CallInstruction callInstruction = new CallInstruction(operands, builder.currentBaseBlock);
+        callInstruction.setOccupyList(occupyList);
+        builder.appendInstr(callInstruction);
         builder.currentBaseBlock.addSuccBaseBlock(function);
         function.addCaller((ValueRef) builder.currentBaseBlock);
         stringBuilder.append(")");

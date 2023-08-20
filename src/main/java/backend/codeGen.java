@@ -245,7 +245,10 @@ public class codeGen {
                 parseTypeTransInstr((TypeTransInstruction) instr, machineBlock);
             } else if (instr instanceof ZextInstruction) {
                 parseZextInstr((ZextInstruction) instr, machineBlock);
-            } else {
+            } else if (instr instanceof OccupyInstruction) {
+                parseOccupyInstr((OccupyInstruction) instr, machineBlock);
+            }
+            else {
                 assert (false);
             }
         }
@@ -427,7 +430,7 @@ public class codeGen {
         BaseRegister dest = (BaseRegister) instr.getOperands().get(0);
         List<ValueRef> params = instr.getParams();
         List<MachineOperand> operands = new ArrayList<>();
-
+        List<ValueRef> occupyList = instr.getOccupyList();
         // push a1, a2, ...
         int paramCnt = params.size();
         int intParamCnt = 0;
@@ -682,6 +685,11 @@ public class codeGen {
             call = new MCCall(outFunc, operands);
         }
         for (MachineOperand operand : operands) {
+            operand.addUse(call);
+        }
+
+        for (ValueRef occ : occupyList) {
+            MachineOperand operand = parseOperand(occ);
             operand.addUse(call);
         }
 
@@ -1262,6 +1270,12 @@ public class codeGen {
         setDefUse(rs, move);
     }
 
+    public void parseOccupyInstr(OccupyInstruction instr, MachineBlock block) {
+        MachineOperand dest = parseOperand(instr.getOperands().get(0));
+        MCOccupy occupy = new MCOccupy(dest);
+        block.getMachineCodes().add(occupy);
+        setDefUse(dest, occupy);
+    }
 
     public MachineOperand parseOperand(ValueRef operand) {
         if (!operandMap.containsKey(operand.getText())) {

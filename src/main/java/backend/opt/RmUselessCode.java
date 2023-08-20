@@ -59,7 +59,7 @@ public class RmUselessCode {
      * @param function the MachineFunction to be dealt
      */
     public void funcRemove(MachineFunction function) {
-        funcRmUselessStore(function);
+        //funcRmUselessStore(function);
 
         LinkedList<MachineBlock> blocks = function.getMachineBlocks();
 
