@@ -867,7 +867,6 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx) {
         ValueRef conditionVal = this.visit(ctx.cond());
-        //ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
         ValueRef cmpResult = conditionVal;
         if (conditionVal instanceof ConstFloatValueRef) {
             if (((ConstFloatValueRef) conditionVal).getValue() != 0) {
@@ -882,7 +881,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
 
-         IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
+        IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
 
         IRPositionBuilderAtEnd(builder, trueBlock);
         this.visit(ctx.stmt(0));

@@ -76,4 +76,20 @@ public class MCStore extends MachineCode {
     public boolean isUselessCode() {
         return false;
     }
+
+    public MachineOperand getSrc() {
+        return src;
+    }
+
+    public MachineOperand getOffset() {
+        return offset;
+    }
+
+    public MachineOperand getDest() {
+        return dest;
+    }
+
+    public String getStoreOp() {
+        return storeOp;
+    }
 }

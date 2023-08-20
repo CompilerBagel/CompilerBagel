@@ -375,14 +375,25 @@ public class codeGen {
             block.getMachineCodes().add(slli);
             setDefUse(dest, slli);
             setDefUse(left, slli);
+
         } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
                 && IntTools.remToAnd(((Immeidiate) right).getImmValue()) != -1
                 && instructionType.equals(IRConstants.SREM)) {
+            // Optimize mod into bitwise operations
             int andNum = IntTools.remToAnd(((Immeidiate) right).getImmValue());
             MCBinaryInteger rem = new MCBinaryInteger(dest, left, new Immeidiate(andNum), ANDI);
             block.getMachineCodes().add(rem);
             setDefUse(dest, rem);
             setDefUse(left, rem);
+        } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
+                && IntTools.logPowerOf2(((Immeidiate) right).getImmValue()) != -1
+                && instructionType.equals(IRConstants.SDIV)) {
+            // Optimize div into bitwise operations
+            int llNum = IntTools.logPowerOf2(((Immeidiate) right).getImmValue());
+            MCBinaryInteger slli = new MCBinaryInteger(dest, left, new Immeidiate(llNum), SRAI);
+            block.getMachineCodes().add(slli);
+            setDefUse(dest, slli);
+            setDefUse(left, slli);
         } else {
             if (right.isImm()) {
                 right = addLiOperation(right, block);
@@ -1365,9 +1376,10 @@ public class codeGen {
 
     /**
      * if the valueRef will be used in call instruction, save it in stack
-     * @param dest the MachineOperand need to ba saved
+     *
+     * @param dest           the MachineOperand need to ba saved
      * @param destVirtualReg ValueRef
-     * @param block MachineBlock
+     * @param block          MachineBlock
      */
     private void saveParamsInStack(MachineOperand dest, ValueRef destVirtualReg, MachineBlock block) {
         int spillIndex = destVirtualReg.getSpillIndex();
