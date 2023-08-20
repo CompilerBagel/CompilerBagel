@@ -1,6 +1,7 @@
 package IRBuilder;
 
 import IRBuilder.*;
+import Pass.ConstPassVisitor;
 import Scope.GlobalScope;
 import Scope.LocalScope;
 import Scope.Scope;
@@ -28,6 +29,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRBuilder builder = IRCreateBuilder();
     private final Map<String,Integer> ConstIntVarMap = new LinkedHashMap<>();
     private final Map<String, Float> ConstFloatVarMap = new LinkedHashMap<>();
+    private final Map<String, Integer> ConstPassVarMap = ConstPassVisitor.variables;
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
     private static final Type int1Type = IRInt1Type();
@@ -116,24 +118,14 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         globalScope.define("after_main", addLib("after_main", afterMainType), afterMainType);
 
         List<Type> startTimeTypeParams = new ArrayList<>();
-        //startTimeTypeParams.add(int32Type);
+        startTimeTypeParams.add(int32Type);
         FunctionType startTimeType = new FunctionType(startTimeTypeParams, voidType);
-        globalScope.define("starttime", addLib("starttime", startTimeType), startTimeType);
+        globalScope.define("start_time", addLib("start_time", startTimeType), startTimeType);
 
         List<Type> endTimeTypeParams = new ArrayList<>();
-        //endTimeTypeParams.add(int32Type);
+        endTimeTypeParams.add(int32Type);
         FunctionType endTimeType = new FunctionType(endTimeTypeParams, voidType);
-        globalScope.define("stoptime", addLib("stoptime", endTimeType), endTimeType);
-
-        List<Type> sysyStartTimeParams = new ArrayList<>();
-        sysyStartTimeParams.add(int32Type);
-        FunctionType sysyStartTime = new FunctionType(sysyStartTimeParams, voidType);
-        globalScope.define("_sysy_starttime", addLib("_sysy_starttime", sysyStartTime), sysyStartTime);
-
-        List<Type> sysyEndTimeParams = new ArrayList<>();
-        sysyEndTimeParams.add(int32Type);
-        FunctionType sysyEndTime = new FunctionType(sysyEndTimeParams, voidType);
-        globalScope.define("_sysy_stoptime", addLib("_sysy_stoptime", sysyEndTime), sysyEndTime);
+        globalScope.define("end_time", addLib("end_time", endTimeType), endTimeType);
 
     }
 
@@ -238,6 +230,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type type = defineType(typeName);
             ValueRef constVariable;
             String constName = constDefContext.IDENT().getText();
+
             if(constName.length()>20){
                 constName = constName.substring(0,20);
             }
@@ -357,6 +350,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if(variableName.length()>20){
                 variableName = variableName.substring(0,20);
             }
+
             // 初始化assign的值
             if (typeName.equals("int")) assign = intZero;
             else assign = floatZero;
@@ -385,6 +379,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                             assign = typeTrans(builder,assign,SiToFp);
                         }
                     }
+                    if(ConstPassVarMap.containsKey(variableName)){
+                        if(type == int32Type){
+                            ConstIntVarMap.put(variable.getText(), Integer.parseInt(assign.getText()));
+                        }else{
+                            ConstFloatVarMap.put(variable.getText(), Float.parseFloat(assign.getText()));
+                        }
+                    }
                     IRSetInitializer(module, variable, assign, variableName);
                 } else {
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
@@ -404,7 +405,15 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                             assign = typeTrans(builder,assign,SiToFp);
                         }
                     }
-                    IRBuildStore(builder, assign, variable);
+
+                    ValueRef temp = IRBuildStore(builder, assign, variable);
+                    if(ConstPassVarMap.containsKey(variableName)){
+                        if(type == int32Type){
+                            ConstIntVarMap.put(temp.getText(), Integer.parseInt(assign.getText()));
+                        }else{
+                            ConstFloatVarMap.put(temp.getText(), Float.parseFloat(assign.getText()));
+                        }
+                    }
                 } else {
 
                     //TODO: 正确性验证
@@ -887,21 +896,15 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx) {
         ValueRef conditionVal = this.visit(ctx.cond());
-        ValueRef cmpResult = conditionVal;
-        if (conditionVal instanceof ConstFloatValueRef) {
-            if (((ConstFloatValueRef) conditionVal).getValue() != 0) {
-                cmpResult = new ConstIntValueRef(1);
-            } else {
-                cmpResult = new ConstIntValueRef(0);
-            }
-        } else if (conditionVal instanceof  BaseRegister && conditionVal.getType() == floatType) {
-            cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
+        if(conditionVal.getText().startsWith("0")){
+            return null;
         }
+         ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
         BaseBlock afterBlock = IRAppendBasicBlock(currentFunction, "afterBlock");
 
-        IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
+         IRBuildCondBr(builder, cmpResult, trueBlock, falseBlock);
 
         IRPositionBuilderAtEnd(builder, trueBlock);
         this.visit(ctx.stmt(0));
@@ -933,8 +936,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             cmpResult = IRBuildICmp(builder, IRIntSGT, lVal, rVal, "icmp_GT");
         }
 
-        // return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
-        return cmpResult;
+        return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
     }
 
     @Override
@@ -947,8 +949,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         } else if (ctx.NEQ() != null) {
             cmpResult = IRBuildICmp(builder, IRIntNE, lVal, rVal, "icmp_NE");
         }
-        // return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
-        return cmpResult;
+        return IRBuildZExt(builder,cmpResult,int32Type,"tmp_");
     }
 
     @Override
@@ -972,8 +973,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder,after);
         res = IRBuildLoad(builder, res , "load_");
-        // return IRBuildZExt(builder,res,int32Type,"tmp_");
-        return res;
+        return IRBuildZExt(builder,res,int32Type,"tmp_");
 
     }
 
@@ -998,8 +998,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder,after);
         res = IRBuildLoad(builder, res , "load_");
-        // return IRBuildZExt(builder,res,int32Type,"tmp_");
-        return res;
+        return IRBuildZExt(builder,res,int32Type,"tmp_");
     }
 
     @Override
@@ -1012,18 +1011,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
 
         IRPositionBuilderAtEnd(builder, condBlock);
         ValueRef conditionVal = this.visit(ctx.cond());
-         //ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
-        ValueRef cmpResult = conditionVal;
-        if (conditionVal instanceof ConstFloatValueRef) {
-            if (((ConstFloatValueRef) conditionVal).getValue() != 0) {
-                cmpResult = new ConstIntValueRef(1);
-            } else {
-                cmpResult = new ConstIntValueRef(0);
-            }
-        } else if (conditionVal instanceof  BaseRegister && conditionVal.getType() == floatType) {
-            cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
-        }
-
+         ValueRef cmpResult = IRBuildICmp(builder, IRIntNE, conditionVal, intZero, "icmp_");
          IRBuildCondBr(builder, cmpResult, bodyBlock, afterBlock);
 //        IRBuildCondBr(builder, conditionVal, bodyBlock, afterBlock);
 

@@ -1,6 +1,7 @@
 import IRBuilder.IRGenVisitor;
 import backend.opt.RmUselessCode;
 import backend.post.reg.RegisterAllocate;
+import Pass.ConstPassVisitor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -60,6 +61,9 @@ public class Main {
         SysYParser sysYParser = new SysYParser(tokens);
         ParseTree tree = sysYParser.program();
         // Generate intermediate code(IR)
+        ConstPassVisitor constPassVisitor = new ConstPassVisitor();
+        constPassVisitor.visit(tree);
+
         IRGenVisitor irGenVisitorVisitor = new IRGenVisitor();
         irGenVisitorVisitor.visit(tree);
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
