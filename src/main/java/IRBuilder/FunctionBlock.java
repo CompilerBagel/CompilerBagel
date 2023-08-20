@@ -14,7 +14,7 @@ public class FunctionBlock implements ValueRef{
     private List<ValueRef> caller; // call the function
     private List<ValueRef> callee; // called by the function
     private List<BaseBlock> retBlocks;
-
+    private BaseBlock retBlock = new BaseBlock("retBlock");
     public FunctionBlock(String functionName, FunctionType type) {
         this.functionName = functionName;
         this.type = type;
@@ -28,6 +28,10 @@ public class FunctionBlock implements ValueRef{
             ValueRef valRegister = new BaseRegister(functionName + (count++), paramType);
             paramsValueRef.add(valRegister);
         }
+    }
+
+    public BaseBlock getRetBlock() {
+        return retBlock;
     }
 
     public ValueRef getParam(int i) {
