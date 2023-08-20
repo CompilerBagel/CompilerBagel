@@ -390,11 +390,17 @@ public class IRBuilder {
 
     public static void IRBuildBr(IRBuilder builder, BaseBlock block) {
         builder.appendInstr(new BrInstruction(generateList(block), builder.currentBaseBlock));
+        builder.currentBaseBlock.addSuccBaseBlock(block);
+        block.addPredBaseBlock(builder.currentBaseBlock);
         builder.emit(BR + " label %" + block.getLabel());
     }
 
     public static void IRBuildCondBr(IRBuilder builder, ValueRef condition, BaseBlock ifTrue, BaseBlock ifFalse) {
         builder.appendInstr(new BrInstruction(generateList(condition, ifTrue, ifFalse), builder.currentBaseBlock));
+        builder.currentBaseBlock.addSuccBaseBlock(ifFalse);
+        builder.currentBaseBlock.addSuccBaseBlock(ifTrue);
+        ifTrue.addPredBaseBlock(builder.currentBaseBlock);
+        ifFalse.addPredBaseBlock(builder.currentBaseBlock);
         builder.emit(BR + " " + condition.getTypeText() + " " + condition.getText() + ", " +
                 "label %" + ifTrue.getLabel() + ", label %" + ifFalse.getLabel());
     }

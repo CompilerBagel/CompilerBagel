@@ -1,6 +1,7 @@
 package IRBuilder;
 
 import IRBuilder.*;
+import Pass.ConstPassVisitor;
 import Scope.GlobalScope;
 import Scope.LocalScope;
 import Scope.Scope;
@@ -28,6 +29,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     IRBuilder builder = IRCreateBuilder();
     private final Map<String,Integer> ConstIntVarMap = new LinkedHashMap<>();
     private final Map<String, Float> ConstFloatVarMap = new LinkedHashMap<>();
+    private final Map<String, Integer> ConstPassVarMap = ConstPassVisitor.variables;
     private static final Type int32Type = IRInt32Type();
     private static final Type floatType = IRFloatType();
     private static final Type int1Type = IRInt1Type();
@@ -228,6 +230,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             Type type = defineType(typeName);
             ValueRef constVariable;
             String constName = constDefContext.IDENT().getText();
+
             if(constName.length()>20){
                 constName = constName.substring(0,20);
             }
@@ -347,6 +350,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             if(variableName.length()>20){
                 variableName = variableName.substring(0,20);
             }
+
             // 初始化assign的值
             if (typeName.equals("int")) assign = intZero;
             else assign = floatZero;
@@ -375,6 +379,13 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                             assign = typeTrans(builder,assign,SiToFp);
                         }
                     }
+                    if(ConstPassVarMap.containsKey(variableName)){
+                        if(type == int32Type){
+                            ConstIntVarMap.put(variable.getText(), Integer.parseInt(assign.getText()));
+                        }else{
+                            ConstFloatVarMap.put(variable.getText(), Float.parseFloat(assign.getText()));
+                        }
+                    }
                     IRSetInitializer(module, variable, assign, variableName);
                 } else {
                     if (varDefContext.ASSIGN() != null) visitInitVal(varDefContext.initVal());
@@ -394,7 +405,15 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                             assign = typeTrans(builder,assign,SiToFp);
                         }
                     }
-                    IRBuildStore(builder, assign, variable);
+
+                    ValueRef temp = IRBuildStore(builder, assign, variable);
+                    if(ConstPassVarMap.containsKey(variableName)){
+                        if(type == int32Type){
+                            ConstIntVarMap.put(temp.getText(), Integer.parseInt(assign.getText()));
+                        }else{
+                            ConstFloatVarMap.put(temp.getText(), Float.parseFloat(assign.getText()));
+                        }
+                    }
                 } else {
 
                     //TODO: 正确性验证
@@ -877,6 +896,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     @Override
     public ValueRef visitConditionStmt(SysYParser.ConditionStmtContext ctx) {
         ValueRef conditionVal = this.visit(ctx.cond());
+        if(conditionVal.getText().startsWith("0")){
+            return null;
+        }
          ValueRef cmpResult = IRBuildICmp(builder, 1, conditionVal, intZero, "icmp_");
         BaseBlock trueBlock = IRAppendBasicBlock(currentFunction, "trueBlock");
         BaseBlock falseBlock = IRAppendBasicBlock(currentFunction, "falseBlock");
