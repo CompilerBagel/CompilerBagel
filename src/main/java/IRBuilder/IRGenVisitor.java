@@ -1,3 +1,5 @@
+package IRBuilder;
+
 import IRBuilder.*;
 import Scope.GlobalScope;
 import Scope.LocalScope;
@@ -33,8 +35,9 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private GlobalScope globalScope = null;
     private Scope currentScope = null;
     private BaseBlock currentBlock = null;
+    private ValueRef currentRetVal = null;
     private int localScopeCounter = 0;
-    private FunctionBlock currentFunction = null;
+    private static FunctionBlock currentFunction = null;
     private Stack<BaseBlock> conditionStack = new Stack<>();
     private Stack<BaseBlock> afterStack = new Stack<>();
     private ValueRef intZero = new ConstIntValueRef(0);
@@ -43,6 +46,10 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
     private boolean tempBool = false;
     public IRModule getModule() {
         return module;
+    }
+
+    public static FunctionBlock getCurrentFunction(){
+        return currentFunction;
     }
 
     @Override
@@ -192,16 +199,24 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             IRBuildStore(builder, param, paramPointer);
             currentScope.define(paramName, paramPointer, paramType);
         }
-
-        ValueRef ret = super.visitFuncDef(ctx);
-        currentScope = currentScope.getEnclosingScope();
-
-        if (returnType.equals(voidType)) {
-            IRBuildRet(builder, null);
-        } else {
-            IRBuildRet(builder, intZero);
+        if(functionType.getRetType() != voidType){
+            currentRetVal = IRBuildAlloca(builder,currentFunction.getRetType(),"retVal");
+        }else{
+            currentRetVal = null;
         }
 
+        ValueRef ret = super.visitFuncDef(ctx);
+
+        currentScope = currentScope.getEnclosingScope();
+
+        IRBuildBr(builder,currentFunction.getRetBlock());
+        IRBuildBaseBlock(builder,currentFunction,currentFunction.getRetBlock());
+
+        ValueRef retVal = null;
+        if(currentRetVal!=null) {
+            retVal = IRBuildLoad(builder, currentRetVal, "retVal");
+        }
+        IRBuildRet(builder,retVal);
         return ret;
     }
 
@@ -608,7 +623,12 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
                 result = typeTrans(builder, result, SiToFp);
             }
         }
-        IRBuildRet(builder, result);
+//        IRBuildRet(builder, result);
+        if(result!=null){
+            IRBuildStore(builder,result,currentRetVal);
+        }
+        IRBuildBr(builder, currentFunction.getRetBlock());
+
         return result;
     }
 
