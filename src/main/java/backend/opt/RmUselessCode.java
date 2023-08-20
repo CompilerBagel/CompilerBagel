@@ -1,16 +1,12 @@
 package backend.opt;
 
 import backend.machineCode.*;
-import backend.machineCode.Instruction.MCLi;
-import backend.machineCode.Instruction.MCLoad;
-import backend.machineCode.Instruction.MCReturn;
-import backend.machineCode.Instruction.MCStore;
+import backend.machineCode.Instruction.*;
 import backend.post.reg.PhysicsReg;
 
 import java.util.*;
 
-import static backend.machineCode.MachineConstants.LW;
-import static backend.machineCode.MachineConstants.SW;
+import static backend.machineCode.MachineConstants.*;
 
 public class RmUselessCode {
     private final List<MachineFunction> functions;
@@ -81,7 +77,11 @@ public class RmUselessCode {
                 if (lastCode instanceof MCReturn) {
                     removeList.add(code);
                     continue;
-                } else if (isRedundancyLS(lastCode, code)) {
+                } else if (lastCode instanceof MCJump && ((MCJump) lastCode).getType().equals(J)){
+                    removeList.add(code);
+                    continue;
+                }
+                else if (isRedundancyLS(lastCode, code)) {
                     // 1. LD r0, a  2. ST a, R0
                     removeList.add(code);
                     continue;
