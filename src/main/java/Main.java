@@ -29,8 +29,8 @@ public class Main {
         SysYParser sysYParser = new SysYParser(tokens);
         ParseTree tree = sysYParser.program();
         // Generate intermediate code(IR)
-        ConstPassVisitor constPassVisitor = new ConstPassVisitor();
-        constPassVisitor.visit(tree);
+//        ConstPassVisitor constPassVisitor = new ConstPassVisitor();
+//        constPassVisitor.visit(tree);
 
         IRGenVisitor irGenVisitorVisitor = new IRGenVisitor();
         irGenVisitorVisitor.visit(tree);

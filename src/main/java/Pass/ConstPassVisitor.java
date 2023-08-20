@@ -6,7 +6,6 @@ import antlr.SysYParser;
 import antlr.SysYParserBaseVisitor;
 import antlr.SysYParserVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +29,13 @@ public class ConstPassVisitor extends SysYParserBaseVisitor<ValueRef> {
         ValueRef assign;
         for (SysYParser.VarDefContext varDefContext : ctx.varDef()) {
             Type type = defineType(typeName);
-            if(varDefContext.constExp().isEmpty()){
+            if(varDefContext.ASSIGN()==null && varDefContext.constExp().isEmpty()){
+                String variableName = varDefContext.IDENT().getText();
+                if(variableName.length()>20){
+                    variableName = variableName.substring(0,20);
+                }
+                variables.put(variableName, 0);
+            }else if(varDefContext.ASSIGN()!=null){
                 String variableName = varDefContext.IDENT().getText();
                 if(variableName.length()>20){
                     variableName = variableName.substring(0,20);
