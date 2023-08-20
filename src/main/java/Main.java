@@ -73,9 +73,8 @@ public class Main {
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
         // code.PrintCodeToFile(mcDest);
 
-        DeadCodeScan deadCodeScan = new DeadCodeScan();
-        deadCodeScan.deadCodeScan(code);
-
+/*        DeadCodeScan deadCodeScan = new DeadCodeScan();
+        deadCodeScan.deadCodeScan(code);*/
 
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
