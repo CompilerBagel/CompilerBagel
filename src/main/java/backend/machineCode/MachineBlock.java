@@ -45,4 +45,8 @@ public class MachineBlock {
     public boolean addInstrsBeforeLast(List<MachineCode> machineCodes) {
         return this.machineCodes.addAll(this.machineCodes.size() - 1, machineCodes);
     }
+
+    public void setMachineCodes(List<MachineCode> machineCodes) {
+        this.machineCodes = machineCodes;
+    }
 }

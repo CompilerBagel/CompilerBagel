@@ -1,8 +1,8 @@
 #include "./src/test/resources/sylib.c"
-//test div
-int main(){
-    int a, b;
-    a = 10;
-    b = 5;
-    return a / b;
+
+int main() {
+  int a = 10;
+  ;
+  return a * 2 + 1;
 }
+

@@ -213,6 +213,12 @@ public class IRBuilder {
                     + origin.getText() + " to float");
             builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock,
                     SiToFp));
+        } else if (type == SiToFp && origin.getType() == int1Type) {
+            resRegister = new BaseRegister("conv", floatType);
+            builder.emit(resRegister.getText() + " = sitofp i1 "
+                    + origin.getText() + " to float");
+            builder.appendInstr(new TypeTransInstruction(generateList(origin, resRegister), builder.currentBaseBlock,
+                    SiToFp));
         } else {
             System.err.println("typeTrans wrong!");
         }
@@ -396,11 +402,17 @@ public class IRBuilder {
 
     public static void IRBuildBr(IRBuilder builder, BaseBlock block) {
         builder.appendInstr(new BrInstruction(generateList(block), builder.currentBaseBlock));
+        builder.currentBaseBlock.addSuccBaseBlock(block);
+        block.addPredBaseBlock(builder.currentBaseBlock);
         builder.emit(BR + " label %" + block.getLabel());
     }
 
     public static void IRBuildCondBr(IRBuilder builder, ValueRef condition, BaseBlock ifTrue, BaseBlock ifFalse) {
         builder.appendInstr(new BrInstruction(generateList(condition, ifTrue, ifFalse), builder.currentBaseBlock));
+        builder.currentBaseBlock.addSuccBaseBlock(ifFalse);
+        builder.currentBaseBlock.addSuccBaseBlock(ifTrue);
+        ifTrue.addPredBaseBlock(builder.currentBaseBlock);
+        ifFalse.addPredBaseBlock(builder.currentBaseBlock);
         builder.emit(BR + " " + condition.getTypeText() + " " + condition.getText() + ", " +
                 "label %" + ifTrue.getLabel() + ", label %" + ifFalse.getLabel());
     }
@@ -410,9 +422,9 @@ public class IRBuilder {
         if (lhs.getType() == floatType || rhs.getType() == floatType) {
             resType = floatType;
         }
-        if (lhs.getType() == int32Type && rhs.getType() == floatType) {
+        if ((lhs.getType() == int32Type || lhs.getType() == int1Type) && rhs.getType() == floatType) {
             lhs = typeTrans(builder, lhs, SiToFp);
-        } else if (lhs.getType() == floatType && rhs.getType() == int32Type) {
+        } else if (lhs.getType() == floatType && (rhs.getType() == int32Type || rhs.getType() == int1Type)) {
             rhs = typeTrans(builder, rhs, SiToFp);
         }
         ValueRef resRegister = new BaseRegister(text, int1Type);
