@@ -52,7 +52,7 @@ public class MachineBlock {
                 return this.machineCodes.addAll(this.machineCodes.size() - 2, machineCodes);
             } else if (this.machineCodes.size() == 2) {
                 return this.machineCodes.addAll(1, machineCodes);
-            } else {
+            } else if(this.machineCodes.size() >=3 ){
                 return this.machineCodes.addAll(this.machineCodes.size() - 3, machineCodes);
             }
         } else {
@@ -71,5 +71,9 @@ public class MachineBlock {
             }
         }
         return false;
+    }
+
+    public void setMachineCodes(List<MachineCode> machineCodes) {
+        this.machineCodes = machineCodes;
     }
 }

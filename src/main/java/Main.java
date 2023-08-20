@@ -1,5 +1,6 @@
 import IRBuilder.IRGenVisitor;
 import Pass.ConstPassVisitor;
+import Pass.DeadCodeScan;
 import backend.RegisterAllocate;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -32,6 +33,8 @@ public class Main {
 //        ConstPassVisitor constPassVisitor = new ConstPassVisitor();
 //        constPassVisitor.visit(tree);
 
+
+
         IRGenVisitor irGenVisitorVisitor = new IRGenVisitor();
         irGenVisitorVisitor.visit(tree);
         PrintModuleToFile(irGenVisitorVisitor.getModule(), dest);
@@ -39,8 +42,14 @@ public class Main {
         code.MachineCodeGen(irGenVisitorVisitor.getModule());
         // code.PrintCodeToFile(mcDest);
 
+        DeadCodeScan deadCodeScan = new DeadCodeScan();
+        deadCodeScan.deadCodeScan(code);
+
+
         RegisterAllocate allocator = new RegisterAllocate(code.getMCFunctions());
         allocator.easyAllocate();
+
+
 
         // Remove useless code
         // RmUselessCode rmUselessCode = new RmUselessCode(code.getMCFunctions());

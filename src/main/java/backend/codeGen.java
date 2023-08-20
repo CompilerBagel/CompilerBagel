@@ -1520,4 +1520,13 @@ public class codeGen {
     private boolean isLegalImm(int imm) {
         return imm >= -2048 && imm <= 2047;
     }
+
+    public static IRModule getModule() {
+        return module;
+    }
+
+    public static HashMap<BaseBlock, MachineBlock> getBlockMap() {
+        return blockMap;
+    }
+    
 }
