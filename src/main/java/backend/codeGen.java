@@ -1327,7 +1327,7 @@ public class codeGen {
                 retBlocks.add(blockMap.get(retBlock));
             }
             Type retType = ((FunctionType) function.getType()).getRetType();
-            mfun.restore(retBlocks, retType.equals(IRInt32Type()) || retType.equals(floatType));
+            mfun.restore(retBlocks);
             for (BaseBlock block : function.getBaseBlocks()) {
                 MachineBlock machineBlock = blockMap.get(block);
                 builder.append(machineBlock.getBlockName()).append(":\n");
