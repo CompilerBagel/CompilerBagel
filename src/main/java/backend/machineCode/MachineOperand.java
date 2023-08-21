@@ -49,9 +49,8 @@ public class MachineOperand {
         def = newDef;
     }
     public boolean noUser() {
-        return useList.isEmpty();
+        return useList.size() == 0;
     }
-    public boolean haveOneMoreUser(){return useList.size()>1;}
     public void replaceUse(MachineCode oldUse, MachineCode newUse) {
         for (int i = 0; i < useList.size(); i++) {
             // find the oldUse in useList
