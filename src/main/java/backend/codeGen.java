@@ -696,6 +696,8 @@ public class codeGen {
         for (ValueRef occ : occupyList) {
             MachineOperand operand = parseOperand(occ);
             operand.addUse(call);
+            call.addUse(operand);
+            // setDefUse(operand, call);
         }
 
         // Move the a0/fa0 to dest(Operand)
