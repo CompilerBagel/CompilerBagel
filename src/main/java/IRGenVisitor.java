@@ -13,6 +13,7 @@ import java.util.*;
 
 import static IRBuilder.BaseBlock.IRAppendBasicBlock;
 import static IRBuilder.IRBuilder.*;
+import static IRBuilder.IRBuilder.IRBuildOccupy;
 import static IRBuilder.IRConstants.*;
 import static IRBuilder.IRModule.IRAddFunction;
 import static IRBuilder.IRModule.IRModuleCreateWithName;
@@ -538,19 +539,16 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
         int floatNO = 0;
         int noFloatNO = 0;
         int spillIndex = 0;
+        List<ValueRef> occupyList = new ArrayList<ValueRef>();
         for (int i = 0; i < argc; i++) {
             ValueRef param = ctx.funcRParams().param(i).accept(this);
             param.setUsedByFunction(true);
             Type paramType = functionBlock.getParam(i).getType();
             Type baseType = paramType;
-//            while(baseType instanceof ArrayType || baseType instanceof PointerType){
-//                if(baseType instanceof ArrayType){
-//                    baseType = ((ArrayType)baseType).getElementType();
-//                }
-//                if(baseType instanceof PointerType){
-//                    baseType = ((PointerType) baseType).getBaseType();
-//                }
-//            }
+            if (param instanceof ConstIntValueRef && argc <= 4) {
+                ValueRef occ = IRBuildOccupy(builder);
+                occupyList.add(occ);
+            }
             if(baseType == floatType){
                 param.setFloatNO(floatNO);
                 if (floatNO > 7) {
@@ -591,7 +589,7 @@ public class IRGenVisitor extends SysYParserBaseVisitor<ValueRef> {
             }
             args.add(i, param);
         }
-        return IRBuildCall(builder, functionBlock, args, argc, funcName);
+        return IRBuildCall(builder, functionBlock, args, argc, funcName, occupyList);
     }
 
     @Override

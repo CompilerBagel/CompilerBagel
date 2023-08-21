@@ -20,7 +20,14 @@ public class CallInstruction extends Instruction{
     public FunctionBlock getFunction(){
         return functionBlock;
     }
+    private List<ValueRef> occupyList;
+    public List<ValueRef> getOccupyList() {
+        return occupyList;
+    }
 
+    public void setOccupyList(List<ValueRef> occupyList) {
+        this.occupyList = occupyList;
+    }
     public CallInstruction(CallInstruction rhs){
         super(rhs);
         this.isVoid = rhs.isVoid;
