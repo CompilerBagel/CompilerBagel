@@ -245,7 +245,10 @@ public class codeGen {
                 parseTypeTransInstr((TypeTransInstruction) instr, machineBlock);
             } else if (instr instanceof ZextInstruction) {
                 parseZextInstr((ZextInstruction) instr, machineBlock);
-            } else {
+            } else if (instr instanceof OccupyInstruction) {
+                parseOccupyInstr((OccupyInstruction) instr, machineBlock);
+            }
+            else {
                 assert (false);
             }
         }
@@ -375,14 +378,25 @@ public class codeGen {
             block.getMachineCodes().add(slli);
             setDefUse(dest, slli);
             setDefUse(left, slli);
+
         } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
                 && IntTools.remToAnd(((Immeidiate) right).getImmValue()) != -1
                 && instructionType.equals(IRConstants.SREM)) {
+            // Optimize mod into bitwise operations
             int andNum = IntTools.remToAnd(((Immeidiate) right).getImmValue());
             MCBinaryInteger rem = new MCBinaryInteger(dest, left, new Immeidiate(andNum), ANDI);
             block.getMachineCodes().add(rem);
             setDefUse(dest, rem);
             setDefUse(left, rem);
+        } else if (right.isImm() && !((Immeidiate) right).isFloatImm()
+                && IntTools.logPowerOf2(((Immeidiate) right).getImmValue()) != -1
+                && instructionType.equals(IRConstants.SDIV)) {
+            // Optimize div into bitwise operations
+            int llNum = IntTools.logPowerOf2(((Immeidiate) right).getImmValue());
+            MCBinaryInteger slli = new MCBinaryInteger(dest, left, new Immeidiate(llNum), SRAI);
+            block.getMachineCodes().add(slli);
+            setDefUse(dest, slli);
+            setDefUse(left, slli);
         } else {
             if (right.isImm()) {
                 right = addLiOperation(right, block);
@@ -416,7 +430,7 @@ public class codeGen {
         BaseRegister dest = (BaseRegister) instr.getOperands().get(0);
         List<ValueRef> params = instr.getParams();
         List<MachineOperand> operands = new ArrayList<>();
-
+        List<ValueRef> occupyList = instr.getOccupyList();
         // push a1, a2, ...
         int paramCnt = params.size();
         int intParamCnt = 0;
@@ -671,6 +685,11 @@ public class codeGen {
             call = new MCCall(outFunc, operands);
         }
         for (MachineOperand operand : operands) {
+            operand.addUse(call);
+        }
+
+        for (ValueRef occ : occupyList) {
+            MachineOperand operand = parseOperand(occ);
             operand.addUse(call);
         }
 
@@ -1251,6 +1270,12 @@ public class codeGen {
         setDefUse(rs, move);
     }
 
+    public void parseOccupyInstr(OccupyInstruction instr, MachineBlock block) {
+        MachineOperand dest = parseOperand(instr.getOperands().get(0));
+        MCOccupy occupy = new MCOccupy(dest);
+        block.getMachineCodes().add(occupy);
+        setDefUse(dest, occupy);
+    }
 
     public MachineOperand parseOperand(ValueRef operand) {
         if (!operandMap.containsKey(operand.getText())) {
@@ -1316,7 +1341,7 @@ public class codeGen {
                 retBlocks.add(blockMap.get(retBlock));
             }
             Type retType = ((FunctionType) function.getType()).getRetType();
-            mfun.restore(retBlocks, retType.equals(IRInt32Type()) || retType.equals(floatType));
+            mfun.restore(retBlocks);
             for (BaseBlock block : function.getBaseBlocks()) {
                 MachineBlock machineBlock = blockMap.get(block);
                 builder.append(machineBlock.getBlockName()).append(":\n");
@@ -1365,9 +1390,10 @@ public class codeGen {
 
     /**
      * if the valueRef will be used in call instruction, save it in stack
-     * @param dest the MachineOperand need to ba saved
+     *
+     * @param dest           the MachineOperand need to ba saved
      * @param destVirtualReg ValueRef
-     * @param block MachineBlock
+     * @param block          MachineBlock
      */
     private void saveParamsInStack(MachineOperand dest, ValueRef destVirtualReg, MachineBlock block) {
         int spillIndex = destVirtualReg.getSpillIndex();
@@ -1475,4 +1501,13 @@ public class codeGen {
     private boolean isLegalImm(int imm) {
         return imm >= -2048 && imm <= 2047;
     }
+
+    public static IRModule getModule() {
+        return module;
+    }
+
+    public static HashMap<BaseBlock, MachineBlock> getBlockMap() {
+        return blockMap;
+    }
+    
 }

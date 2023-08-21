@@ -4,6 +4,7 @@ import IRBuilder.BaseBlock;
 import IRBuilder.FunctionBlock;
 import IRBuilder.ValueRef;
 import Type.VoidType;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,14 @@ public class CallInstruction extends Instruction{
         return functionBlock;
     }
 
+    private List<ValueRef> occupyList;
+    public List<ValueRef> getOccupyList() {
+        return occupyList;
+    }
+
+    public void setOccupyList(List<ValueRef> occupyList) {
+        this.occupyList = occupyList;
+    }
     public CallInstruction(CallInstruction rhs){
         super(rhs);
         this.isVoid = rhs.isVoid;
