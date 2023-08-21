@@ -11,6 +11,7 @@ public class MCJump extends MachineCode {
     String label;
     MachineOperand lCmp;
     MachineOperand rCmp;
+
     String type;
 
     public MCJump(String label) {
@@ -49,5 +50,9 @@ public class MCJump extends MachineCode {
         }else{
             return "bne\t" + lCmp.getRegister() + ", " + rCmp.getRegister() + ", " + label;
         }
+    }
+
+    public String getType() {
+        return type;
     }
 }

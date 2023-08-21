@@ -81,5 +81,20 @@ public class MCLoad extends MachineCode {
         return false;
     }
 
+    public MachineOperand getSrc() {
+        return src;
+    }
+
+    public MachineOperand getDest() {
+        return dest;
+    }
+
+    public MachineOperand getOffset() {
+        return offset;
+    }
+
+    public String getLoadOp() {
+        return loadOp;
+    }
 
 }
