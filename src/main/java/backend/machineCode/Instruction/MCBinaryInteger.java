@@ -1,7 +1,6 @@
 package backend.machineCode.Instruction;
 
 import IRBuilder.IRConstants;
-import backend.machineCode.Immeidiate;
 import backend.machineCode.MachineCode;
 import backend.machineCode.MachineOperand;
 
@@ -61,11 +60,6 @@ public class MCBinaryInteger extends MachineCode {
 
     @Override
     public boolean isUselessCode() {
-        if (binaryOp.equals(ADDI) || binaryOp.equals(ADDIW)) {
-            return right.isImm() && !((Immeidiate) right).isFloatImm()
-                    && dest.getRegister().equals(left.getRegister())
-                    && ((Immeidiate) right).getImmValue() == 0;
-        }
         return false;
     }
 }

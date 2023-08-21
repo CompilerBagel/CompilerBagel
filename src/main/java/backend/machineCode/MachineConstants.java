@@ -28,9 +28,6 @@ public final class MachineConstants {
     public static final String SLLW = "sllw";
     public static final String SLLIW = "slliw";
     public static final String SRL = "srl";
-    public static final String SRLI = "srli";
-    public static final String SRA = "sra";
-    public static final String SRAI = "srai";
     public static final String SRAW = "sraw";
     public static final String ANDI = "andi";
     public static final String AND = "and";

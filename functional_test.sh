@@ -25,12 +25,12 @@ do
     fi
     echo $? >> answer.txt
 
-    java -Xss8M -Dfile.encoding=UTF-8 -classpath ./target/classes:./lib/antlr-4.12.0-complete.jar Main ${sysy_filename} out_without_sylib.ll test.s
-    riscv64-unknown-elf-gcc test.s ./src/test/resources/sylib.c -o out
+    java -Dfile.encoding=UTF-8 -classpath ./target/classes:./lib/antlr4-runtime-4.9.1.jar Main ${sysy_filename} out_without_sylib.ll test.s
+    gcc test.s ./src/test/resources/sylib.c -o out
     if [ -f $input_file ]; then
-        timeout 60s qemu-riscv64 out < $input_file > output.txt
+        timeout 60s ./out < $input_file > output.txt
     else
-        timeout 60s qemu-riscv64 out > output.txt
+        timeout 60s ./out > output.txt
     fi
     echo $? >> output.txt
 
